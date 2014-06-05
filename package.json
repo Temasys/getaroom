@@ -1,0 +1,43 @@
+{
+  "name": "getaroom.io",
+  "description": "FREE and hassle free audio/video real-time chat for desktop and mobile.",
+  "version": "0.1.0",
+  "homepage": "http://github.com/serrynaimo/getaroom",
+  "author": {
+    "name": "Thomas Gorissen",
+    "email": "mail@serrynaimo.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/serrynaimo/getaroom.git"
+  },
+  "licenses": [
+    {
+      "type": "All rights reserved",
+      "url": "http://github.com/serrynaimo/getaroom"
+    }
+  ],
+  "scripts": {
+    "prestart": "./start.sh"
+  },
+  "dependencies": {
+    "SkywayJS": "git://github.com/TemasysCommunications/SkywayJS.git",
+    "connect": "^2.19.3"
+  },
+  "devDependencies": {
+    "grunt": "0.4.4",
+    "grunt-contrib-clean": "^0.5.0",
+    "grunt-contrib-copy": "^0.5.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-env": "^0.4.1",
+    "grunt-open": "^0.2.3",
+    "grunt-replace": "^0.7.7",
+    "grunt-svgtemplater": "^0.1.4"
+  },
+  "engines": {
+    "node": "0.10.26",
+    "npm": "1.4.6"
+  },
+  "keywords": []
+}

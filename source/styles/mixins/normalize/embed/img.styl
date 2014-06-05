@@ -1,0 +1,7 @@
+// 1. Removes border when inside 'a' element in IE6/7/8/9, FF3
+// 2. Improves image quality when scaled in IE7
+//    code.flickr.com/blog/2008/11/12/on-ui-quality-the-little-things-client-side-image-resizing/
+
+img
+  border: 0 // 1
+  -ms-interpolation-mode: bicubic // 2

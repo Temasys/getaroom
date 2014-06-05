@@ -1,0 +1,32 @@
+loader(color, background, fromtop)
+	min-height 220px
+	position relative
+
+	&:before
+		content ""
+		position absolute
+		top fromtop
+		left 50%
+		padding 15px
+		border 6px solid color
+		margin -21px
+		border-radius 21px
+		background background
+
+	&:after
+		content ""
+		position absolute
+		top fromtop
+		left 50%
+		padding 21px 3px
+		margin -21px -3px
+		animation loader 1s infinite ease-out
+		background background
+
+@keyframes loader
+	0%
+		transform rotate(0deg)
+	50%
+		transform rotate(180deg)
+	100%
+		transform rotate(360deg)

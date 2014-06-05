@@ -1,0 +1,14 @@
+// 1. Addresses CSS quotes not supported in IE6/7
+// 2. Addresses quote property not supported in S4
+
+// 1
+
+q
+  quotes: none
+
+// 2
+
+q:before,
+q:after
+  content: ''
+  content: none
