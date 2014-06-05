@@ -10,13 +10,13 @@ define([
 
 var sky = new Skyway();
 
-var HelloMessage = React.createClass({displayName: 'HelloMessage',
+var HelloMessage = React.createClass({
   render: function() {
-    return React.DOM.div(null, "Hello ", this.props.name);
+    return <div>Hello {this.props.name}</div>;
   }
 });
 
-React.renderComponent(HelloMessage( {name:"Visitor"} ),
+React.renderComponent(<HelloMessage name="Visitor" />,
     document.getElementById('notifications'));
 
 });
