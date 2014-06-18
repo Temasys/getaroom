@@ -15,6 +15,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-usemin');
     grunt.loadNpmTasks('grunt-replace');
 
+    var pushState = require('grunt-connect-pushstate/lib/utils').pushState;
+
     grunt.initConfig({
 
         base: grunt.config('base') || grunt.option('base') || process.cwd(),
@@ -211,18 +213,23 @@ module.exports = function (grunt) {
         },
 
         connect: {
+            options: {
+                middleware: function(connect, options, middlewares) {
+                    return [pushState()].concat(middlewares);
+                }
+            },
             dev: {
                 options: {
-                    base: '<%= source %>',
+                    base: '<%= source %>/',
                     port: 8085,
-                    open: 'http://localhost:8085'
+                    open: 'http://dev.getaroom.io:8085'
                 }
             },
             production: {
                 options: {
-                    base: '<%= production %>',
-                    port: 8080,
-                    open: 'http://localhost:8080'
+                    base: '<%= production %>/',
+                    port: 80,
+                    open: 'http://getaroom.io'
                 }
             }
         },
@@ -230,7 +237,7 @@ module.exports = function (grunt) {
         watch: {
             svg: {
                 files: [
-                    '<%= source %>/img/svgs/*.svg'
+                    '<%= source %>/img/**/*.svg'
                 ],
                 tasks: 'svgtemplater:dev',
                 options: {

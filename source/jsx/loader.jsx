@@ -9,6 +9,8 @@ require.config({
     ],
 
     paths: {
+        socketio: '/js/libs/socket.io-client.min',
+        router: '/js/libs/director',
         react: '//cdnjs.cloudflare.com/' +
             'ajax/libs/react/0.10.0/react.min',
         skyway: '/js/libs/skyway',
@@ -19,8 +21,17 @@ require.config({
     },
 
     shim: {
+        router: {
+            exports: 'Router',
+            init: function() {
+                return new this.Router();
+            }
+        },
         skyway: {
-            exports: 'Skyway'
+            exports: 'Skyway',
+            init: function() {
+                return new this.Skyway();
+            }
         },
         facebook: {
             exports: 'FB'
