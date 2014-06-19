@@ -46,7 +46,7 @@ define([
         },
         componentDidMount: function() {
             Router.configure({
-                html5history: true
+                html5history: false
             }).mount({
                 '/:room': this.joinRoom.bind(this),
                 '/': this.enterFoyer.bind(this)
@@ -54,9 +54,9 @@ define([
 
             Router.init();
 
-            if(location.pathname.length > 1) {
-                this.joinRoom(location.pathname.replace('/',''));
-            }
+            // if(location.pathname.length > 1) {
+            //     this.joinRoom(location.pathname.replace('/',''));
+            // }
 
 
             var self = this;

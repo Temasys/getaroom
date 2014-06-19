@@ -41,9 +41,15 @@ define([
 
     var UserArea = React.createClass({displayName: 'UserArea',
         render: function() {
+            var props = {
+                id: 'uservideo' + this.props.user.id,
+                autoPlay: true,
+                muted: this.props.user.isMuted || this.props.user.id === 0
+            };
+
             return (
                 React.DOM.div(null, 
-                    React.DOM.video( {id:'uservideo' + this.props.user.id})
+                    React.DOM.video(props)
                 )
                 );
         }
