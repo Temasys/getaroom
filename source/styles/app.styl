@@ -12,6 +12,9 @@ color3 = #ff688b
 body
     font-family 'Open Sans', Helvetica, Arial, sans-serif
 
+#app
+    perspective 500
+
 #app, #app > div, #userareas, .userarea, #controls, #controls > div
     position absolute
     top 0
@@ -23,12 +26,20 @@ body
 #controls
     left 50%
     top 50%
-    margin -325px -200px
+    margin -300px -200px
     border-radius 4px
     height 600px
     width 400px
     background rgba(255,255,255,0.85)
     box-shadow 1px 1px 1px rgba(0,0,0,.3)
+    transform rotateX(10deg)
+    transform-origin 70% 50%
+    transition all .2s ease-in
+    opacity 0
+
+    &.visible
+        transform rotateX(0)
+        opacity 1
 
     button
         width 100%

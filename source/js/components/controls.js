@@ -29,14 +29,14 @@ define([
             if(this.props.state.state === Constants.AppState.FOYER) {
                 res.push(
                     React.DOM.button( {className:"joinRoom", onClick:this.handleStartRoom}, 
-                        "Start"
+                        "Start Call"
                     )
                     );
             }
             else if(this.props.state.state === Constants.AppState.IN_ROOM) {
                 res.push(
                     React.DOM.button( {className:"leaveRoom", onClick:this.handleLeaveRoom}, 
-                        "Leave"
+                        "Leave Call"
                     )
                     );
 
@@ -46,7 +46,7 @@ define([
             }
 
             return (
-                React.DOM.section( {id:"controls"}, 
+                React.DOM.section( {id:"controls", className:this.props.state.controls ? 'visible' : ''}, 
                     React.DOM.div(null, 
                         res
                     )

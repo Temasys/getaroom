@@ -29,14 +29,14 @@ define([
             if(this.props.state.state === Constants.AppState.FOYER) {
                 res.push(
                     <button className="joinRoom" onClick={this.handleStartRoom}>
-                        Start
+                        Start Call
                     </button>
                     );
             }
             else if(this.props.state.state === Constants.AppState.IN_ROOM) {
                 res.push(
                     <button className="leaveRoom" onClick={this.handleLeaveRoom}>
-                        Leave
+                        Leave Call
                     </button>
                     );
 
@@ -46,7 +46,7 @@ define([
             }
 
             return (
-                <section id="controls">
+                <section id="controls" className={this.props.state.controls ? 'visible' : ''}>
                     <div>
                         {res}
                     </div>

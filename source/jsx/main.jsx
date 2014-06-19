@@ -32,6 +32,7 @@ define([
                     }
                 ],
                 state: Constants.AppState.FOYER,
+                controls: true,
                 room: {
                     id: '',
                     status: Constants.RoomState.IDLE,
@@ -77,7 +78,8 @@ define([
                     self.setState({
                         room: Utils.extend(self.state.room, {
                             status: Constants.RoomState.CONNECTED
-                        })
+                        }),
+                        controls: false
                     });
 
                     Skyway.joinRoom();
@@ -123,7 +125,8 @@ define([
                 state: Constants.AppState.FOYER,
                 room: Utils.extend(this.state.room, {
                     status: Constants.RoomState.IDLE
-                })
+                }),
+                controls: true
             });
         },
         joinRoom: function(room) {
@@ -144,10 +147,17 @@ define([
             Skyway.init(Configs.Skyway.server,
                 Configs.Skyway.apiKey, room);
         },
+        handleShowControls: function(e) {
+            this.setState({
+                controls: !this.state.controls
+            });
+        },
         render: function() {
             return (
                 <div>
-                    <UserAreas state={this.state} />
+                    <div onClick={this.handleShowControls}>
+                        <UserAreas state={this.state} />
+                    </div>
                     <Controls state={this.state} />
                 </div>
                 )
