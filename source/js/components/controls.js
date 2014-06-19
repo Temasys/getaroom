@@ -28,20 +28,20 @@ define([
 
             if(this.props.state.state === Constants.AppState.FOYER) {
                 res.push(
-                    React.DOM.button( {onClick:this.handleStartRoom}, 
+                    React.DOM.button( {className:"joinRoom", onClick:this.handleStartRoom}, 
                         "Start"
                     )
                     );
             }
             else if(this.props.state.state === Constants.AppState.IN_ROOM) {
                 res.push(
-                    React.DOM.button( {onClick:this.handleLeaveRoom}, 
+                    React.DOM.button( {className:"leaveRoom", onClick:this.handleLeaveRoom}, 
                         "Leave"
                     )
                     );
 
                 res.push(
-                    React.DOM.div(null, "Status: ", this.props.state.room.status)
+                    React.DOM.div( {className:"status"}, "Status: ", this.props.state.room.status)
                     );
             }
 

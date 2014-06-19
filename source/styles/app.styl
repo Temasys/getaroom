@@ -4,3 +4,124 @@
 @import 'mixins/normalize'
 @import 'mixins/loader'
 
+color1 = #1abc9c
+color2 = #3498db
+color3 = #ff688b
+
+
+body
+    font-family 'Open Sans', Helvetica, Arial, sans-serif
+
+#app, #app > div, #userareas, .userarea, #controls, #controls > div
+    position absolute
+    top 0
+    left 0
+    right 0
+    bottom 0
+
+
+#controls
+    left 50%
+    top 50%
+    margin -325px -200px
+    border-radius 4px
+    height 600px
+    width 400px
+    background rgba(255,255,255,0.85)
+    box-shadow 1px 1px 1px rgba(0,0,0,.3)
+
+    button
+        width 100%
+        display inline-block
+        font-size 1.3em
+        margin 0
+        padding 15px 25px
+        background 0
+        border 0
+        outline 0
+        text-align center
+
+        border-radius 0 0 4px 4px
+        position absolute
+        bottom 0
+        left 0
+
+        &.joinRoom
+            color #fff
+            background linear-gradient(top, darken(green, 10%) 80%, darken(green, 20%) 100%)
+
+        &.leaveRoom
+            color #fff
+            background linear-gradient(top, darken(red, 30%) 80%, darken(red, 40%) 100%)
+
+    .status
+        text-align center
+        padding 15px 25px
+
+#userareas
+    .userarea
+        overflow hidden
+
+        > div
+            position absolute
+            width 100vw
+            height 100vh
+            margin 0
+            background #000
+            transition all .5s ease-out
+
+            video
+                width 100%
+                height 100%
+
+    &.split2
+        .userarea:nth-child(1)
+            right 50%
+
+        .userarea:nth-child(2)
+            left 50%
+
+        .userarea > div
+            margin 0 -25vw
+
+    &.split3
+        .userarea:nth-child(1)
+            right 66.7%
+
+        .userarea:nth-child(2)
+            left 33.3%
+            right 33.3%
+
+        .userarea:nth-child(3)
+            left 66.7%
+
+        .userarea > div
+            margin 0 -33.3vw
+
+
+#noUser
+    overflow hidden
+    filter blur(10px)
+
+    &:after
+        display block
+        content ""
+        padding 400px
+        margin -400px
+        position absolute
+        left 30%
+        top 35%
+        border-radius 400px
+        background linear-gradient(top left, color1 0%, color2 100%)
+
+    &:before
+        display block
+        content ""
+        padding 600px
+        margin -600px
+        position absolute
+        left 80%
+        top 70%
+        border-radius 600px
+        background linear-gradient(bottom left, color2 0%, color3 100%)
+

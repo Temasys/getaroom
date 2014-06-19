@@ -18,7 +18,7 @@ define([
                  React.DOM.div( {id:"noUser"})
 
             return (
-                React.DOM.section( {id:"userareas"}, 
+                React.DOM.section( {id:"userareas", className:'split' + this.props.state.users.length}, 
                     showList
                 )
                 )
@@ -28,7 +28,11 @@ define([
     var UserAreaList = React.createClass({displayName: 'UserAreaList',
         render: function() {
             var userareas = this.props.users.map(function(user) {
-                    return UserArea( {user:user} );
+                    return (
+                        React.DOM.div( {className:"userarea"}, 
+                            UserArea( {user:user} )
+                        )
+                        );
                 });
 
             return (
