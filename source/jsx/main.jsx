@@ -1,7 +1,6 @@
 /** @jsx React.DOM */
 
 define([
-    'socketio',
     'react',
     'router',
     'skyway',
@@ -11,7 +10,6 @@ define([
     'components/userareas',
     'components/controls'
 ], function (
-    SocketIO,
     React,
     Router,
     Skyway,
@@ -21,8 +19,6 @@ define([
     UserAreas,
     Controls
 ) {
-
-
 
     var App = React.createClass({
         getInitialState: function() {

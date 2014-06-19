@@ -9,7 +9,8 @@ require.config({
     ],
 
     paths: {
-        socketio: '/js/libs/socket.io-client.min',
+        socketio: 'http://signaling.temasys.com.sg:6001/'
+            + 'socket.io/socket.io',
         router: '/js/libs/director',
         react: '//cdnjs.cloudflare.com/' +
             'ajax/libs/react/0.10.0/react.min',
@@ -29,7 +30,11 @@ require.config({
         },
         skyway: {
             exports: 'Skyway',
-            init: function() {
+            deps: [
+                'socketio'
+            ],
+            init: function(io) {
+                window.io = io;
                 return new this.Skyway();
             }
         },
