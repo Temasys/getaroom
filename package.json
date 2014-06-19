@@ -21,7 +21,8 @@
     "start": "grunt dev"
   },
   "dependencies": {
-    "SkywayJS": "git://github.com/TemasysCommunications/SkywayJS.git"
+    "SkywayJS": "git://github.com/TemasysCommunications/SkywayJS.git",
+    "grunt-connect-pushstate": "^0.2.0"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
