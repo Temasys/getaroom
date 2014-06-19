@@ -60,9 +60,14 @@ define([
                 muted: this.props.user.isMuted || this.props.user.id === 0
             };
 
+            var res = this.props.user.stream === null &&
+                this.props.user.id === 0 ?
+                <div>Not sharing your audio/video</div> :
+                React.DOM.video(props);
+
             return (
                 <div>
-                    {React.DOM.video(props)}
+                    {res}
                 </div>
                 );
         }
