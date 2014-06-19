@@ -27,8 +27,8 @@ define([
                     {
                         id: 0,
                         name: 'Thomas',
-                        hasAV: false,
-                        stream: null
+                        stream: null,
+                        isMuted: true
                     }
                 ],
                 state: Constants.AppState.FOYER,
@@ -44,31 +44,13 @@ define([
                 }
             }
         },
-        componentDidMount: function() {
-            Router.configure({
-                html5history: false
-            }).mount({
-                '/:room': this.joinRoom.bind(this),
-                '/': this.enterFoyer.bind(this)
-            });
-
-            Router.init();
-
-            // if(location.pathname.length > 1) {
-            //     this.joinRoom(location.pathname.replace('/',''));
-            // }
-
-
-            var self = this;
+        componentWillMount: function() {
+           var self = this;
 
             Skyway.on('mediaAccessSuccess', function(stream) {
-                window.attachMediaStream(
-                    document.getElementById('uservideo0'), stream);
-
                 self.setState({
                     users: self.state.users.map(function (user) {
                         if(user.id === 0) {
-                            user.hasAV = true;
                             user.stream = stream;
                         }
                         return user;
@@ -102,6 +84,39 @@ define([
                     Skyway.getDefaultStream();
                 }
             });
+
+            Skyway.on('addPeerStream', function(peerId, stream) {
+                self.setState({
+                    users: self.state.users.concat({
+                            id: peerId,
+                            name: 'Guest ' + peerId,
+                            stream: stream,
+                            isMuted: false
+                        })
+                });
+            });
+
+            Skyway.on('peerLeft', function(peerId) {
+                self.setState({
+                    users: self.state.users.filter(function(user) {
+                            return user.id !== peerId
+                        })
+                });
+            });
+        },
+        componentDidMount: function() {
+            Router.configure({
+                html5history: false
+            }).mount({
+                '/:room': this.joinRoom.bind(this),
+                '/': this.enterFoyer.bind(this)
+            });
+
+            Router.init();
+
+            // if(location.pathname.length > 1) {
+            //     this.joinRoom(location.pathname.replace('/',''));
+            // }
         },
         enterFoyer: function() {
             this.setState({

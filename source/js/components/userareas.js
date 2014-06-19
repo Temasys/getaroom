@@ -40,9 +40,22 @@ define([
     });
 
     var UserArea = React.createClass({displayName: 'UserArea',
+        attachStream: function() {
+            if(this.props.user.stream !== null) {
+                window.attachMediaStream(
+                    document.getElementById('uv' + this.props.user.id),
+                        this.props.user.stream);
+            }
+        },
+        componentDidMount: function() {
+            this.attachStream();
+        },
+        componentDidUpdate: function() {
+            this.attachStream();
+        },
         render: function() {
             var props = {
-                id: 'uservideo' + this.props.user.id,
+                id: 'uv' + this.props.user.id,
                 autoPlay: true,
                 muted: this.props.user.isMuted || this.props.user.id === 0
             };
