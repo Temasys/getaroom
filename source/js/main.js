@@ -83,7 +83,12 @@ define([
                     });
 
                     Skyway.joinRoom();
-                    Skyway.getDefaultStream();
+
+                    if(!self.state.users.some(function(user) {
+                        return user.id === 0 && user.stream !== null;
+                    })) {
+                        Skyway.getDefaultStream();
+                    }
                 }
             });
 
@@ -131,7 +136,6 @@ define([
             }
 
             room = room.toString();
-            console.log(room);
 
             this.setState({
                 state: Constants.AppState.IN_ROOM,

@@ -83,7 +83,12 @@ define([
                     });
 
                     Skyway.joinRoom();
-                    Skyway.getDefaultStream();
+
+                    if(!self.state.users.some(function(user) {
+                        return user.id === 0 && user.stream !== null;
+                    })) {
+                        Skyway.getDefaultStream();
+                    }
                 }
             });
 
@@ -108,17 +113,13 @@ define([
         },
         componentDidMount: function() {
             Router.configure({
-                html5history: false
+                html5history: true
             }).mount({
                 '/:room': this.joinRoom.bind(this),
                 '/': this.enterFoyer.bind(this)
             });
 
             Router.init();
-
-            // if(location.pathname.length > 1) {
-            //     this.joinRoom(location.pathname.replace('/',''));
-            // }
         },
         enterFoyer: function() {
             this.setState({
