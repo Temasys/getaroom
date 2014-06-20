@@ -2,7 +2,7 @@ define([], function() {
 
     var dev = {
         Skyway: {
-            server: 'http://developer.temasys.com.sg/',
+            server: 'http://sgbeta.signaling.temasys.com.sg:8018/',
             apiKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf'
         },
         API: {

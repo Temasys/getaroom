@@ -65,9 +65,11 @@ define([
             };
 
             var res = this.props.user.stream === null &&
-                this.props.user.id === 0 ?
-                <div>Not sharing your audio/video</div> :
-                React.DOM.video(props);
+                this.props.user.id === 0 ? (
+                <span className="userInfo">
+                    Share your camera and microphone to participate in the call
+                </span>
+                ) : React.DOM.video(props);
 
             return (
                 <div>
