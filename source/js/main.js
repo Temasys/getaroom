@@ -108,17 +108,13 @@ define([
         },
         componentDidMount: function() {
             Router.configure({
-                html5history: false
+                html5history: true
             }).mount({
                 '/:room': this.joinRoom.bind(this),
                 '/': this.enterFoyer.bind(this)
             });
 
             Router.init();
-
-            // if(location.pathname.length > 1) {
-            //     this.joinRoom(location.pathname.replace('/',''));
-            // }
         },
         enterFoyer: function() {
             this.setState({
@@ -135,6 +131,7 @@ define([
             }
 
             room = room.toString();
+            console.log(room);
 
             this.setState({
                 state: Constants.AppState.IN_ROOM,
