@@ -7,7 +7,7 @@ define([], function() {
             var uuid = '';
             l = Math.max(Math.min(parseInt(l, 10), 32), 0);
 
-            for (i = 0; i < l || 32; i++) {
+            for (i = 0; i < l; i++) {
                 random = Math.random() * 16 | 0;
                 if (i === 8 || i === 12 || i === 16 || i === 20) {
                     uuid += '-';
