@@ -16,7 +16,7 @@ define([
 
     var Controls = React.createClass({
         handleStartRoom: function(e) {
-            var room = 'home'; //Utils.uuid();
+            var room = Utils.uuid(6);
             Router.setRoute('/' + room);
         },
         handleLeaveRoom: function(e) {

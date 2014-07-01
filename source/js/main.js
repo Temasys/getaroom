@@ -92,6 +92,18 @@ define([
                 }
             });
 
+            Skyway.on("channelError", function(error) {
+                self.setState({
+                    room: Utils.extend(self.state.room, {
+                        status: Constants.RoomState.IDLE
+                    }),
+                    state: Constants.AppState.FOYER,
+                    controls: true
+                });
+
+                alert("ERROR: " + error.toString());
+            });
+
             Skyway.on('addPeerStream', function(peerId, stream) {
                 self.setState({
                     users: self.state.users.concat({
@@ -145,7 +157,7 @@ define([
                 })
             });
 
-            Skyway.init(Configs.Skyway.server,
+            Skyway.initCORS(Configs.Skyway.server,
                 Configs.Skyway.apiKey, room);
         },
         handleShowControls: function(e) {

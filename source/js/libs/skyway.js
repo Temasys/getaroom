@@ -1,4 +1,4 @@
-/*! SkywayJS - v0.0.1 - 2014-06-13 */
+/*! SkywayJS - v0.0.1 - 2014-06-30 */
 
 RTCPeerConnection = null;
 /**
@@ -6,24 +6,24 @@ RTCPeerConnection = null;
  *  Get UserMedia (only difference is the prefix).
  * [Credits] Code from Adam Barth.
  *
- * @attribute RTCIceCandidate
- * @type Function
+ * [attribute] RTCIceCandidate
+ * [type] Function
  */
 getUserMedia = null;
 /**
  * Note:
  *  Attach a media stream to an element.
  *
- * @attribute attachMediaStream
- * @type Function
+ * [attribute] attachMediaStream
+ * [type] Function
  */
 attachMediaStream = null;
 /**
  * Note:
  *  Re-attach a media stream to an element.
  *
- * @attribute reattachMediaStream
- * @type Function
+ * [attribute] reattachMediaStream
+ * [type] Function
  */
 reattachMediaStream = null;
 /**
@@ -33,15 +33,15 @@ reattachMediaStream = null;
  *  - plugName : the plugin name
  *  - installedCb : callback if the plugin is detected (no argument)
  *  - notInstalledCb : callback if the plugin is not detected (no argument)
- * @attribute isPluginInstalled
- * @type Function
+ * @method isPluginInstalled
+ * @protected
  */
 isPluginInstalled = null;
 /**
  * Note:
  *  defines webrtc's JS interface according to the plugin's implementation
- * @attribute defineWebRTCInterface
- * @type Function
+ * [attribute] defineWebRTCInterface
+ * [type] Function
  */
 defineWebRTCInterface = null;
 /**
@@ -50,29 +50,29 @@ defineWebRTCInterface = null;
  *  (browser different from Chrome or Firefox),
  *  but the plugin is not installed
  *  Override it according to your application logic.
- * @attribute pluginNeededButNotInstalledCb
- * @type Function
+ * [attribute] pluginNeededButNotInstalledCb
+ * [type] Function
  */
 pluginNeededButNotInstalledCb = null;
 /**
  * Note:
  *  The Object used in SkywayJS to check the WebRTC Detected type
- * @attribute WebRTCDetectedBrowser
- * @type JSON
+ * [attribute] WebRTCDetectedBrowser
+ * [type] JSON
  */
 webrtcDetectedBrowser = {};
 /**
  * Note:
  *  The Object to store the list of DataChannels
- * @attribute RTCDataChannels
- * @type JSON
+ * [attribute] RTCDataChannels
+ * [type] JSON
  */
 RTCDataChannels = {};
 /**
  * Note:
  *  The Object to store Plugin information
- * @attribute temPluginInfo
- * @type JSON
+ * [attribute] temPluginInfo
+ * [type] JSON
  */
 temPluginInfo = {
   pluginId : 'plugin0',
@@ -82,8 +82,8 @@ temPluginInfo = {
 /**
  * Note:
  * Unique identifier of each opened page
- * @attribute TemPageId
- * @type String
+ * [attribute] TemPageId
+ * [type] String
  */
 TemPageId = Math.random().toString(36).slice(2);
 /**
@@ -103,8 +103,9 @@ TemPageId = Math.random().toString(36).slice(2);
  * 4th Step: Get browser version
  * [Credits]: Get version of Browser. Code provided by kennebec@stackoverflow.com
  * [Credits]: IsSCTP/isRTPD Supported. Code provided by DetectRTC by Muaz Khan
- * @attribute getBrowserVersion
- * @type Function
+ *
+ * @method getBrowserVersion
+ * @protected
  */
 getBrowserVersion = function () {
   var agent = {},
@@ -172,33 +173,12 @@ getBrowserVersion = function () {
 webrtcDetectedBrowser = getBrowserVersion();
 /**
  * Note:
- *  use this function whenever you want to call the plugin
- * @attribute plugin
- * @type Function
- * @protected
+ *  use this whenever you want to call the plugin
+ * [attribute] plugin
+ * [type DOM] {Object}
+ * [protected]
  */
-plugin = function () {
-  var pluginDOM = document.getElementById(temPluginInfo.pluginId);
-  if (!pluginDOM) {
-    pluginDOM = document.createElement('object');
-    pluginDOM.id = temPluginInfo.pluginId;
-    pluginDOM.style.visibility = 'hidden';
-    pluginDOM.type = temPluginInfo.type;
-    pluginDOM.innerHTML = '<param name="onload" value="' +
-      temPluginInfo.onload + '">' +
-      '<param name="pluginId" value="' +
-      temPluginInfo.pluginId + '">';
-    document.getElementsByTagName('body')[0].appendChild(pluginDOM);
-    pluginDOM.onreadystatechange = function (state) {
-      console.log('Plugin: Ready State : ' + state);
-      if (state === 4) {
-        return pluginDOM;
-      }
-    };
-  } else {
-    return pluginDOM;
-  }
-};
+TemRTCPlugin = null;
 /**
  * Note:
  *  webRTC readu Cb, should only be called once.
@@ -208,9 +188,9 @@ plugin = function () {
  *  this can be because of the browser or because of the plugin
  *  Override WebRTCReadyCb and use it to do whatever you need to do when the
  *  page is ready
- * @attribute TemPrivateWebRTCReadyCb
- * @type Function
- * @private
+ * [attribute] TemPrivateWebRTCReadyCb
+ * [type] Function
+ * [private]
  */
 TemPrivateWebRTCReadyCb = function () {
   arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
@@ -230,13 +210,13 @@ TemPrivateWebRTCReadyCb = function () {
  *  TemPrivateWebRTCReadyCb instead.
  *  This function is not in the IE/Safari condition brackets so that
  *  TemPluginLoaded function might be called on Chrome/Firefox
- * @attribute TemInitPlugin0
- * @type Function
- * @protected
+ * [attribute] TemInitPlugin0
+ * [type] Function
+ * [protected]
  */
 TemInitPlugin0 = function () {
-  plugin().setPluginId(TemPageId, temPluginInfo.pluginId);
-  plugin().setLogFunction(console);
+  TemRTCPlugin.setPluginId(TemPageId, temPluginInfo.pluginId);
+  TemRTCPlugin.setLogFunction(console);
   TemPrivateWebRTCReadyCb();
 };
 /**
@@ -244,10 +224,10 @@ TemInitPlugin0 = function () {
  *  To Fix Configuration as some browsers,
  *  some browsers does not support the 'urls' attribute
  * - .urls is not supported in FF yet.
- * @attribute maybeFixConfiguration
- * @type Function
- * _ @params {JSON} pcConfig
- * @private
+ * [attribute] maybeFixConfiguration
+ * [type] Function
+ * _ [param] {JSON} pcConfig
+ * [private]
  */
 maybeFixConfiguration = function (pcConfig) {
   if (pcConfig === null) {
@@ -261,16 +241,16 @@ maybeFixConfiguration = function (pcConfig) {
   }
 };
 /*******************************************************************
-Check for browser types and react accordingly
- *******************************************************************/
+ Check for browser types and react accordingly
+*******************************************************************/
 if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Note:
    *  Creates a RTCPeerConnection object for moz
    *
-   * @method RTCPeerConnection
-   * @param {JSON} pcConfig
-   * @param {JSON} pcConstraints
+   * [method] RTCPeerConnection
+   * [param] {JSON} pcConfig
+   * [param] {JSON} pcConstraints
    */
   RTCPeerConnection = function (pcConfig, pcConstraints) {
     maybeFixConfiguration(pcConfig);
@@ -292,10 +272,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - FF 27 and above supports transport parameters in TURN url,
    *    - So passing in the full url to create iceServer.
    *
-   * @method createIceServer
-   * @param {String} url
-   * @param {String} username
-   * @param {String} password
+   * [method] createIceServer
+   * [param] {String} url
+   * [param] {String} username
+   * [param] {String} password
    */
   createIceServer = function (url, username, password) {
     var iceServer = null;
@@ -329,9 +309,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - Use .url for FireFox.
    *  - Multiple Urls support
    *
-   * @method createIceServers
-   * @param {JSON} pcConfig
-   * @param {JSON} pcConstraints
+   * [method] createIceServers
+   * [param] {JSON} pcConfig
+   * [param] {JSON} pcConstraints
    */
   createIceServers = function (urls, username, password) {
     var iceServers = [];
@@ -348,9 +328,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Attach Media Stream for moz
    *
-   * @method attachMediaStream
-   * @param {HTMLVideoDOM} element
-   * @param {Blob} Stream
+   * [method] attachMediaStream
+   * [param] {HTMLVideoDOM} element
+   * [param] {Blob} Stream
    */
   attachMediaStream = function (element, stream) {
     console.log('Attaching media stream');
@@ -363,9 +343,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Re-attach Media Stream for moz
    *
-   * @method attachMediaStream
-   * @param {HTMLVideoDOM} to
-   * @param {HTMLVideoDOM} from
+   * [method] attachMediaStream
+   * [param] {HTMLVideoDOM} to
+   * [param] {HTMLVideoDOM} from
    */
   reattachMediaStream = function (to, from) {
     console.log('Reattaching media stream');
@@ -395,10 +375,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - Create iceServer with stun url.
    *  - Chrome M28 & above uses below TURN format.
    *
-   * @method createIceServer
-   * @param {String} url
-   * @param {String} username
-   * @param {String} password
+   * [method] createIceServer
+   * [param] {String} url
+   * [param] {String} username
+   * [param] {String} password
    */
   createIceServer = function (url, username, password) {
     var iceServer = null;
@@ -421,10 +401,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - .urls is supported since Chrome M34.
    *  - Multiple Urls support
    *
-   * @method createIceServers
-   * @param {Array} urls
-   * @param {String} username
-   * @param {String} password
+   * [method] createIceServers
+   * [param] {Array} urls
+   * [param] {String} username
+   * [param] {String} password
    */
   createIceServers = function (urls, username, password) {
     var iceServers = [];
@@ -449,10 +429,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Creates an RTCPeerConection Object for webkit
    * - .urls is supported since Chrome M34.
-   * @method RTCPeerConnection
-   * @param {String} url
-   * @param {String} username
-   * @param {String} password
+   * [method] RTCPeerConnection
+   * [param] {String} url
+   * [param] {String} username
+   * [param] {String} password
    */
   RTCPeerConnection = function (pcConfig, pcConstraints) {
     if (webrtcDetectedBrowser.version < 34) {
@@ -468,9 +448,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Attach Media Stream for webkit
    *
-   * @method attachMediaStream
-   * @param {HTMLVideoDOM} element
-   * @param {Blob} Stream
+   * [method] attachMediaStream
+   * [param] {HTMLVideoDOM} element
+   * [param] {Blob} Stream
    */
   attachMediaStream = function (element, stream) {
     if (typeof element.srcObject !== 'undefined') {
@@ -489,9 +469,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Re-attach Media Stream for webkit
    *
-   * @method attachMediaStream
-   * @param {HTMLVideoDOM} to
-   * @param {HTMLVideoDOM} from
+   * [method] attachMediaStream
+   * [param] {HTMLVideoDOM} to
+   * [param] {HTMLVideoDOM} from
    */
   reattachMediaStream = function (to, from) {
     to.src = from.src;
@@ -505,6 +485,25 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   var isChrome = webrtcDetectedBrowser.browser === 'Chrome';
   var isIE = webrtcDetectedBrowser.browser === 'IE';
 
+  /********************************************************************************
+    Load Plugin
+  ********************************************************************************/
+  TemRTCPlugin = document.createElement('object');
+  TemRTCPlugin.id = temPluginInfo.pluginId;
+  TemRTCPlugin.style.visibility = 'hidden';
+  TemRTCPlugin.type = temPluginInfo.type;
+  TemRTCPlugin.innerHTML = '<param name="onload" value="' +
+    temPluginInfo.onload + '">' +
+    '<param name="pluginId" value="' +
+    temPluginInfo.pluginId + '">' +
+    '<param name="pageId" value="' + TemPageId + '">';
+  document.body.appendChild(TemRTCPlugin);
+  TemRTCPlugin.onreadystatechange = function (state) {
+    console.log('Plugin: Ready State : ' + state);
+    if (state === 4) {
+      console.log('Plugin has been loaded');
+    }
+  };
   /**
    * Note:
    *   Checks if the Plugin is installed
@@ -512,11 +511,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - Else If it's IE - we're running IE and do something
    *  - Else Unsupported
    *
-   * @method isPluginInstalled
-   * @param {String} comName
-   * @param {String} plugName
-   * @param {Function} installedCb
-   * @param {Function} notInstalledCb
+   * [method] isPluginInstalled
+   * [param] {String} comName
+   * [param] {String} plugName
+   * [param] {Function} installedCb
+   * [param] {Function} notInstalledCb
    */
   isPluginInstalled = function (comName, plugName, installedCb, notInstalledCb) {
     if (isChrome || isSafari || isFirefox) {
@@ -545,7 +544,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *   Define Plugin Browsers as WebRTC Interface
    *
-   * @method defineWebRTCInterface
+   * [method] defineWebRTCInterface
    */
   defineWebRTCInterface = function () {
     /**
@@ -553,8 +552,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     *   Check if WebRTC Interface is Defined
     * - This is a Util Function
     *
-    * @method isDefined
-    * @param {String} variable
+    * [method] isDefined
+    * [param] {String} variable
     */
     isDefined = function (variable) {
       return variable !== null && variable !== undefined;
@@ -567,10 +566,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     * - Else - Create iceServer with turn url
     * - This is a WebRTC Function
     *
-    * @method createIceServer
-    * @param {String} url
-    * @param {String} username
-    * @param {String} password
+    * [method] createIceServer
+    * [param] {String} url
+    * [param] {String} username
+    * [param] {String} password
     */
     createIceServer = function (url, username, password) {
       var iceServer = null;
@@ -597,10 +596,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     * - Multiple Urls support
     * - This is a WebRTC Function
     *
-    * @method createIceServers
-    * @param {Array} urls
-    * @param {String} username
-    * @param {String} password
+    * [method] createIceServers
+    * [param] {Array} urls
+    * [param] {String} username
+    * [param] {String} password
     */
     createIceServers = function (urls, username, password) {
       var iceServers = [];
@@ -615,13 +614,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     *   Creates RTCSessionDescription object for Plugin Browsers
     * - This is a WebRTC Function
     *
-    * @method RTCSessionDescription
-    * @param {Array} urls
-    * @param {String} username
-    * @param {String} password
+    * [method] RTCSessionDescription
+    * [param] {Array} urls
+    * [param] {String} username
+    * [param] {String} password
     */
     RTCSessionDescription = function (info) {
-      return plugin().ConstructSessionDescription(info.type, info.sdp);
+      return TemRTCPlugin.ConstructSessionDescription(info.type, info.sdp);
     };
 
     /**
@@ -629,9 +628,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     *   Creates RTCPeerConnection object for Plugin Browsers
     * - This is a WebRTC Function
     *
-    * @method RTCSessionDescription
-    * @param {JSON} servers
-    * @param {JSON} contstraints
+    * [method] RTCSessionDescription
+    * [param] {JSON} servers
+    * [param] {JSON} contstraints
     */
     RTCPeerConnection = function (servers, constraints) {
       var iceServers = null;
@@ -641,17 +640,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           if (iceServers[i].urls && !iceServers[i].url) {
             iceServers[i].url = iceServers[i].urls;
           }
-          iceServers[i].hasCredentials = isDefined(iceServers[i].username) && isDefined(iceServers[i].credential);
+          iceServers[i].hasCredentials = isDefined(iceServers[i].username) &&
+            isDefined(iceServers[i].credential);
         }
       }
       var mandatory = (constraints && constraints.mandatory) ? constraints.mandatory : null;
       var optional = (constraints && constraints.optional) ? constraints.optional : null;
-      return plugin().PeerConnection(TemPageId, iceServers, mandatory, optional);
+      return TemRTCPlugin.PeerConnection(TemPageId, iceServers, mandatory, optional);
     };
 
     MediaStreamTrack = {};
     MediaStreamTrack.getSources = function (callback) {
-      plugin().GetSources(callback);
+      TemRTCPlugin.GetSources(callback);
     };
 
     /*******************************************************
@@ -661,7 +661,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (!constraints.audio) {
         constraints.audio = false;
       }
-      plugin().getUserMedia(constraints, successCallback, failureCallback);
+      TemRTCPlugin.getUserMedia(constraints, successCallback, failureCallback);
     };
     navigator.getUserMedia = getUserMedia;
 
@@ -671,9 +671,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      *  - If Check is audio element
      *  - Else The sound was enabled, there is nothing to do here
      *
-     * @method attachMediaStream
-     * @param {HTMLVideoDOM} element
-     * @param {Blob} Stream
+     * [method] attachMediaStream
+     * [param] {HTMLVideoDOM} element
+     * [param] {Blob} Stream
      */
     attachMediaStream = function (element, stream) {
       stream.enableSoundTracks(true);
@@ -726,16 +726,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Note:
      *  Re-attach Media Stream for Plugin Browsers
      *
-     * @method attachMediaStream
-     * @param {HTMLVideoDOM} to
-     * @param {HTMLVideoDOM} from
+     * [method] attachMediaStream
+     * [param] {HTMLVideoDOM} to
+     * [param] {HTMLVideoDOM} from
      */
     reattachMediaStream = function (to, from) {
       var stream = null;
       var children = from.children;
       for (var i = 0; i !== children.length; ++i) {
         if (children[i].name === 'streamId') {
-          stream = plugin().getStreamWithId(TemPageId, children[i].value);
+          stream = TemRTCPlugin.getStreamWithId(TemPageId, children[i].value);
           break;
         }
       }
@@ -751,14 +751,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     *   Creates RTCIceCandidate object for Plugin Browsers
     * - This is a WebRTC Function
     *
-    * @method RTCIceCandidate
-    * @param {JSON} candidate
+    * [method] RTCIceCandidate
+    * [param] {JSON} candidate
     */
     RTCIceCandidate = function (candidate) {
       if (!candidate.sdpMid) {
         candidate.sdpMid = '';
       }
-      return plugin().ConstructIceCandidate(
+      return TemRTCPlugin.ConstructIceCandidate(
         candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate
       );
     };
@@ -788,7 +788,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
     this.VERSION = '0.0.1';
 
-    this._socketVersion=1.04;
+    this._socketVersion = '1.0.6';
 
     // NOTE ALEX: check if last char is '/'
     /**
@@ -875,39 +875,45 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._downloadDataTransfers = {};
 
     var _parseInfo = function (info, self) {
-      self._key = info.cid;
-      self._user = {
-        id        : info.username,
-        token     : info.userCred,
-        timeStamp : info.timeStamp,
-        displayName    : info.displayName,
-        apiOwner:       info.apiOwner,
-        streams : []
-      };
-      self._room = {
-        id : info.room_key,
-        token : info.roomCred,
-        start:          info.start,
-        len:            info.len,
-        signalingServer : {
-          ip : info.ipSigserver,
-          port : info.portSigserver
-        },
-        pcHelper : {
-          pcConstraints : JSON.parse(info.pc_constraints),
-          pcConfig : null,
-          offerConstraints : JSON.parse(info.offer_constraints),
-          sdpConstraints : {
-            mandatory : {
-              OfferToReceiveAudio : true,
-              OfferToReceiveVideo : true
+      if (info.success){
+        self._key = info.cid;
+        self._user = {
+          id        : info.username,
+          token     : info.userCred,
+          timeStamp : info.timeStamp,
+          displayName    : info.displayName,
+          apiOwner:       info.apiOwner,
+          streams : []
+        };
+        self._room = {
+          id : info.room_key,
+          token : info.roomCred,
+          start:          info.start,
+          len:            info.len,
+          signalingServer : {
+            ip : info.ipSigserver,
+            port : info.portSigserver
+          },
+          pcHelper : {
+            pcConstraints : JSON.parse(info.pc_constraints),
+            pcConfig : null,
+            offerConstraints : JSON.parse(info.offer_constraints),
+            sdpConstraints : {
+              mandatory : {
+                OfferToReceiveAudio : true,
+                OfferToReceiveVideo : true
+              }
             }
           }
-        }
-      };
-      console.log('API - Parsed infos from webserver. Ready.');
-      self._readyState = 2;
-      self._trigger('readyStateChange', 2);
+        };
+        console.log('API - Parsed infos from webserver. Ready.');
+
+        self._readyState = 2;
+        self._trigger('readyStateChange', 2);
+
+      }else{
+        console.log("<<: Fatal Error >> , Not able to start Meeting Service : "+ info.info);
+      }
     };
 
     this._init = function (self) {
@@ -920,7 +926,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         return;
       }
       if (!window.io) {
-        console.log('API - Socket.io is not loaded.');
+        console.log('API - Socket.io is not loaded.'+io);
         return;
       }
       if (!this._path) {
@@ -1022,7 +1028,37 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._readyState = 0;
     this._trigger('readyStateChange', 0);
     this._key = apikey;
+    // the start, len, cred  must exist for NONE CORS calls
+
+    this._path = server + "api/"+apikey + "/" + room+"/"+start+"/"+len+"?&cred="+cred;
+    console.log(cred);
+
+    if(socketIOVer){
+      console.log('Socket.IO version passed: ' + socketIOVer);
+      this._socketVersion = socketIOVer;
+      this._path+="&io="+socketIOVer;
+    }
+    console.log(this._path);
+    this._init(this);
+  };
+
+    /**
+   * @method init
+   * @param {String} server Path to the Temasys backend server
+   * @param {String} apikey API key to identify with the Temasys backend server
+   * @param {String} room Room to enter
+   */
+  Skyway.prototype.initCORS = function (server, apikey, room,socketIOVer) {
+    this._readyState = 0;
+    this._trigger('readyStateChange', 0);
+    this._key = apikey;
     this._path = server + "api/"+apikey + "/" + room;
+    if(socketIOVer){
+      console.log('Socket.IO version passed: ' + socketIOVer);
+      this._socketVersion = socketIOVer;
+      this._path+="&io="+socketIOVer;
+    }
+    console.log(this._path);
     this._init(this);
   };
 
@@ -1119,6 +1155,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {Boolean} pvt
      */
     'chatMessage' : [],
+
+        /**
+     * @event systemMessage
+     * @param {String}  msg
+     * @param {String}  displayName
+     * @param {Boolean} pvt
+     */
+    'systemAction' : [],
+
     /**
      * Event fired when a peer joins the room
      * @event peerJoined
@@ -1197,7 +1242,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var msg_json = {
       cid : this._key,
       data : chatMsg,
-      mid : this._user.id,
+      mid : this._user.sid,
       nick : this._user.displayName,
       rid : this._room.id,
       type : 'chat'
@@ -1276,6 +1321,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    */
   Skyway.prototype._processSigMsg = function (message) {
+   // console.log(message);
     var msg = JSON.parse(message);
     if (msg.type === 'group') {
       console.log('API - Bundle of ' + msg.lists.length + ' messages.');
@@ -1297,11 +1343,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._processSingleMsg = function (msg) {
     this._trigger('channelMessage');
     var origin = msg.mid;
-    if (!origin || origin === this._user.id) {
+    if (!origin || origin === this._user.sid) {
       origin = 'Server';
     }
     console.log('API - [' + origin + '] Incoming message: ' + msg.type);
-    if (msg.mid === this._user.id &&
+    if (msg.mid === this._user.sid &&
       msg.type !== 'redirect' &&
       msg.type !== 'inRoom' &&
       msg.type !== 'chat') {
@@ -1372,10 +1418,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._chatHandler = function (msg) {
     this._trigger('chatMessage',
       msg.data,
-      ((msg.id === this._user.id) ? 'Me, myself and I' : msg.nick),
+      ((msg.id === this._user.sid) ? 'Me, myself and I' : msg.nick),
       (msg.target ? true : false));
   };
-
+// redirect msg need to be handled by customer API, not skyway JS.
   /**
    * Signaller server wants us to move out.
    *
@@ -1385,13 +1431,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._redirectHandler = function (msg) {
     console.log('API - [Server] You are being redirected: ' + msg.info);
-    if (msg.action === 'warning') {
-      return;
+  /*  if (msg.action === 'warning') {
+  //    return;
     } else if (msg.action === 'reject') {
-      location.href = msg.url;
+   //   location.href = msg.url;
     } else if (msg.action === 'close') {
-      location.href = msg.url;
-    }
+   //  location.href = msg.url;
+    }*/
+
+    this._trigger('systemAction',msg.action,msg.info);
   };
 
   /**
@@ -1467,6 +1515,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
     this._room.pcHelper.pcConfig = temp_config;
     this._in_room = true;
+    this._user.sid = msg.sid;
     this._trigger('joinedRoom', this._room.id);
 
     // NOTE ALEX: should we wait for local streams?
@@ -1478,7 +1527,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._trigger('handshakeProgress', 'enter');
     this._sendMessage({
       type : 'enter',
-      mid : this._user.id,
+      mid : this._user.sid,
       rid : this._room.id,
       nick : this._user.displayName
     });
@@ -1494,15 +1543,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._enterHandler = function (msg) {
     var targetMid = msg.mid;
+    var nick=msg.nick;
     this._trigger('handshakeProgress', 'enter', targetMid);
-    this._trigger('peerJoined', targetMid);
+    this._trigger('peerJoined', targetMid,nick);
     // need to check entered user is new or not.
     if (!this._peerConnections[targetMid]) {
       console.log('API - [' + targetMid + '] Sending welcome.');
       this._trigger('handshakeProgress', 'welcome', targetMid);
       this._sendMessage({
         type : 'welcome',
-        mid : this._user.id,
+        mid : this._user.sid,
         target : targetMid,
         rid : this._room.id,
         nick : this._user.displayName
@@ -1524,8 +1574,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._welcomeHandler = function (msg) {
     var targetMid = msg.mid;
+    var nick=msg.nick;
     this._trigger('handshakeProgress', 'welcome', targetMid);
-    this._trigger('peerJoined', targetMid);
+    this._trigger('peerJoined', targetMid,nick);
     if (!this._peerConnections[targetMid]) {
       this._openPeer(targetMid, true);
     }
@@ -1624,7 +1675,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     // I'm the callee I need to make an offer
     if (toOffer) {
-      this._createDC(this._user.id, targetMid, null, true, null);
+      this._createDC(this._user.sid, targetMid, null, true, null);
       this._doCall(targetMid);
     }
   };
@@ -1718,7 +1769,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       self._sendMessage({
         type : sessionDescription.type,
         sdp : sessionDescription.sdp,
-        mid : self._user.id,
+        mid : self._user.sid,
         target : targetMid,
         rid : self._room.id
       });
@@ -1763,7 +1814,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     pc.ondatachannel = function (event) {
       console.log('DataChannel Opened');
       var dc = event.channel || event;
-      self._createDC(self._user.id, targetMid, null, false, dc);
+      self._createDC(self._user.sid, targetMid, null, false, dc);
     };
     pc.onaddstream = function (event) {
       self._onRemoteStreamAdded(targetMid, event);
@@ -1810,7 +1861,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         label : event.candidate.sdpMLineIndex,
         id : event.candidate.sdpMid,
         candidate : event.candidate.candidate,
-        mid : this._user.id,
+        mid : this._user.sid,
         target : targetMid,
         rid : this._room.id
       });
@@ -1888,6 +1939,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       return;
     }
     var msgString = JSON.stringify(message);
+    console.log(msgString);
     console.log('API - [' + (message.target ? message.target : 'server') +
       '] Outgoing message: ' + message.type);
     this._socket.send(msgString);
@@ -1910,8 +1962,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         'http://' + self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
       console.log('API - Signaling server URL: ' + ip_signaling);
 
-      if(self._socketVersion>=1){
-        self._socket = window.io.connect(ip_signaling, {
+      if(self._socketVersion.toString().indexOf('1.') === 0) {
+        self._socket = io.connect(ip_signaling, {
             forceNew : true
           });
 
@@ -1933,6 +1985,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         self._trigger('channelError');
       });
       self._socket.on('disconnect', function () {
+        console.log("----Disconnect detected!---");
         self._trigger('channelClose');
       });
       self._socket.on('message', function (msg) {
@@ -2125,7 +2178,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           self._sendDataCH(channel,
             'WRQ|' + _info.name + '|' + _info.size + '|' +
             self._uploadDataTransfers[channel].chunks.length + '|' +
-            self._user.id
+            self._user.sid
           );
         }
         // WRQ - Send File Request Received. For receiver to accept or not
@@ -2173,7 +2226,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       } else if (data[0] === 'COM') {
         var blob = new Blob(self._downloadDataTransfers[channel].data);
         self._trigger('receivedData', {
-          myuserid: self._user.id,
+          myuserid: self._user.sid,
           senderid: self._downloadDataTransfers[channel].sender,
           filename: self._downloadDataTransfers[channel].filename,
           filesize: self._downloadDataTransfers[channel].filesize,
@@ -2195,7 +2248,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         if (this.status == 200) {
           self._downloadDataTransfers[channel].data.push(this.response);
           self._downloadDataTransfers[channel].completed += 1;
-          self._sendDataCH(channel, 'ACK|N|' + self._user.id);
+          self._sendDataCH(channel, 'ACK|N|' + self._user.sid);
         }
       };
       xhr.open('GET', dataString, true);
@@ -2310,7 +2363,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._sendFileToPeers = function(fileInfo, blob) {
     console.log('API - Preparing File Sending to Queue');
     var self = this, noOfPeersSent = 0;
-    var itemId = self._user.id +
+    var itemId = self._user.sid +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     fileInfo.itemId = itemId;
     var fileChunks = this._chunkFile(blob, fileInfo.size);
@@ -2340,8 +2393,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       self._trigger('receivedData', {
         filename: fileInfo.name,
         filesize: fileInfo.size,
-        senderid: self._user.id,
-        myuserid: self._user.id,
+        senderid: self._user.sid,
+        myuserid: self._user.sid,
         data: URL.createObjectURL(blob),
         channel: fileInfo.channel
       });
@@ -2400,7 +2453,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - Joining room: ' + self._room.id);
       self._sendMessage({
         type : 'joinRoom',
-        mid : self._user.id,
+        uid : self._user.id,
         userCred : self._user.token,
         timeStamp: self._user.timeStamp,
         apiOwner  : self._user.apiOwner,
@@ -2413,7 +2466,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         len:       self._room.len,
 
       });
-      this._user.peer = this._createPeerConnection(this._user.id);
+      this._user.peer = this._createPeerConnection(this._user.sid);
     };
     if (!this._channel_open) {
       console.log("not opened");

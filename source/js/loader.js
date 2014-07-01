@@ -9,8 +9,8 @@ require.config({
     ],
 
     paths: {
-        socketio: 'http://signaling.temasys.com.sg:6001/'
-            + 'socket.io/socket.io',
+        socketio: '//cdn.temasys.com.sg/libraries/'
+            + 'socket.io-client/1.0.6/socket.io',
         router: '/js/libs/director',
         react: '//cdnjs.cloudflare.com/' +
             'ajax/libs/react/0.10.0/react.min',
