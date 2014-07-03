@@ -15,7 +15,7 @@ require.config({
         react: '//cdnjs.cloudflare.com/' +
             'ajax/libs/react/0.10.0/react.min',
         skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
-            'latest/skyway.debug',
+            'latest/skyway.min',
         facebook: '//connect.facebook.net/en_US/all',
         twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +
