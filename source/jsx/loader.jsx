@@ -11,10 +11,11 @@ require.config({
     paths: {
         socketio: '//cdn.temasys.com.sg/libraries/'
             + 'socket.io-client/1.0.6/socket.io',
-        router: '/js/libs/director',
+        router: 'libs/director',
         react: '//cdnjs.cloudflare.com/' +
             'ajax/libs/react/0.10.0/react.min',
-        skyway: '/js/libs/skyway',
+        skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
+            'latest/skyway.debug',
         facebook: '//connect.facebook.net/en_US/all',
         twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +

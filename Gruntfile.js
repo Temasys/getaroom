@@ -222,7 +222,7 @@ module.exports = function (grunt) {
                 options: {
                     base: '<%= source %>/',
                     port: 8085,
-                    open: 'http://dev.getaroom.io:8085'
+                    open: 'http://dev.getaroom.localhost:8085'
                 }
             },
             production: {
@@ -282,7 +282,8 @@ module.exports = function (grunt) {
                     flatten: true,
                     src: [
                         '<%= staging %>/index.html',
-                        '<%= staging %>/version.txt'
+                        '<%= staging %>/version.txt',
+                        '<%= staging %>/jsx/configs.jsx'
                     ],
                     dest: '<%= staging %>/'
                 }]
@@ -336,6 +337,7 @@ module.exports = function (grunt) {
     grunt.registerTask('stage', [
         'clean:staging',
         'copy:staging',
+        'replace:dist',
         'svgtemplater:staging',
         'react:staging',
         'imagemin',
@@ -349,9 +351,7 @@ module.exports = function (grunt) {
         'requirejs',
         'filerev:js',
         'versionise',
-        'replace:dist',
-        'usemin:html',
-        'htmlmin:html'
+        'usemin:html'
     ]);
 
     grunt.registerTask('publish', [

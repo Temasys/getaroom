@@ -157,7 +157,7 @@ define([
                 })
             });
 
-            Skyway.initCORS(Configs.Skyway.server,
+            Skyway.init(Configs.Skyway.server,
                 Configs.Skyway.apiKey, room);
         },
         handleShowControls: function(e) {
