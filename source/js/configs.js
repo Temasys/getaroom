@@ -25,8 +25,8 @@ define([], function() {
     var prod = {
         env: 'prod',
         Skyway: {
-            server: '//signaling.temasys.com.sg/',
-            apiKey: '0cd2b351-3d95-4ece-88ea-44a114d5c9f5'
+            server: '//sgbeta.signaling.temasys.com.sg:8018/',
+            apiKey: '7e31b061-71e6-4dd7-bd55-516579973930'
         },
         API: {
             server: 'http://api.getaroom.io'
