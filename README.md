@@ -1,7 +1,7 @@
 getaroom.io
 ====
 
-> Pretty nifty cross device and browser WebRTC audio/video conferencing demo of [SkywayJS](http://github.com/Temasys/SkywayJS) using [React](http://facebook.github.io/react/).
+> Pretty nifty cross device and cross browser WebRTC audio/video conferencing demo of [SkywayJS](http://github.com/Temasys/SkywayJS) using [React](http://facebook.github.io/react/).
 > Try it out at http://getaroom.io
 
 
