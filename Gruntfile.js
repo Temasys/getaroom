@@ -49,7 +49,7 @@ module.exports = function (grunt) {
                     cwd: '<%= staging %>/',
                     dest: '<%= production %>/',
                     src: [
-                        'index.html'
+                        '**/*'
                     ]
                 }]
             }
