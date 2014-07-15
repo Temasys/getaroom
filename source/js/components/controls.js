@@ -36,7 +36,7 @@ define([
             if(this.props.state.state === Constants.AppState.FOYER) {
                 res.push(
                     React.DOM.button( {className:"joinRoom", onClick:this.handleStartRoom}, 
-                        "Start Call"
+                        "Start a new call"
                     )
                     );
 
@@ -46,7 +46,7 @@ define([
                             "Start a FREE call",React.DOM.br(null ),"with up to 3 others"
                         ),
                         React.DOM.p(null, 
-                            "Just hit the \"Start Call\" button below and share the link"
+                            "Just hit the \"Start a new call\" button below and share the link"
                         )
                     )
                     );
@@ -54,7 +54,7 @@ define([
             else if(this.props.state.state === Constants.AppState.IN_ROOM) {
                 res.push(
                     React.DOM.button( {className:"leaveRoom", onClick:this.handleLeaveRoom}, 
-                        "Leave Call"
+                        "Leave this call"
                     )
                     );
 

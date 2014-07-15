@@ -36,7 +36,7 @@ define([
             if(this.props.state.state === Constants.AppState.FOYER) {
                 res.push(
                     <button className="joinRoom" onClick={this.handleStartRoom}>
-                        Start Call
+                        Start a new call
                     </button>
                     );
 
@@ -46,7 +46,7 @@ define([
                             Start a FREE call<br />with up to 3 others
                         </p>
                         <p>
-                            Just hit the &quot;Start Call&quot; button below and share the link
+                            Just hit the &quot;Start a new call&quot; button below and share the link
                         </p>
                     </div>
                     );
@@ -54,7 +54,7 @@ define([
             else if(this.props.state.state === Constants.AppState.IN_ROOM) {
                 res.push(
                     <button className="leaveRoom" onClick={this.handleLeaveRoom}>
-                        Leave Call
+                        Leave this call
                     </button>
                     );
 

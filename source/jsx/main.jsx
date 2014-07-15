@@ -162,7 +162,7 @@ define([
                 Configs.Skyway.apiKey, room);
         },
         handleShowControls: function(e) {
-            if(this.room.status === Constants.RoomState.CONNECTED) {
+            if(this.state.room.status === Constants.RoomState.CONNECTED) {
                 this.setState({
                     controls: !this.state.controls
                 });
