@@ -161,9 +161,11 @@ define([
                 Configs.Skyway.apiKey, room);
         },
         handleShowControls: function(e) {
-            this.setState({
-                controls: !this.state.controls
-            });
+            if(this.state.state !== Constants.AppState.FOYER) {
+                this.setState({
+                    controls: !this.state.controls
+                });
+            }
         },
         render: function() {
             return (
