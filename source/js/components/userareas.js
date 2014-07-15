@@ -13,7 +13,7 @@ define([
     var UserAreas = React.createClass({displayName: 'UserAreas',
         render: function() {
             var showList =
-                this.props.state.room.status !== Constants.RoomState.IDLE ?
+                this.props.state.room.status === Constants.RoomState.CONNECTED ?
                  UserAreaList( {users:this.props.state.users} ) :
                  React.DOM.div( {id:"noUser"})
 

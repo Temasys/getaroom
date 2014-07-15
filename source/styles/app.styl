@@ -31,7 +31,7 @@ body
     border-radius 4px
     height 600px
     width 400px
-    background rgba(255,255,255,0.85)
+    background rgba(255,255,255,0.9)
     box-shadow 1px 1px 1px rgba(0,0,0,.3)
     transform rotateX(10deg)
     transform-origin 70% 50%
@@ -66,9 +66,38 @@ body
             color #fff
             background linear-gradient(top, darken(red, 30%) 80%, darken(red, 40%) 100%)
 
-    .status
+    > div > div
         text-align center
-        padding 15px 25px
+        font-weight 300
+
+    .logo
+        text-align center
+        font-family Lobster
+        font-size 3.5em
+        padding 200px 25px 5px
+        text-shadow 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff, 5px 5px 0 #fff, 5px 5px 0 #fff
+
+    p
+        margin 0
+        padding 0 55px 35px
+
+    p:nth-child(2)
+        color rgba(180,180,180,.9)
+        font-weight 300
+        text-shadow 2px 2px 0 #fff;
+
+    .link
+        position absolute
+        bottom 65px
+        left 0
+        right 0
+
+        input
+            width 330px
+            text-align center
+            font-size 1em
+            padding 5px 8px
+
 
 #userareas
     .userarea
@@ -86,29 +115,57 @@ body
                 width 100%
                 height 100%
 
-    &.split2
-        .userarea:nth-child(1)
-            right 50%
+@media all and (min-width: 680px)
+    #userareas
+        &.split2
+            .userarea:nth-child(1)
+                right 50%
 
-        .userarea:nth-child(2)
-            left 50%
+            .userarea:nth-child(2)
+                left 50%
 
-        .userarea > div
-            margin 0 -25vw
+            .userarea > div
+                margin 0 -25vw
 
-    &.split3
-        .userarea:nth-child(1)
-            right 66.7%
+        &.split3
+            .userarea:nth-child(1)
+                right 66.7%
 
-        .userarea:nth-child(2)
-            left 33.3%
-            right 33.3%
+            .userarea:nth-child(2)
+                left 33.3%
+                right 33.3%
 
-        .userarea:nth-child(3)
-            left 66.7%
+            .userarea:nth-child(3)
+                left 66.7%
 
-        .userarea > div
-            margin 0 -33.3vw
+            .userarea > div
+                margin 0 -33.3vw
+
+@media all and (max-width: 679px)
+    #userareas
+        &.split2
+            .userarea:nth-child(1)
+                bottom 50%
+
+            .userarea:nth-child(2)
+                top 50%
+
+            .userarea > div
+                margin -25vh 0
+
+        &.split3
+            .userarea:nth-child(1)
+                bottom 66.7%
+
+            .userarea:nth-child(2)
+                top 33.3%
+                bottom 33.3%
+
+            .userarea:nth-child(3)
+                top 66.7%
+
+            .userarea > div
+                margin -33.3vh 0
 
 #userareas .userInfo
     position absolute
