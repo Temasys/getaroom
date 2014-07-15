@@ -154,14 +154,15 @@ define([
                 room: Utils.extend(this.state.room, {
                     id: room,
                     status: Constants.RoomState.IDLE
-                })
+                }),
+                controls: true
             });
 
             Skyway.init(Configs.Skyway.server,
                 Configs.Skyway.apiKey, room);
         },
         handleShowControls: function(e) {
-            if(this.state.state !== Constants.AppState.FOYER) {
+            if(this.room.status === Constants.RoomState.CONNECTED) {
                 this.setState({
                     controls: !this.state.controls
                 });
