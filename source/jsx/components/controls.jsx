@@ -47,7 +47,7 @@ define([
                         </p>
                         <p>
                             Just hit the &quot;Start a new call&quot; button below and share the link.<br /><br />
-                            This app is a <a href="http://temasys.github.io" target="_blank">SkywayJS</a> tech demo
+                            This app is a <a href="https://temasys.github.io" target="_blank">SkywayJS</a> tech demo and you can fork the <a href="https://github.com/serrynaimo/getaroom" target="_blank">code on github</a>.
                         </p>
                     </div>
                     );

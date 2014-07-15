@@ -47,7 +47,7 @@ define([
                         ),
                         React.DOM.p(null, 
                             "Just hit the \"Start a new call\" button below and share the link.",React.DOM.br(null ),React.DOM.br(null ),
-                            "This app is a ", React.DOM.a( {href:"http://temasys.github.io", target:"_blank"}, "SkywayJS"), " tech demo"
+                            "This app is a ", React.DOM.a( {href:"https://temasys.github.io", target:"_blank"}, "SkywayJS"), " tech demo and you can fork the ", React.DOM.a( {href:"https://github.com/serrynaimo/getaroom", target:"_blank"}, "code on github"),"."
                         )
                     )
                     );
