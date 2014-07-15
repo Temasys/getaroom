@@ -43,7 +43,7 @@ define([
                         data: false
                     }
                 }
-            }
+            };
         },
         componentWillMount: function() {
            var self = this;
