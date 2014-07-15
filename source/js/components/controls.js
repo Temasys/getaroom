@@ -46,7 +46,8 @@ define([
                             "Start a FREE call",React.DOM.br(null ),"with up to 3 others"
                         ),
                         React.DOM.p(null, 
-                            "Just hit the \"Start a new call\" button below and share the link"
+                            "Just hit the \"Start a new call\" button below and share the link.",React.DOM.br(null ),React.DOM.br(null ),
+                            "This app is a ", React.DOM.a( {href:"http://temasys.github.io", target:"_blank"}, "SkywayJS"), " tech demo"
                         )
                     )
                     );

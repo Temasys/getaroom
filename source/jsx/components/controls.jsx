@@ -46,7 +46,8 @@ define([
                             Start a FREE call<br />with up to 3 others
                         </p>
                         <p>
-                            Just hit the &quot;Start a new call&quot; button below and share the link
+                            Just hit the &quot;Start a new call&quot; button below and share the link.<br /><br />
+                            This app is a <a href="http://temasys.github.io" target="_blank">SkywayJS</a> tech demo
                         </p>
                     </div>
                     );
