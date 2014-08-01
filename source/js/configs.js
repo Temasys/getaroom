@@ -3,7 +3,7 @@ define([], function() {
     var local = {
         env: 'local',
         Skyway: {
-            server: '//sgbeta.signaling.temasys.com.sg:8018/',
+            server: '//api.temasys.com.sg/',
             apiKey: '4fbc45b1-a458-4396-aeb6-579d58ffda1b'
         },
         API: {
@@ -14,7 +14,7 @@ define([], function() {
     var dev = {
         env: 'dev',
         Skyway: {
-            server: '//sgbeta.signaling.temasys.com.sg:8018/',
+            server: '//api.temasys.com.sg/',
             apiKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf'
         },
         API: {
@@ -25,7 +25,7 @@ define([], function() {
     var prod = {
         env: 'prod',
         Skyway: {
-            server: '//sgbeta.signaling.temasys.com.sg:8018/',
+            server: '//api.temasys.com.sg/',
             apiKey: '7e31b061-71e6-4dd7-bd55-516579973930'
         },
         API: {
