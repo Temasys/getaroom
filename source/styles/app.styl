@@ -32,7 +32,7 @@ body
     border-radius 4px
     height 600px
     width 400px
-    background rgba(255,255,255,0.9)
+    background rgba(255,255,255,0.7)
     box-shadow 1px 1px 1px rgba(0,0,0,.3)
     transform rotateX(10deg)
     transform-origin 70% 50%
@@ -69,13 +69,13 @@ body
 
     > div > div
         text-align center
-        font-weight 300
+        font-weight 700
 
     .logo
         text-align center
         font-family Lobster
         font-size 3.5em
-        padding 200px 25px 5px
+        padding 170px 25px 5px
         text-shadow 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff, 5px 5px 0 #fff, 5px 5px 0 #fff
 
     p
@@ -83,18 +83,18 @@ body
         padding 0 55px 35px
 
     a
-        color rgba(180,180,180,.9)
+        color #222
 
     p:nth-child(2)
-        color rgba(180,180,180,.9)
-        font-weight 300
-        text-shadow 2px 2px 0 #fff;
+        color #222
+        font-weight 200
 
     .link
         position absolute
         bottom 65px
         left 0
         right 0
+        font-weight 200
 
         input
             width 330px
@@ -181,8 +181,13 @@ body
     top 47%
 
 #noUser
+    top 0
+    left 0
+    right 0
+    bottom 0
+    position absolute
     overflow hidden
-    filter blur(10px)
+    vendor(filter, blur(100px))
 
     &:after
         display block
@@ -194,6 +199,7 @@ body
         top 35%
         border-radius 400px
         background linear-gradient(top left, color1 0%, color2 100%)
+        animation move1 30s linear
 
     &:before
         display block
@@ -205,4 +211,30 @@ body
         top 70%
         border-radius 600px
         background linear-gradient(bottom left, color2 0%, color3 100%)
+        animation move2 23s linear
+
+@keyframes move1
+    0%, 100%
+        transform translate(0,0) rotateZ(0) scale(1)
+    20%
+        transform translate(50px, 30px) rotateZ(45deg)
+    40%
+        transform translate(20px, 80px) scale(1.5)
+    60%
+        transform translate(-90px, 50px) rotateZ(200deg)
+    80%
+        transform translate(-40px, -30px) scale(1.05)
+
+@keyframes move2
+    0%, 100%
+        transform translate(0,0) rotateZ(0) scale(1)
+    20%
+        transform translate(-50px, -30px) rotateZ(-85deg)
+    40%
+        transform translate(-20px, -80px)
+    60%
+        transform translate(90px, 10px) rotateZ(-230deg) scale(.82)
+    80%
+        transform translate(40px, 50px)
+
 

@@ -82,7 +82,10 @@ define([
                         controls: false
                     });
 
-                    Skyway.joinRoom();
+                    Skyway.joinRoom({
+                        audio: true,
+                        video: true
+                    });
 
                     if(!self.state.users.some(function(user) {
                         return user.id === 0 && user.stream !== null;
@@ -158,8 +161,11 @@ define([
                 controls: true
             });
 
-            Skyway.init(Configs.Skyway.server,
-                Configs.Skyway.apiKey, room);
+            Skyway.init({
+                appID: Configs.Skyway.apiKey,
+                room: room,
+                roomserver: '//api.temasys.com.sg/'
+            });
         },
         handleShowControls: function(e) {
             if(this.state.room.status === Constants.RoomState.CONNECTED) {

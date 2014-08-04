@@ -14,10 +14,13 @@ require.config({
         router: 'libs/director',
         react: '//cdnjs.cloudflare.com/' +
             'ajax/libs/react/0.10.0/react.min',
-        skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
-            'latest/skyway.min',
-        facebook: '//connect.facebook.net/en_US/all',
-        twitter: '//platform.twitter.com/widgets',
+        adapter: '//cdn.temasys.com.sg/adapterjs/' +
+            'latest/adapter.min',
+        skyway: 'libs/skyway.debug',
+        // skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
+        //     'latest/skyway.min',
+        // facebook: '//connect.facebook.net/en_US/all',
+        // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +
             'ajax/libs/fastclick/0.6.11/fastclick.min'
     },
@@ -32,20 +35,20 @@ require.config({
         skyway: {
             exports: 'Skyway',
             deps: [
-                'socketio'
+                'socketio',
+                'adapter'
             ],
             init: function(io) {
                 window.io = io;
                 return new this.Skyway();
             }
         },
-        facebook: {
-            exports: 'FB'
-        },
-        twitter: {
-            exports: 'TW'
-        },
-
+        // facebook: {
+        //     exports: 'FB'
+        // },
+        // twitter: {
+        //     exports: 'TW'
+        // }
     }
 
 });
