@@ -11,7 +11,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-react');
     grunt.loadNpmTasks('grunt-filerev');
-    grunt.loadNpmTasks('grunt-svgtemplater');
     grunt.loadNpmTasks('grunt-usemin');
     grunt.loadNpmTasks('grunt-replace');
 
@@ -172,17 +171,6 @@ module.exports = function (grunt) {
             }
         },
 
-        svgtemplater: {
-            dev: {
-                src: '<%= source %>/img/*.svg',
-                dest: '<%= source %>/index.html'
-            },
-            staging: {
-                src: '<%= staging %>/img/*.svg',
-                dest: '<%= source %>/index.html'
-            }
-        },
-
         usemin: {
             options: {
                 assetsDirs: ['<%= staging %>']
@@ -235,16 +223,6 @@ module.exports = function (grunt) {
         },
 
         watch: {
-            svg: {
-                files: [
-                    '<%= source %>/img/**/*.svg'
-                ],
-                tasks: 'svgtemplater:dev',
-                options: {
-                    debounceDelay: 1000,
-                    interrupt: true
-                }
-            },
             styl: {
                 files: [
                     '<%= source %>/styles/**/**/**.styl'
@@ -338,7 +316,6 @@ module.exports = function (grunt) {
         'clean:staging',
         'copy:staging',
         'replace:dist',
-        'svgtemplater:staging',
         'react:staging',
         'imagemin',
         'filerev:assets',
@@ -361,7 +338,6 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dev', [
         'stylus:dev',
-        'svgtemplater:dev',
         'react:dev',
         'connect:dev',
         'watch'

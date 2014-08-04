@@ -27,21 +27,14 @@ define([
                     {
                         id: 0,
                         name: 'Thomas',
-                        stream: null,
-                        isMuted: true
+                        stream: null
                     }
                 ],
                 state: Constants.AppState.FOYER,
                 controls: true,
                 room: {
                     id: '',
-                    status: Constants.RoomState.IDLE,
-                    feature: {
-                        chat: false,
-                        audio: false,
-                        video: false,
-                        data: false
-                    }
+                    status: Constants.RoomState.IDLE
                 }
             };
         },
@@ -78,20 +71,22 @@ define([
                     self.setState({
                         room: Utils.extend(self.state.room, {
                             status: Constants.RoomState.CONNECTED
-                        }),
-                        controls: false
+                        })
                     });
 
-                    Skyway.joinRoom({
-                        audio: true,
-                        video: true
-                    });
+                    Skyway.joinRoom();
 
                     if(!self.state.users.some(function(user) {
                         return user.id === 0 && user.stream !== null;
                     })) {
                         Skyway.getDefaultStream();
                     }
+
+                    setTimeout(function() {
+                        self.setState({
+                            controls: false
+                        });
+                    }, 4000);
                 }
             });
 
@@ -112,8 +107,7 @@ define([
                     users: self.state.users.concat({
                             id: peerId,
                             name: 'Guest ' + peerId,
-                            stream: stream,
-                            isMuted: false
+                            stream: stream
                         })
                 });
             });

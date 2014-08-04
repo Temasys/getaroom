@@ -15,6 +15,12 @@ define([
 ) {
 
     var Controls = React.createClass({
+        getInitialState: function() {
+            return {
+                audioMute: false,
+                videoMute: false
+            }
+        },
         handleStartRoom: function(e) {
             var room = Utils.uuid(6);
             Router.setRoute('/' + room);
@@ -22,6 +28,16 @@ define([
         handleLeaveRoom: function(e) {
             Skyway.leaveRoom();
             Router.setRoute('/');
+        },
+        handleVideoMute: function(e) {
+            this.setState({
+                videoMute: !this.state.videoMute
+            });
+        },
+        handleAudioMute: function(e) {
+           this.setState({
+                audioMute: !this.state.audioMute
+            });
         },
         handleLinkClick: function (e) {
             e.target.setSelectionRange(0, e.target.value.length);
@@ -35,7 +51,7 @@ define([
 
             if(this.props.state.state === Constants.AppState.FOYER) {
                 res.push(
-                    <button className="joinRoom" onClick={this.handleStartRoom}>
+                    <button className="joinRoom mainControl" onClick={this.handleStartRoom}>
                         Start a new call
                     </button>
                     );
@@ -54,7 +70,7 @@ define([
             }
             else if(this.props.state.state === Constants.AppState.IN_ROOM) {
                 res.push(
-                    <button className="leaveRoom" onClick={this.handleLeaveRoom}>
+                    <button className="leaveRoom mainControl" onClick={this.handleLeaveRoom}>
                         Leave this call
                     </button>
                     );
@@ -68,7 +84,15 @@ define([
 
                 res.push(
                     <div className="status">Status: {this.props.state.room.status}</div>
-                    )
+                    );
+
+                res.push(
+                    <button id="videoMute" onClick={this.handleVideoMute} className={this.state.videoMute ? 'muted' : ''} title="Mute/Unmute Video"></button>
+                    );
+
+                res.push(
+                    <button id="audioMute" onClick={this.handleAudioMute} className={this.state.audioMute ? 'muted' : ''} title="Mute/Unmute Audio"></button>
+                    );
             }
 
             return (

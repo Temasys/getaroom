@@ -15,6 +15,12 @@ define([
 ) {
 
     var Controls = React.createClass({displayName: 'Controls',
+        getInitialState: function() {
+            return {
+                audioMute: false,
+                videoMute: false
+            }
+        },
         handleStartRoom: function(e) {
             var room = Utils.uuid(6);
             Router.setRoute('/' + room);
@@ -22,6 +28,16 @@ define([
         handleLeaveRoom: function(e) {
             Skyway.leaveRoom();
             Router.setRoute('/');
+        },
+        handleVideoMute: function(e) {
+            this.setState({
+                videoMute: !this.state.videoMute
+            });
+        },
+        handleAudioMute: function(e) {
+           this.setState({
+                audioMute: !this.state.audioMute
+            });
         },
         handleLinkClick: function (e) {
             e.target.setSelectionRange(0, e.target.value.length);
@@ -35,7 +51,7 @@ define([
 
             if(this.props.state.state === Constants.AppState.FOYER) {
                 res.push(
-                    React.DOM.button( {className:"joinRoom", onClick:this.handleStartRoom}, 
+                    React.DOM.button( {className:"joinRoom mainControl", onClick:this.handleStartRoom}, 
                         "Start a new call"
                     )
                     );
@@ -54,7 +70,7 @@ define([
             }
             else if(this.props.state.state === Constants.AppState.IN_ROOM) {
                 res.push(
-                    React.DOM.button( {className:"leaveRoom", onClick:this.handleLeaveRoom}, 
+                    React.DOM.button( {className:"leaveRoom mainControl", onClick:this.handleLeaveRoom}, 
                         "Leave this call"
                     )
                     );
@@ -68,7 +84,15 @@ define([
 
                 res.push(
                     React.DOM.div( {className:"status"}, "Status: ", this.props.state.room.status)
-                    )
+                    );
+
+                res.push(
+                    React.DOM.button( {id:"videoMute", onClick:this.handleVideoMute, className:this.state.videoMute ? 'muted' : '', title:"Mute/Unmute Video"})
+                    );
+
+                res.push(
+                    React.DOM.button( {id:"audioMute", onClick:this.handleAudioMute, className:this.state.audioMute ? 'muted' : '', title:"Mute/Unmute Audio"})
+                    );
             }
 
             return (

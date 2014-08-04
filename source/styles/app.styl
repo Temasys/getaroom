@@ -12,6 +12,7 @@ color3 = #ff688b
 body
     font-family 'Open Sans', Helvetica, Arial, sans-serif
     user-select none
+    background #fff
 
 #app
     perspective 500
@@ -23,7 +24,6 @@ body
     left 0
     right 0
     bottom 0
-
 
 #controls
     left 50%
@@ -38,21 +38,81 @@ body
     transform-origin 70% 50%
     transition all .2s ease-in
     opacity 0
+    z-index 10
 
     &.visible
         transform rotateX(0)
         opacity 1
 
     button
+        position relative
+        margin 20px 80px
+        width 100px
+        height 100px
+        border-radius 50px
+        border 2px groove rgba(255,255,255,.6)
+        background-color rgba(255,255,255,.08)
+        outline 0
+        text-align center
+
+        &#videoMute
+            float left
+            font-face Helvetica Neue, Helvetica, Arial, sans-serif
+            margin-right 0
+            background-image url(/img/camera.svg)
+            background-repeat no-repeat
+            background-position 50% 50%
+            background-size 20% 20%
+
+        &#audioMute
+            float right
+            font-face Helvetica Neue, Helvetica, Arial, sans-serif
+            margin-left 0
+            background-image url(/img/speaker.svg)
+            background-repeat no-repeat
+            background-position 50% 50%
+            background-size 20% 20%
+
+        &.muted:before
+            content ""
+            display block
+            position absolute
+            left 50%
+            top 50%
+            margin -25px -2px
+            transform rotate(45deg)
+            width 4px
+            height 50px
+            background red
+
+        &.muted:after
+            content ""
+            display block
+            border 4px solid red
+            border-radius 25px
+            position absolute
+            left 50%
+            top 50%
+            width 42px
+            height 42px
+            margin -25px
+            background none
+
+        &:hover
+            background-color rgba(255,255,255,.2)
+
+        &:active
+            background-color rgba(200,200,200,.3)
+
+    button.mainControl
         width 100%
+        height auto
         display inline-block
         font-size 1.3em
         margin 0
         padding 15px 25px
         background 0
         border 0
-        outline 0
-        text-align center
 
         border-radius 0 0 4px 4px
         position absolute
@@ -104,6 +164,8 @@ body
 
 
 #userareas
+    z-index 0
+
     .userarea
         overflow hidden
 
@@ -118,6 +180,9 @@ body
             video
                 width 100%
                 height 100%
+
+    #uv0
+        transform rotateY(-180deg);
 
 @media all and (min-width: 680px)
     #userareas
@@ -236,5 +301,4 @@ body
         transform translate(90px, 10px) rotateZ(-230deg) scale(.82)
     80%
         transform translate(40px, 50px)
-
 

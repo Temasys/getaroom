@@ -61,7 +61,7 @@ define([
             var props = {
                 id: 'uv' + this.props.user.id,
                 autoPlay: true,
-                muted: this.props.user.isMuted || this.props.user.id === 0
+                muted: this.props.user.id === 0
             };
 
             var res = this.props.user.stream === null &&
