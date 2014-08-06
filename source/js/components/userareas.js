@@ -67,19 +67,29 @@ define([
                     )
                 );
             }
-            else if(this.props.user.videoMute) {
-                res.push(
-                    React.DOM.span( {className:"userInfo"}, 
-                        "Video muted"
-                    )
-                );
-            }
             else {
                 res.push(React.DOM.video({
                     id: 'uv' + this.props.user.id,
                     autoPlay: true,
                     muted: this.props.user.id === 0
                 }));
+
+                var muted = [];
+
+                if(this.props.user.audioMute) {
+                    muted.push('Audio');
+                }
+                if(this.props.user.videoMute) {
+                    muted.push('Video');
+                }
+
+                if(muted.length > 0) {
+                    res.push(
+                        React.DOM.span( {className:"userInfo"}, 
+                            muted.join('/'), " muted"
+                        )
+                    );
+                }
             }
 
             return (

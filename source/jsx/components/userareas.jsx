@@ -67,19 +67,29 @@ define([
                     </span>
                 );
             }
-            else if(this.props.user.videoMute) {
-                res.push(
-                    <span className="userInfo">
-                        Video muted
-                    </span>
-                );
-            }
             else {
                 res.push(React.DOM.video({
                     id: 'uv' + this.props.user.id,
                     autoPlay: true,
                     muted: this.props.user.id === 0
                 }));
+
+                var muted = [];
+
+                if(this.props.user.audioMute) {
+                    muted.push('Audio');
+                }
+                if(this.props.user.videoMute) {
+                    muted.push('Video');
+                }
+
+                if(muted.length > 0) {
+                    res.push(
+                        <span className="userInfo">
+                            {muted.join('/')} muted
+                        </span>
+                    );
+                }
             }
 
             return (

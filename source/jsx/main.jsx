@@ -126,7 +126,9 @@ define([
                     users: self.state.users.concat({
                             id: peerId,
                             name: 'Guest ' + peerId,
-                            stream: stream
+                            stream: stream,
+                            videoMute: false,
+                            audioMute: false
                         })
                 };
 
