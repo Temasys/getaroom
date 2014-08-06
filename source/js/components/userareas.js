@@ -58,18 +58,29 @@ define([
             this.attachStream();
         },
         render: function() {
-            var props = {
-                id: 'uv' + this.props.user.id,
-                autoPlay: true,
-                muted: this.props.user.id === 0
-            };
+            var res = [];
 
-            var res = this.props.user.stream === null &&
-                this.props.user.id === 0 ? (
-                React.DOM.span( {className:"userInfo"}, 
-                    "Share your camera and microphone to participate in the call"
-                )
-                ) : React.DOM.video(props);
+            if(this.props.user.stream === null && this.props.user.id === 0) {
+                res.push(
+                    React.DOM.span( {className:"userInfo"}, 
+                        "Share your camera and microphone to participate in the call"
+                    )
+                );
+            }
+            else if(this.props.user.videoMute) {
+                res.push(
+                    React.DOM.span( {className:"userInfo"}, 
+                        "Video muted"
+                    )
+                );
+            }
+            else {
+                res.push(React.DOM.video({
+                    id: 'uv' + this.props.user.id,
+                    autoPlay: true,
+                    muted: this.props.user.id === 0
+                }));
+            }
 
             return (
                 React.DOM.div(null, 
