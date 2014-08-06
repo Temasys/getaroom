@@ -74,13 +74,10 @@ define([
                         })
                     });
 
-                    Skyway.joinRoom();
-
-                    if(!self.state.users.some(function(user) {
-                        return user.id === 0 && user.stream !== null;
-                    })) {
-                        Skyway.getDefaultStream();
-                    }
+                    Skyway.joinRoom({
+                        audio: true,
+                        video: true
+                    });
 
                     setTimeout(function() {
                         self.setState({
