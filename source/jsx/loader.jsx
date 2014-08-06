@@ -16,7 +16,7 @@ require.config({
             'ajax/libs/react/0.10.0/react.min',
         adapter: '//cdn.temasys.com.sg/adapterjs/' +
             'latest/adapter.min',
-        skyway: 'libs/skyway.min',
+        skyway: 'libs/skyway.debug',
         // skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
         //     'latest/skyway.min',
         // facebook: '//connect.facebook.net/en_US/all',
