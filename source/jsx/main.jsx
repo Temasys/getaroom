@@ -156,9 +156,8 @@ define([
             });
 
             Skyway.init({
-                appID: Configs.Skyway.apiKey,
-                room: room,
-                roomserver: '//api.temasys.com.sg/'
+                appKey: Configs.Skyway.apiKey,
+                room: room
             });
         },
         handleShowControls: function(e) {

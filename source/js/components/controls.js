@@ -30,12 +30,14 @@ define([
             Router.setRoute('/');
         },
         handleVideoMute: function(e) {
+	        Skyway[this.state.videoMute ? 'enableVideo' : 'disableVideo']();
             this.setState({
                 videoMute: !this.state.videoMute
             });
         },
         handleAudioMute: function(e) {
-           this.setState({
+	        Skyway[this.state.audioMute ? 'enableAudio' : 'disableAudio']();
+			this.setState({
                 audioMute: !this.state.audioMute
             });
         },
