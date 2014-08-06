@@ -36,14 +36,14 @@ body
     width 400px
     background rgba(255,255,255,0.7)
     box-shadow 1px 1px 1px rgba(0,0,0,.3)
-    transform translateZ(-100px)
+    transform rotateX(10deg)
     transform-origin 70% 50%
     transition all .2s ease-in
     opacity 0
     z-index -1
 
     &.visible
-        transform translateZ(0)
+        transform rotateX(0)
         opacity 1
         z-index 10
 
