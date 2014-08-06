@@ -1,6 +1,5 @@
-/**
- * @class Skyway
- */
+/*! skywayjs - v0.3.0 - 2014-08-06 */
+
 (function() {
   /**
    * Call 'init()' to initialize Skyway
@@ -16,7 +15,7 @@
      * @attribute VERSION
      * @readOnly
      */
-    this.VERSION = '@@version';
+    this.VERSION = '0.3.0';
     /**
      * List of regional server for Skyway to connect to.
      * Default server is US1. Servers:
@@ -1138,6 +1137,7 @@
      * TODO Event fired when a peer joins the room
      * @event presenceChanged
      * @param {JSON} users The list of users
+     * @private
      * @deprecated
      */
     'presenceChanged': [],
@@ -1153,6 +1153,8 @@
      * Event fired when a remote stream has become unavailable
      * @event removePeerStream
      * @param {String} peerId
+     * @private
+     * @deprecated
      */
     'removePeerStream': [],
     /**
@@ -3170,7 +3172,7 @@
       });
     }
     this._trigger((mediaType === 'audio') ? 'peerAudioMute' : 'peerVideoMute',
-      this._user.sid, isEnabled, true);
+      this._user.sid, !isEnabled, true);
   };
 
   /**
@@ -3341,6 +3343,60 @@
     }
   };
 
+  /**
+   * User to join the room.
+   * You may call getDefaultStream first if you want to get
+   * MediaStream and joining Room seperately.
+   * @method joinRoom
+   * @param {String} room Room to join
+   * @param {JSON} mediaOptions Optional. Media Constraints.
+   * @param {} mediaOptions.audio This call requires audio
+   * @param {Boolean} mediaOptions.audio.stereo Enabled stereo or not
+   * @param {} mediaOptions.video This call requires video
+   * @param {String} mediaOptions.video.res [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {Integer} mediaOptions.video.res.width Video width
+   * @param {Integer} mediaOptions.video.res.height Video height
+   * @param {Integer} mediaOptions.video.frameRate Mininum frameRate of Video
+   * @param {String} mediaOptions.bandwidth Bandwidth settings
+   * @param {String} mediaOptions.bandwidth.audio Audio Bandwidth
+   * @param {String} mediaOptions.bandwidth.video Video Bandwidth
+   * @param {String} mediaOptions.bandwidth.data Data Bandwidth
+   * @bubbles joinedRoom
+   * @example
+   *   SkywayDemo.joinRoom();
+   * @example
+   *   SkywayDemo.joinRoom('room');
+   * @example
+   *   SkywayDemo.joinRoom('room', {
+   *     'audio' : true,
+   *     'video' : false
+   *   });
+   * @example
+   *   SkywayDemo.joinRoom('room', {
+   *     'audio' : true,
+   *     'video' : {
+   *       'res' : {
+   *         'width' : 640,
+   *         'height' : 320
+   *       }
+   *     }
+   *   });
+   * @example
+   *   SkwayDemo.joinRoom({
+   *     'audio' : {
+   *        'stereo' : true
+   *      },
+   *     'video' : {
+   *        'res' : SkywayDemo.VIDEO_RESOLUTION.VGA,
+   *        'frameRate' : 50
+   *     },
+   *     'bandwidth' : {
+   *        'audio' : 48,
+   *        'video' : 256,
+   *        'data' : 14480
+   *      }
+   *   });
+   */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
     if (this._in_room) {
       return;
