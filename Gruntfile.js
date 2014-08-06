@@ -164,7 +164,7 @@ module.exports = function (grunt) {
             assets: {
                 files: [{
                     src: [
-                        '<%= staging %>/img/**/*.{jpg,jpeg,gif,png,webp}',
+                        '<%= staging %>/img/**/*.{jpg,jpeg,gif,png,webp,svg}',
                         '<%= staging %>/fonts/**/*.{eot,svg,ttf,woff}'
                     ]
                 }]
