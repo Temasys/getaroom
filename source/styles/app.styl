@@ -34,14 +34,14 @@ body
     width 400px
     background rgba(255,255,255,0.7)
     box-shadow 1px 1px 1px rgba(0,0,0,.3)
-    transform rotateX(10deg)
+    transform rotateX(10deg) translateZ(-500px)
     transform-origin 70% 50%
     transition all .2s ease-in
     opacity 0
     z-index 10
 
     &.visible
-        transform rotateX(0)
+        transform rotateX(0) translateZ(0)
         opacity 1
 
     button
@@ -244,7 +244,7 @@ body
     width 200px
     margin 0 -100px
     left 50%
-    top 20%
+    top 23%
 
 #noUser
     top 0
