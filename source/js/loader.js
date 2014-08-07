@@ -17,7 +17,7 @@ require.config({
         adapter: '//cdn.temasys.com.sg/adapterjs/' +
             'latest/adapter.min',
         skyway: '//cdn.temasys.com.sg/skyway/' +
-            'skywayjs/0.3.0/skyway.debug',
+            'skywayjs/0.3.0/skyway.min',
         // skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
         //     'latest/skyway.min',
         // facebook: '//connect.facebook.net/en_US/all',
