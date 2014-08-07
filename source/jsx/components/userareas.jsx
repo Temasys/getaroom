@@ -67,6 +67,13 @@ define([
                     </span>
                 );
             }
+            else if(this.props.user.stream === null) {
+                res.push(
+                    <span className="userInfo">
+                        Joining...
+                    </span>
+                );
+            }
             else {
                 res.push(React.DOM.video({
                     id: 'uv' + this.props.user.id,

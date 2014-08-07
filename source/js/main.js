@@ -26,7 +26,7 @@ define([
                 users: [
                     {
                         id: 0,
-                        name: 'Thomas',
+                        name: 'Yourself',
                         stream: null,
                         audioMute: false,
                         videoMute: false
@@ -116,20 +116,31 @@ define([
 
                 alert("ERROR: " + error.toString());
             });
-
-            Skyway.on('addPeerStream', function(peerId, stream) {
+            
+            Skyway.on('peerJoined', function(peerId) {
                 if(self.state.users.length === 3) {
                     return;
                 }
 
-                var state = {
+                self.setState({
                     users: self.state.users.concat({
                             id: peerId,
                             name: 'Guest ' + peerId,
-                            stream: stream,
+                            stream: null,
                             videoMute: false,
                             audioMute: false
                         })
+                });
+            });
+
+            Skyway.on('addPeerStream', function(peerId, stream) {
+                var state = {
+                    users: self.state.users.map(function (user) {
+                        if(user.id === peerId) {
+                            user.stream = stream;
+                        }
+                        return user;
+                    })
                 };
 
                 if(state.users.length === 2) {
