@@ -134,14 +134,10 @@ define([
             });
 
             Skyway.on('addPeerStream', function(peerId, stream) {
-                if(self.state.users.length === 3) {
-                    return;
-                }
-            
                 var state = {
                     users: self.state.users.map(function (user) {
                         if(user.id === peerId) {
-                            stream: stream
+                            user.stream = stream;
                         }
                         return user;
                     })
