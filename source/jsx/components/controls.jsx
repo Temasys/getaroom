@@ -58,7 +58,7 @@ define([
                 res.push(
                     <div className="description">
                         <p>
-                            Start a FREE call<br />with up to 3 others
+                            Start a FREE call<br />with up to 3 people
                         </p>
                         <p>
                             Just hit the &quot;Start a new call&quot; button below and share the link.<br /><br />

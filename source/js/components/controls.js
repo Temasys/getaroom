@@ -58,7 +58,7 @@ define([
                 res.push(
                     React.DOM.div( {className:"description"}, 
                         React.DOM.p(null, 
-                            "Start a FREE call",React.DOM.br(null ),"with up to 3 others"
+                            "Start a FREE call",React.DOM.br(null ),"with up to 3 people"
                         ),
                         React.DOM.p(null, 
                             "Just hit the \"Start a new call\" button below and share the link.",React.DOM.br(null ),React.DOM.br(null ),
