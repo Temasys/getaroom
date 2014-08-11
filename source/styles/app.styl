@@ -14,9 +14,15 @@ body
     user-select none
     background #fff
 
+body > a {
+    position absolute
+    top 0
+    right 0
+    z-index 900
+}
+
 #app
     perspective 500px
-    transform-style preserve-3d
     perspective-origin 50% 50%
     overflow hidden
 
