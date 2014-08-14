@@ -14,6 +14,8 @@ You'll need node, npm and grunt installed. Clone the repo and run `npm install` 
 - `grunt stage` will create a _staging_ folder and create a compiled and minified version of the application
 - `grunt publish` will move the contents of the _staging_ folder to a _publish_ folder.
 
+Replace the API keys and hostnames in the `configs.jsx` file with your own. You can [sign up for your own API key here](https://developer.temasys.com.sg).
+
 
 License
 ----
