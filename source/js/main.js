@@ -54,22 +54,12 @@ define([
                 });
             });
 
-            Skyway.on('peerVideoMute', function(peerId, isMute, isSelf) {
+            Skyway.on('peerUpdated', function(peerId, peerInfo, isSelf) {
                 self.setState({
                     users: self.state.users.map(function (user) {
                         if((isSelf && user.id === 0) || user.id === peerId) {
-                            user.videoMute = isMute;
-                        }
-                        return user;
-                    })
-                });
-            });
-
-            Skyway.on('peerAudioMute', function(peerId, isMute, isSelf) {
-                self.setState({
-                    users: self.state.users.map(function (user) {
-                        if((isSelf && user.id === 0) || user.id === peerId) {
-                            user.audioMute = isMute;
+                            user.audioMute = peerInfo.mediaStatus.audioMuted;
+                            user.videoMute = peerInfo.mediaStatus.videoMuted;
                         }
                         return user;
                     })
@@ -116,9 +106,9 @@ define([
 
                 alert("ERROR: " + error.toString());
             });
-            
-            Skyway.on('peerJoined', function(peerId) {
-                if(self.state.users.length === 3) {
+
+            Skyway.on('peerJoined', function(peerId, peerInfo, isSelf) {
+                if(self.state.users.length === 3 || isSelf) {
                     return;
                 }
 
@@ -127,8 +117,8 @@ define([
                             id: peerId,
                             name: 'Guest ' + peerId,
                             stream: null,
-                            videoMute: false,
-                            audioMute: false
+                            videoMute: peerInfo.mediaStatus.videoMuted,
+                            audioMute: peerInfo.mediaStatus.audioMuted
                         })
                 });
             });
@@ -200,8 +190,8 @@ define([
             });
 
             Skyway.init({
-                appKey: Configs.Skyway.apiKey,
-                room: room
+                apiKey: Configs.Skyway.apiKey,
+                defaultRoom: room
             });
         },
         handleShowControls: function(e) {
