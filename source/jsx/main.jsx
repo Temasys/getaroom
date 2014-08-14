@@ -43,29 +43,6 @@ define([
         componentWillMount: function() {
            var self = this;
 
-            Skyway.on('mediaAccessSuccess', function(stream) {
-                self.setState({
-                    users: self.state.users.map(function (user) {
-                        if(user.id === 0) {
-                            user.stream = stream;
-                        }
-                        return user;
-                    })
-                });
-            });
-
-            Skyway.on('peerUpdated', function(peerId, peerInfo, isSelf) {
-                self.setState({
-                    users: self.state.users.map(function (user) {
-                        if((isSelf && user.id === 0) || user.id === peerId) {
-                            user.audioMute = peerInfo.mediaStatus.audioMuted;
-                            user.videoMute = peerInfo.mediaStatus.videoMuted;
-                        }
-                        return user;
-                    })
-                });
-            });
-
             Skyway.on('readyStateChange', function(state) {
                 if(state === 0) {
                     self.setState({
@@ -114,19 +91,19 @@ define([
 
                 self.setState({
                     users: self.state.users.concat({
-                            id: peerId,
-                            name: 'Guest ' + peerId,
-                            stream: null,
-                            videoMute: peerInfo.mediaStatus.videoMuted,
-                            audioMute: peerInfo.mediaStatus.audioMuted
-                        })
+                        id: peerId,
+                        name: 'Guest ' + peerId,
+                        stream: null,
+                        videoMute: peerInfo.mediaStatus.videoMuted,
+                        audioMute: peerInfo.mediaStatus.audioMuted
+                    })
                 });
             });
 
-            Skyway.on('addPeerStream', function(peerId, stream) {
+            Skyway.on('addPeerStream', function(peerId, stream, isSelf) {
                 var state = {
                     users: self.state.users.map(function (user) {
-                        if(user.id === peerId) {
+                        if((isSelf && user.id === 0) || user.id === peerId) {
                             user.stream = stream;
                         }
                         return user;
@@ -138,6 +115,18 @@ define([
                 }
 
                 self.setState(state);
+            });
+
+            Skyway.on('peerUpdated', function(peerId, peerInfo, isSelf) {
+                self.setState({
+                    users: self.state.users.map(function (user) {
+                        if((isSelf && user.id === 0) || user.id === peerId) {
+                            user.audioMute = peerInfo.mediaStatus.audioMuted;
+                            user.videoMute = peerInfo.mediaStatus.videoMuted;
+                        }
+                        return user;
+                    })
+                });
             });
 
             Skyway.on('peerLeft', function(peerId) {
