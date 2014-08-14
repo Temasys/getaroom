@@ -100,14 +100,14 @@ var listener = {
             if (fireOnReady) {
               self.fire();
             }
-          }, 1)
+          }, 1);
         };
 
         if(document.readyState === 'complete') {
           onDOMReady();
         }
         else {
-          window.addEventListener('onload', onDOMReady);
+          window.addEventListener('load', onDOMReady);
         }
       }
       else {

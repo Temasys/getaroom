@@ -11,11 +11,12 @@ require.config({
     paths: {
         socketio: '//cdn.temasys.com.sg/libraries/'
             + 'socket.io-client/1.0.6/socket.io',
-        adapter: '//cdn.temasys.com.sg/adapterjs/' +
-            'latest/adapter.min',
-        skyway: 'libs/skyway',
-        // skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
-        //     'latest/skyway.min',
+        //adapter: 'libs/adapter',
+        adapter: '//cdn.temasys.com.sg/adapterjs/latest/' +
+            'adapter.min',
+        //skyway: 'libs/skyway',
+        skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
+            '0.3.1/skyway.min',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +
@@ -39,9 +40,6 @@ require.config({
         },
         router: {
             exports: 'Router',
-            deps: [
-                'skyway'
-            ],
             init: function() {
                 return new this.Router();
             }
