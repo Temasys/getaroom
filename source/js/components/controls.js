@@ -90,7 +90,7 @@ define([
                     React.DOM.div( {className:"status"}, "Status: ", this.props.state.room.status)
                     );
 
-                if(this.props.state.room.status === Constants.RoomState.CONNECTED) {
+                if(this.props.state.room.status === Constants.RoomState.CONNECTED && user.stream != null) {
                     res.push(
                         React.DOM.button( {id:"roomLock", onClick:this.handleRoomLock, className:this.props.state.room.isLocked ? 'muted' : '', title:"Lock/Unlock Room"})
                         );
