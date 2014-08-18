@@ -36,7 +36,9 @@ define([
 	        Skyway[user.audioMute ? 'enableAudio' : 'disableAudio']();
         },
         handleRoomLock: function() {
-            Skyway[this.props.state.room.isLocked ? 'unlockRoom' : 'lockRoom']();
+            if(this.props.state.users.length < 3) {
+                Skyway[this.props.state.room.isLocked ? 'unlockRoom' : 'lockRoom']();
+            }
         },
         handleLinkClick: function (e) {
             e.target.setSelectionRange(0, e.target.value.length);
