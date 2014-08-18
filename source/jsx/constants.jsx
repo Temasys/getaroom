@@ -5,10 +5,10 @@ define([], function() {
             IN_ROOM: 'in_room'
         },
         RoomState: {
-            IDLE: 'idle',
-            CONNECTING: 'connecting',
-            ERROR: 'error',
-            CONNECTED: 'connected'
+            IDLE: 'Not connected',
+            CONNECTING: 'Connecting',
+            LOCKED: 'Room is locked',
+            CONNECTED: 'Connected'
         }
     };
 });

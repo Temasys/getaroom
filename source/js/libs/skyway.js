@@ -814,9 +814,13 @@
       arr = this._events[eventName];
     args.shift();
     for (var e in arr) {
+      try {
       if (arr[e].apply(this, args) === false) {
         break;
       }
+  } catch(e) {
+    console.warn(e);
+  }
     }
   };
 

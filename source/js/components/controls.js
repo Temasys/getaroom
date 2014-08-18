@@ -15,25 +15,28 @@ define([
 ) {
 
     var Controls = React.createClass({displayName: 'Controls',
-        handleStartRoom: function(e) {
+        handleStartRoom: function() {
             var room = Utils.uuid(6);
             Router.setRoute('/' + room);
         },
-        handleLeaveRoom: function(e) {
+        handleLeaveRoom: function() {
             Skyway.leaveRoom();
             Router.setRoute('/');
         },
-        handleVideoMute: function(e) {
+        handleVideoMute: function() {
             var user = this.props.state.users.filter(function (user) {
                 return user.id === 0;
             })[0];
 	        Skyway[user.videoMute ? 'enableVideo' : 'disableVideo']();
         },
-        handleAudioMute: function(e) {
+        handleAudioMute: function() {
             var user = this.props.state.users.filter(function (user) {
                 return user.id === 0;
             })[0];
 	        Skyway[user.audioMute ? 'enableAudio' : 'disableAudio']();
+        },
+        handleRoomLock: function() {
+            Skyway[this.props.state.room.isLocked ? 'unlockRoom' : 'lockRoom']();
         },
         handleLinkClick: function (e) {
             e.target.setSelectionRange(0, e.target.value.length);
@@ -85,13 +88,19 @@ define([
                     React.DOM.div( {className:"status"}, "Status: ", this.props.state.room.status)
                     );
 
-                res.push(
-                    React.DOM.button( {id:"videoMute", onClick:this.handleVideoMute, className:user.videoMute ? 'muted' : '', title:"Mute/Unmute Video"})
-                    );
+                if(this.props.state.room.status === Constants.RoomState.CONNECTED) {
+                    res.push(
+                        React.DOM.button( {id:"roomLock", onClick:this.handleRoomLock, className:this.props.state.room.isLocked ? 'muted' : '', title:"Lock/Unlock Room"})
+                        );
 
-                res.push(
-                    React.DOM.button( {id:"audioMute", onClick:this.handleAudioMute, className:user.audioMute ? 'muted' : '', title:"Mute/Unmute Audio"})
-                    );
+                    res.push(
+                        React.DOM.button( {id:"videoMute", onClick:this.handleVideoMute, className:user.videoMute ? 'muted' : '', title:"Mute/Unmute Video"})
+                        );
+
+                    res.push(
+                        React.DOM.button( {id:"audioMute", onClick:this.handleAudioMute, className:user.audioMute ? 'muted' : '', title:"Mute/Unmute Audio"})
+                        );
+                }
             }
 
             return (

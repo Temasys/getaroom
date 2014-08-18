@@ -36,6 +36,7 @@ define([
                 controls: true,
                 room: {
                     id: '',
+                    isLocked: false,
                     status: Constants.RoomState.IDLE
                 }
             };
@@ -70,6 +71,13 @@ define([
                         video: true
                     });
                 }
+                else if(state === -1) {
+                    self.setState({
+                        room: Utils.extend(self.state.room, {
+                            status: Constants.RoomState.LOCKED
+                        })
+                    });
+                }
             });
 
             Skyway.on("channelError", function(error) {
@@ -86,6 +94,7 @@ define([
 
             Skyway.on('peerJoined', function(peerId, peerInfo, isSelf) {
                 if(self.state.users.length === 3 || isSelf) {
+                    Skyway.lockRoom();
                     return;
                 }
 
@@ -142,6 +151,17 @@ define([
 
                 self.setState(state);
             });
+
+            Skyway.on("roomLock", function(success, isLocked) {
+                if(success) {
+                    self.setState({
+                        room: Utils.extend(self.state.room, {
+                            isLocked: isLocked
+                        })
+                    });
+                }
+            });
+
         },
         componentDidMount: function() {
             Router.configure({
