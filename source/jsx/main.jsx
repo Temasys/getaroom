@@ -93,11 +93,10 @@ define([
             });
 
             Skyway.on('peerJoined', function(peerId, peerInfo, isSelf) {
-                if(self.state.users.length === 3) {
+                if(self.state.users.length === 2) {
                     Skyway.lockRoom();
-                    return;
                 }
-                else if(isSelf) {
+                else if(self.state.users.length === 3 || isSelf) {
                     return;
                 }
 
