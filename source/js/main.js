@@ -149,6 +149,7 @@ define([
                 };
 
                 if(state.users.length === 1) {
+                    Skyway.unlockRoom();
                     state.controls = true;
                 }
 
