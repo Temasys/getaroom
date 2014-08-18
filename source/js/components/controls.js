@@ -4,12 +4,14 @@ define([
     'react',
     'utils',
     'constants',
+    'configs',
     'skyway',
     'router'
 ], function (
     React,
     Utils,
     Constants,
+    Configs,
     Skyway,
     Router
 ) {
@@ -36,7 +38,7 @@ define([
 	        Skyway[user.audioMute ? 'enableAudio' : 'disableAudio']();
         },
         handleRoomLock: function() {
-            if(this.props.state.users.length < 3) {
+            if(this.props.state.users.length < Configs.maxUsers) {
                 Skyway[this.props.state.room.isLocked ? 'unlockRoom' : 'lockRoom']();
             }
         },
@@ -63,7 +65,7 @@ define([
                 res.push(
                     React.DOM.div( {className:"description"}, 
                         React.DOM.p(null, 
-                            "Start a FREE call",React.DOM.br(null ),"with up to 3 people"
+                            "Start a FREE call",React.DOM.br(null ),"with up to ", Configs.maxUsers, " people"
                         ),
                         React.DOM.p(null, 
                             "Just hit the \"Start a new call\" button below and share the link.",React.DOM.br(null ),React.DOM.br(null ),
