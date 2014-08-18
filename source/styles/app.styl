@@ -200,6 +200,16 @@ body > a {
     #uv0
         transform rotateY(-180deg);
 
+    .userInfo
+        position absolute
+        text-align center
+        color #fff
+        text-shadow 1px 1px 0 #000
+        width 200px
+        margin 0 -100px
+        left 50%
+        top 23%
+
 @media all and (min-width: 680px)
     #userareas
         &.split2
@@ -238,6 +248,9 @@ body > a {
             .userarea > div
                 margin -25vh 0
 
+            .userInfo
+                top 36%
+
         &.split3
             .userarea:nth-child(1)
                 bottom 66.7%
@@ -252,15 +265,8 @@ body > a {
             .userarea > div
                 margin -33.3vh 0
 
-#userareas .userInfo
-    position absolute
-    text-align center
-    color #fff
-    text-shadow 1px 1px 0 #000
-    width 200px
-    margin 0 -100px
-    left 50%
-    top 23%
+            .userInfo
+                top 40%
 
 #noUser
     top 0
