@@ -111,7 +111,7 @@ define([
                 });
             });
 
-            Skyway.on('addPeerStream', function(peerId, stream, isSelf) {
+            Skyway.on('incomingStream', function(peerId, stream, isSelf) {
                 var state = {
                     users: self.state.users.map(function (user) {
                         if((isSelf && user.id === 0) || user.id === peerId) {
@@ -140,7 +140,7 @@ define([
                 });
             });
 
-            Skyway.on('peerLeft', function(peerId) {
+            Skyway.on('peerLeft', function(peerId, peerInfo, isSelf) {
                 var state = {
                     users: self.state.users.filter(function(user) {
                             return user.id !== peerId
@@ -155,14 +155,12 @@ define([
                 self.setState(state);
             });
 
-            Skyway.on("roomLock", function(success, isLocked) {
-                if(success) {
-                    self.setState({
-                        room: Utils.extend(self.state.room, {
-                            isLocked: isLocked
-                        })
-                    });
-                }
+            Skyway.on("roomLock", function(isLocked) {
+                self.setState({
+                    room: Utils.extend(self.state.room, {
+                        isLocked: isLocked
+                    })
+                });
             });
 
         },
