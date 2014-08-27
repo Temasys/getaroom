@@ -147,12 +147,12 @@ define([
             var sampleAudioStream = function() {
                 self._analyser.getByteFrequencyData(self._streamData);
 
-                for(var i = 0; i < 80; i++) {
-                    self._volume = Math.min(self._volume || self._streamData[i]);
-                }
+                // for(var i = 0; i < 80; i++) {
+                //     self._volume = Math.min(self._volume || self._streamData[i]);
+                // }
             };
 
-            this._volume = 0;
+            // this._volume = 0;
             this._streamData = new Uint8Array(128);
 
             this._sampleInterval = window.setInterval(sampleAudioStream, 50);
@@ -164,7 +164,7 @@ define([
                 this._loop = 0;
             }
             for(var bin = -127; bin < 128; bin++) {
-                var val = this._streamData[Math.abs(bin)] / this._volume * 100;
+                var val = this._streamData[Math.abs(bin)] / 32;
                 var h = this._loop;
                 var s = 100;
                 var l = Math.min(Math.max(val, 0) Math.abs(bin)/128*100);
