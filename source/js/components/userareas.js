@@ -49,11 +49,10 @@ define([
             cancelAnimationFrame(this._animFrame);
 
             if(this.props.user.stream !== null) {
-                var us = document.getElementById('us' + this.props.user.id);
 
                 if(this.props.user.videoMute) {
                     if(!this.props.user.audioMute) {
-                        this.analyseAudio(us);
+                        this.analyseAudio(this.props.user.stream, this.props.user.id === 0);
                     }
 
                     this._canvasElement = document.getElementById('uc' + this.props.user.id);
@@ -61,8 +60,11 @@ define([
 
                     this.drawViz();
                 }
-
-                window.attachMediaStream(us, this.props.user.stream);
+                else {
+                    window.attachMediaStream(
+                        document.getElementById('us' + this.props.user.id),
+                            this.props.user.stream);
+                }
             }
         },
         componentDidMount: function() {
@@ -94,12 +96,13 @@ define([
                         React.DOM.canvas( {id:'uc' + this.props.user.id, width:"256", height:"256"})
                         );
                 }
-
-                res.push(React.DOM.video({
-                        id: 'us' + this.props.user.id,
-                        autoPlay: true,
-                        muted: this.props.user.id === 0
-                    }));
+                else {
+                    res.push(React.DOM.video({
+                            id: 'us' + this.props.user.id,
+                            autoPlay: true,
+                            muted: this.props.user.id === 0
+                        }));
+                }
 
                 var muted = [];
 
@@ -125,49 +128,44 @@ define([
                 )
                 );
         },
-        analyseAudio: function(player) {
+        analyseAudio: function(stream, muted) {
             var self = this;
+
             if(!this._source) {
-                this._audioCtx = new window.AudioContext; // this is because it's not been standardised accross browsers yet.
+                this._audioCtx = new (window.AudioContext || window.webkitAudioContext); // this is because it's not been standardised accross browsers yet.
                 this._analyser = this._audioCtx.createAnalyser();
                 this._analyser.fftSize = 256;
+
+                this._source = this._audioCtx.createMediaStreamSource(stream); // this is where we hook up the <audio> element
+                this._source.connect(this._analyser);
+
+                if(!muted) {
+                    this._analyser.connect(this._audioCtx.destination);
+                }
             }
 
-            try {
-                this._source = this._audioCtx.createMediaElementSource(player); // this is where we hook up the <audio> element
-                this._source.connect(this._analyser);
-                this._analyser.connect(this._audioCtx.destination);
-            } catch (e) {}
-
             var sampleAudioStream = function() {
-                // This closure is where the magic happens. Because it gets called with setInterval below, it continuously samples the audio data
-                // and updates the streamData and volume properties. This the SoundCouldAudioSource function can be passed to a visualization routine and
-                // continue to give real-time data on the audio stream.
                 self._analyser.getByteFrequencyData(self._streamData);
-                // calculate an overall volume value
-                var total = 0;
-                for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
-                    total += self._streamData[i];
-                }
-                self._volume = total;
             };
 
-            this._sampleInterval = window.setInterval(sampleAudioStream, 20);
             this._volume = 0;
             this._streamData = new Uint8Array(128);
+
+            this._sampleInterval = window.setInterval(sampleAudioStream, 100);
+
         },
         drawViz: function() {
-            // you can then access all the frequency and volume data
-            // and use it to draw whatever you like on your canvas
-            for(var bin = 0; bin < 128; bin++) {
-                // do something with each value. Here's a simple example
-                var val = this._streamData[bin];
-                var red = val;
-                var green = 255 - val;
-                var blue = val / 2;
-                this._context.fillStyle = 'rgb(' + red + ', ' + green + ', ' + blue + ')';
-                this._context.fillRect(bin * 2, 0, 2, 256);
-                // use lines and shapes to draw to the canvas is various ways. Use your imagination!
+            this._loop = (this._loop || 0) + 1;
+            if(this._loop > 360) {
+                this._loop = 0;
+            }
+            for(var bin = -64; bin < 64; bin++) {
+                var val = this._streamData[Math.abs(bin)];
+                var h = this._loop;
+                var s = 100;
+                var l = Math.min(val, 100);
+                this._context.fillStyle = 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
+                this._context.fillRect(bin + 128, 0, 1, 255);
             }
             this._animFrame = window.requestAnimationFrame(this.drawViz);
         }
