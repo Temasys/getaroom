@@ -136,11 +136,11 @@ define([
                 this._analyser = this._audioCtx.createAnalyser();
                 this._analyser.fftSize = 256;
                 this._gain = this._audioCtx.createGain();
-                this._gain.value = 0.8;
+                this._gain.value = 0.5;
 
                 this._source = this._audioCtx.createMediaStreamSource(stream); // this is where we hook up the <audio> element
-                this._source.connect(this._analyser);
                 this._source.connect(this._gain);
+                this._source.connect(this._analyser);
 
                 if(!muted) {
                     this._analyser.connect(this._audioCtx.destination);
@@ -154,7 +154,7 @@ define([
             this._volume = 0;
             this._streamData = new Uint8Array(128);
 
-            this._sampleInterval = window.setInterval(sampleAudioStream, 100);
+            this._sampleInterval = window.setInterval(sampleAudioStream, 20);
 
         },
         drawViz: function() {

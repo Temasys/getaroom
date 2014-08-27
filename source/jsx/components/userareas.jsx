@@ -135,12 +135,9 @@ define([
                 this._audioCtx = new (window.AudioContext || window.webkitAudioContext); // this is because it's not been standardised accross browsers yet.
                 this._analyser = this._audioCtx.createAnalyser();
                 this._analyser.fftSize = 256;
-                this._gain = this._audioCtx.createGain();
-                this._gain.value = 0.8;
 
                 this._source = this._audioCtx.createMediaStreamSource(stream); // this is where we hook up the <audio> element
                 this._source.connect(this._analyser);
-                this._source.connect(this._gain);
 
                 if(!muted) {
                     this._analyser.connect(this._audioCtx.destination);
@@ -149,12 +146,16 @@ define([
 
             var sampleAudioStream = function() {
                 self._analyser.getByteFrequencyData(self._streamData);
+
+                for(var i = 0; i < 80; i++) {
+                    self._volume = Math.min(self._volume || self._streamData[i]);
+                }
             };
 
             this._volume = 0;
             this._streamData = new Uint8Array(128);
 
-            this._sampleInterval = window.setInterval(sampleAudioStream, 100);
+            this._sampleInterval = window.setInterval(sampleAudioStream, 50);
 
         },
         drawViz: function() {
@@ -163,10 +164,10 @@ define([
                 this._loop = 0;
             }
             for(var bin = -127; bin < 128; bin++) {
-                var val = this._streamData[Math.abs(bin)];
+                var val = this._streamData[Math.abs(bin)] / this._volume * 100;
                 var h = this._loop;
                 var s = 100;
-                var l = Math.min(val, Math.abs(bin)/128*100);
+                var l = Math.min(Math.max(val, 0) Math.abs(bin)/128*100);
                 this._context.fillStyle = 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
                 this._context.fillRect(bin + 128, 0, 1, 255);
             }
