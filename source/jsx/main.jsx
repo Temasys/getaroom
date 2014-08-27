@@ -147,8 +147,10 @@ define([
                         })
                 };
 
-                if(state.users.length === 1) {
+                if(state.users.length === 2) {
                     Skyway.unlockRoom();
+                }
+                else if(state.users.length === 1) {
                     state.controls = true;
                 }
 
