@@ -135,9 +135,12 @@ define([
                 this._audioCtx = new (window.AudioContext || window.webkitAudioContext); // this is because it's not been standardised accross browsers yet.
                 this._analyser = this._audioCtx.createAnalyser();
                 this._analyser.fftSize = 256;
+                this._gain = this._audioCtx.createGain();
+                this._gain.value = 0.8;
 
                 this._source = this._audioCtx.createMediaStreamSource(stream); // this is where we hook up the <audio> element
                 this._source.connect(this._analyser);
+                this._source.connect(this._gain);
 
                 if(!muted) {
                     this._analyser.connect(this._audioCtx.destination);
@@ -159,11 +162,11 @@ define([
             if(this._loop > 360) {
                 this._loop = 0;
             }
-            for(var bin = -64; bin < 64; bin++) {
+            for(var bin = -127; bin < 128; bin++) {
                 var val = this._streamData[Math.abs(bin)];
                 var h = this._loop;
                 var s = 100;
-                var l = Math.min(val, 100);
+                var l = Math.min(val, Math.abs(bin)/128*100);
                 this._context.fillStyle = 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
                 this._context.fillRect(bin + 128, 0, 1, 255);
             }
