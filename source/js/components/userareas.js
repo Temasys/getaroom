@@ -50,11 +50,11 @@ define([
 
             if(this.props.user.stream !== null) {
 
-                if(this.props.user.videoMute) {
-                    if(!this.props.user.audioMute) {
-                        this.analyseAudio(this.props.user.stream, this.props.user.id === 0);
-                    }
+                if(!this.props.user.audioMute) {
+                    this.analyseAudio(this.props.user.stream, this.props.user.id === 0);
+                }
 
+                if(this.props.user.videoMute) {
                     this._canvasElement = document.getElementById('uc' + this.props.user.id);
                     this._context = this._canvasElement.getContext('2d');
 
@@ -100,7 +100,7 @@ define([
                     res.push(React.DOM.video({
                             id: 'us' + this.props.user.id,
                             autoPlay: true,
-                            muted: this.props.user.id === 0
+                            muted: true//this.props.user.id === 0
                         }));
                 }
 
@@ -132,14 +132,11 @@ define([
             var self = this;
 
             if(!this._source) {
-                this._audioCtx = new (window.AudioContext || window.webkitAudioContext); // this is because it's not been standardised accross browsers yet.
+                this._audioCtx = new (window.AudioContext || window.webkitAudioContext);
                 this._analyser = this._audioCtx.createAnalyser();
                 this._analyser.fftSize = 256;
-                this._gain = this._audioCtx.createGain();
-                this._gain.value = 0.5;
 
-                this._source = this._audioCtx.createMediaStreamSource(stream); // this is where we hook up the <audio> element
-                this._source.connect(this._gain);
+                this._source = this._audioCtx.createMediaStreamSource(stream);
                 this._source.connect(this._analyser);
 
                 if(!muted) {
@@ -151,10 +148,9 @@ define([
                 self._analyser.getByteFrequencyData(self._streamData);
             };
 
-            this._volume = 0;
             this._streamData = new Uint8Array(128);
 
-            this._sampleInterval = window.setInterval(sampleAudioStream, 20);
+            this._sampleInterval = window.setInterval(sampleAudioStream, 50);
 
         },
         drawViz: function() {
@@ -163,10 +159,10 @@ define([
                 this._loop = 0;
             }
             for(var bin = -127; bin < 128; bin++) {
-                var val = this._streamData[Math.abs(bin)];
+                var val = this._streamData[Math.abs(bin)] / 10;
                 var h = this._loop;
                 var s = 100;
-                var l = Math.min(val, Math.abs(bin)/128*100);
+                var l = Math.min(Math.max(val, 0), Math.abs(bin)/128*100);
                 this._context.fillStyle = 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
                 this._context.fillRect(bin + 128, 0, 1, 255);
             }
