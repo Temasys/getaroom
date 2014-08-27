@@ -193,9 +193,12 @@ body > a {
             background #000
             transition all .5s ease-out
 
-            video
+            video, canvas
                 width 100%
                 height 100%
+
+            canvas + video
+                display none
 
     #uv0
         transform rotateY(-180deg);

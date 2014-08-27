@@ -45,10 +45,24 @@ define([
 
     var UserArea = React.createClass({displayName: 'UserArea',
         attachStream: function() {
+            clearInterval(this._sampleInterval);
+            cancelAnimationFrame(this._animFrame);
+
             if(this.props.user.stream !== null) {
-                window.attachMediaStream(
-                    document.getElementById('uv' + this.props.user.id),
-                        this.props.user.stream);
+                var us = document.getElementById('us' + this.props.user.id);
+
+                if(this.props.user.videoMute) {
+                    if(!this.props.user.audioMute) {
+                        this.analyseAudio(us);
+                    }
+
+                    this._canvasElement = document.getElementById('uc' + this.props.user.id);
+                    this._context = this._canvasElement.getContext('2d');
+
+                    this.drawViz();
+                }
+
+                window.attachMediaStream(us, this.props.user.stream);
             }
         },
         componentDidMount: function() {
@@ -75,11 +89,17 @@ define([
                 );
             }
             else {
+                if(this.props.user.videoMute) {
+                    res.push(
+                        React.DOM.canvas( {id:'uc' + this.props.user.id, width:"256", height:"256"})
+                        );
+                }
+
                 res.push(React.DOM.video({
-                    id: 'uv' + this.props.user.id,
-                    autoPlay: true,
-                    muted: this.props.user.id === 0
-                }));
+                        id: 'us' + this.props.user.id,
+                        autoPlay: true,
+                        muted: this.props.user.id === 0
+                    }));
 
                 var muted = [];
 
@@ -104,6 +124,52 @@ define([
                     res
                 )
                 );
+        },
+        analyseAudio: function(player) {
+            var self = this;
+            if(!this._source) {
+                this._audioCtx = new window.AudioContext; // this is because it's not been standardised accross browsers yet.
+                this._analyser = this._audioCtx.createAnalyser();
+                this._analyser.fftSize = 256;
+            }
+
+            try {
+                this._source = this._audioCtx.createMediaElementSource(player); // this is where we hook up the <audio> element
+                this._source.connect(this._analyser);
+                this._analyser.connect(this._audioCtx.destination);
+            } catch (e) {}
+
+            var sampleAudioStream = function() {
+                // This closure is where the magic happens. Because it gets called with setInterval below, it continuously samples the audio data
+                // and updates the streamData and volume properties. This the SoundCouldAudioSource function can be passed to a visualization routine and
+                // continue to give real-time data on the audio stream.
+                self._analyser.getByteFrequencyData(self._streamData);
+                // calculate an overall volume value
+                var total = 0;
+                for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
+                    total += self._streamData[i];
+                }
+                self._volume = total;
+            };
+
+            this._sampleInterval = window.setInterval(sampleAudioStream, 20);
+            this._volume = 0;
+            this._streamData = new Uint8Array(128);
+        },
+        drawViz: function() {
+            // you can then access all the frequency and volume data
+            // and use it to draw whatever you like on your canvas
+            for(var bin = 0; bin < 128; bin++) {
+                // do something with each value. Here's a simple example
+                var val = this._streamData[bin];
+                var red = val;
+                var green = 255 - val;
+                var blue = val / 2;
+                this._context.fillStyle = 'rgb(' + red + ', ' + green + ', ' + blue + ')';
+                this._context.fillRect(bin * 2, 0, 2, 256);
+                // use lines and shapes to draw to the canvas is various ways. Use your imagination!
+            }
+            this._animFrame = window.requestAnimationFrame(this.drawViz);
         }
     });
 
