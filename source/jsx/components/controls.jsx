@@ -45,6 +45,9 @@ define([
         handleLinkClick: function (e) {
             e.target.setSelectionRange(0, e.target.value.length);
         },
+        handleClose: function(e) {
+            e.target.parentElement.parentElement.parentElement.children[0].click()
+        },
         render: function() {
             var res = [];
             var user = this.props.state.users.filter(function (user) {
@@ -109,6 +112,11 @@ define([
 
             return (
                 <section id="controls" className={this.props.state.controls ? 'visible' : ''}>
+                    <nav>
+                        <button onClick={this.handleClose} className={this.props.state.state === Constants.AppState.IN_ROOM ? 'close' : ''}></button>
+                        <button></button>
+                        <button></button>
+                    </nav>
                     <div>
                         {res}
                     </div>

@@ -119,7 +119,7 @@ body > a {
 
         &:active
             background-color rgba(200,200,200,.3)
-
+                
     button.mainControl
         width 100%
         height auto
@@ -177,6 +177,65 @@ body > a {
             text-align center
             font-size 1em
             padding 5px 8px
+
+    nav
+        position relative
+        z-index 15
+
+    nav button
+        border 0
+        position relative
+        margin 8px -2px 0 8px
+        width 14px
+        height 14px
+        overflow hidden
+        display inline-block
+        font bold 12px/14px 'Helvetica', 'Arial'
+        text-align center
+        color #888
+        box-shadow 0 -1px 1px 0 rgba(0, 0, 0, 0.3) inset, 0 1px 3px 0 rgba(0, 0, 0, 0.80) inset, 0 1px 0px 0 rgba(255, 255, 255, 0.40);
+        border-radius 7px
+        background #d8d8d8
+        background linear-gradient(top, #ddd 0%, #eee 100%)
+        pointer default
+
+        &.close
+            background #f12519
+            background linear-gradient(top, #f12519 0%, #ff8684 100%)
+            color #630f0a
+            
+            &:active
+                background #c84840
+
+
+        &:before
+            content ''
+            width 6px
+            height 3px
+            background -webkit-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
+            background -moz-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
+            background radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
+            position absolute
+            left 50%
+            top 1px
+            margin-left -3px
+
+        &:after
+            content ''
+            line-height 2px
+            width 12px
+            height 12px
+            position absolute
+            left 50%
+            margin-left -6px
+            bottom -4px
+            opacity 0.55
+            background -webkit-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
+            background -moz-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
+            background radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
+
+    nav:hover button.close:after
+    	content 'x'
 
 
 #userareas
