@@ -126,26 +126,6 @@ define([
                 }
 
                 self.setState(state);
-
-                /*var audioCtx = new (window.AudioContext || window.webkitAudioContext);
-                var analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 256;
-
-                var source = audioCtx.createMediaStreamSource(stream);
-                source.connect(analyser);
-
-                var sampleAudioStream = function() {
-                    analyser.getByteFrequencyData(self._streams[peerId]);
-                    var volume = 0;
-                    for(var i = 0; i < 128; i++) {
-                        volume = Math.max(self._streams[peerId][i], volume);
-                    }
-                    console.log((isSelf ? 'myself' : peerId) + ': ' + volume);
-                };
-
-                self._streams[peerId] = new Uint8Array(128);
-
-                self._intervals[peerId] = window.setInterval(sampleAudioStream, 50);*/
             });
 
             Skyway.on('peerUpdated', function(peerId, peerInfo, isSelf) {
@@ -188,8 +168,6 @@ define([
             });
 
         },
-        _intervals: {},
-        _streams: {},
         componentDidMount: function() {
             Router.configure({
                 html5history: true

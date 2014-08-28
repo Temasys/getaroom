@@ -45,22 +45,10 @@ define([
 
     var UserArea = React.createClass({displayName: 'UserArea',
         attachStream: function() {
-            // clearInterval(this._sampleInterval);
-            // cancelAnimationFrame(this._animFrame);
-
             if(this.props.user.stream !== null) {
-
-                /*if(this.props.user.videoMute) {
-                    this._canvasElement = document.getElementById('uc' + this.props.user.id);
-                    this._context = this._canvasElement.getContext('2d');
-
-                    this.drawViz();
-                }
-                else {*/
-                    window.attachMediaStream(
-                        document.getElementById('us' + this.props.user.id),
-                            this.props.user.stream);
-                // }
+                window.attachMediaStream(
+                    document.getElementById('us' + this.props.user.id),
+                        this.props.user.stream);
             }
         },
         componentDidMount: function() {
@@ -87,18 +75,11 @@ define([
                 );
             }
             else {
-                /*if(this.props.user.videoMute) {
-                    res.push(
-                        <canvas id={'uc' + this.props.user.id} width='256' height='256'></canvas>
-                        );
-                }
-                else {*/
-                    res.push(React.DOM.video({
-                            id: 'us' + this.props.user.id,
-                            autoPlay: true,
-                            muted: this.props.user.id === 0
-                        }));
-                // }
+                res.push(React.DOM.video({
+                        id: 'us' + this.props.user.id,
+                        autoPlay: true,
+                        muted: this.props.user.id === 0
+                    }));
 
                 var muted = [];
 
@@ -123,22 +104,7 @@ define([
                     res
                 )
                 );
-        }/*,
-        drawViz: function() {
-            this._loop = (this._loop || 0) + 1;
-            if(this._loop > 360) {
-                this._loop = 0;
-            }
-            for(var bin = -127; bin < 128; bin++) {
-                var val = this._streamData[Math.abs(bin)] / 10;
-                var h = this._loop;
-                var s = 100;
-                var l = Math.min(Math.max(val, 0), Math.abs(bin)/128*100);
-                this._context.fillStyle = 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
-                this._context.fillRect(bin + 128, 0, 1, 255);
-            }
-            this._animFrame = window.requestAnimationFrame(this.drawViz);
-        }*/
+        }
     });
 
     return UserAreas;
