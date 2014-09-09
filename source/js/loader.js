@@ -12,11 +12,11 @@ require.config({
         socketio: '//cdn.temasys.com.sg/libraries/'
             + 'socket.io-client/1.0.6/socket.io',
         //adapter: 'libs/adapter',
-        adapter: '//cdn.temasys.com.sg/adapterjs/latest/' +
+        adapter: '//cdn.temasys.com.sg/adapterjs/0.9.0/' +
             'adapter.min',
         //skyway: 'libs/skyway',
         skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
-            '0.4.0/skyway.min',
+            '0.4.x/skyway.min',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +
