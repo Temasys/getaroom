@@ -16,7 +16,7 @@ require.config({
             'adapter.min',
         //skyway: 'libs/skyway',
         skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
-            '0.4.x/skyway.min',
+            '0.4.x/skyway.debug',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +
