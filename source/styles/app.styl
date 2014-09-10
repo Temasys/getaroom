@@ -41,15 +41,15 @@ body > a {
     height 600px
     width 400px
     background rgba(255,255,255,0.7)
-    box-shadow 1px 1px 1px rgba(0,0,0,.3)
-    transform rotateX(10deg) translateZ(-10px)
+    transform scale(.95) translateZ(-10px)
     transform-origin 70% 50%
-    transition all .2s ease-in
+    transition all .1s ease-in
     opacity 0
+    color darken(color2, 20%)
     z-index 1
 
     &.visible
-        transform rotateX(0) translateZ(0)
+        transform scale(1) translateZ(0)
         opacity 1
         z-index 10
 
@@ -59,10 +59,10 @@ body > a {
         width 100px
         height 100px
         border-radius 50px
-        border 2px groove rgba(255,255,255,.5)
         background-color rgba(255,255,255,.08)
         outline 0
         text-align center
+        border 2px solid darken(color2, 10%)
 
         &#videoMute
             float left
@@ -99,12 +99,12 @@ body > a {
             transform rotate(45deg)
             width 4px
             height 50px
-            background red
+            background darken(color3, 20%)
 
         &.muted:after
             content ""
             display block
-            border 4px solid red
+            border 4px solid darken(color3, 20%)
             border-radius 25px
             position absolute
             left 50%
@@ -121,7 +121,7 @@ body > a {
             background-color rgba(200,200,200,.3)
 
     button.mainControl
-        width 100%
+        width 392px
         height auto
         display inline-block
         font-size 1.3em
@@ -129,45 +129,53 @@ body > a {
         padding 15px 25px
         background 0
         border 0
-
-        border-radius 0 0 4px 4px
+        border-radius 4px
         position absolute
-        bottom 0
-        left 0
+        left 4px
+        bottom 4px
+
+        &:hover
+            background-color rgba(255,255,255,.2)
+
+        &:active
+            background-color rgba(200,200,200,.3)
 
         &.joinRoom
-            color #fff
-            background linear-gradient(top, darken(green, 10%) 80%, darken(green, 20%) 100%)
+            color darken(color1, 10%)
+            border 2px solid darken(color1, 10%)
+            text-shadow 1px 1px 0 white
 
         &.leaveRoom
-            color #fff
-            background linear-gradient(top, darken(red, 30%) 80%, darken(red, 40%) 100%)
+            color darken(color3, 20%)
+            border 2px solid darken(color3, 30%)
+            text-shadow 1px 1px 0 rgba(255,255,255,.6)
 
     > div > div
         text-align center
         font-weight 700
 
     .logo
+        color #fbfbfb
         text-align center
         font-family Lobster
-        font-size 3.5em
+        font-size 3.9em
         padding 170px 25px 5px
-        text-shadow 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff, 5px 5px 0 #fff, 5px 5px 0 #fff
+        text-shadow -1px -1px 0 color2, 1px -1px 0 color2, -1px 1px 0 color2, 1px 1px 0 color2, 2px 2px 0 color2, 3px 3px 0 color2, 4px 4px 0 color2, 5px 5px 0 color2
 
     p
         margin 0
         padding 0 55px 35px
 
     a
-        color #222
+        color darken(color2, 20%)
 
     p:nth-child(2)
-        color #222
         font-weight 200
+        padding-top 40px
 
     .link
         position absolute
-        bottom 65px
+        bottom 85px
         left 0
         right 0
         font-weight 200
@@ -176,7 +184,11 @@ body > a {
             width 330px
             text-align center
             font-size 1em
+            border-radius 4px
             padding 5px 8px
+            background none
+            border 1px solid color2
+            color darken(color2, 20%)
 
     nav
         position relative
@@ -187,6 +199,7 @@ body > a {
         position relative
         margin 8px -2px 0 8px
         width 14px
+        line-height 14px
         height 14px
         overflow hidden
         display inline-block
