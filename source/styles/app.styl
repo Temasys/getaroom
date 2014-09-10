@@ -37,7 +37,7 @@ body > a {
     left 50%
     top 50%
     margin -300px -200px
-    border-radius 4px
+    border-radius 8px
     height 600px
     width 400px
     background rgba(255,255,255,0.7)
@@ -129,38 +129,35 @@ body > a {
         padding 15px 25px
         background 0
         border 0
-        border-radius 4px
+        border-radius 6px
         position absolute
         left 4px
         bottom 4px
-
-        &:hover
-            background-color rgba(255,255,255,.2)
-
-        &:active
-            background-color rgba(200,200,200,.3)
+        color #fff
 
         &.joinRoom
-            color darken(color1, 10%)
-            border 2px solid darken(color1, 10%)
-            text-shadow 1px 1px 0 white
+            background darken(color1, 20%)
+
+            &:active
+                background darken(color1, 30%)
 
         &.leaveRoom
-            color darken(color3, 20%)
-            border 2px solid darken(color3, 30%)
-            text-shadow 1px 1px 0 rgba(255,255,255,.6)
+            background darken(color3, 40%)
+
+            &:active
+                background darken(color3, 50%)
 
     > div > div
         text-align center
         font-weight 700
 
     .logo
-        color #fbfbfb
+        color darken(color1, 10%)
         text-align center
         font-family Lobster
-        font-size 3.9em
-        padding 170px 25px 5px
-        text-shadow -1px -1px 0 color2, 1px -1px 0 color2, -1px 1px 0 color2, 1px 1px 0 color2, 2px 2px 0 color2, 3px 3px 0 color2, 4px 4px 0 color2, 5px 5px 0 color2
+        font-size 4.2em
+        padding 160px 25px 5px
+        text-shadow -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff, 4px 4px 0 #fff, 5px 5px 0 #fff
 
     p
         margin 0
@@ -204,49 +201,28 @@ body > a {
         height 14px
         overflow hidden
         display inline-block
-        font bold 12px/14px 'Helvetica', 'Arial'
+        font bold 11px/14px 'Helvetica', 'Arial'
         text-align center
         color #888
-        box-shadow 0 -1px 1px 0 rgba(0, 0, 0, 0.3) inset, 0 1px 3px 0 rgba(0, 0, 0, 0.80) inset, 0 1px 0px 0 rgba(255, 255, 255, 0.40);
         border-radius 7px
-        background #d8d8d8
-        background linear-gradient(top, #ddd 0%, #eee 100%)
+        background rgba(200,200,200,.4)
         pointer default
 
         &.close
-            background #f12519
-            background linear-gradient(top, #f12519 0%, #ff8684 100%)
-            color #630f0a
+            background darken(color3, 30%)
+            color darken(color3, 50%)
+
+            &:after
+                display inline-block
+
+            &:hover
+                background darken(color3, 30%)
 
             &:active
-                background #c84840
+                background darken(color3, 40%)
 
-
-        &:before
-            content ''
-            width 6px
-            height 3px
-            background -webkit-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            background -moz-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            background radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            position absolute
-            left 50%
-            top 1px
-            margin-left -3px
-
-        &:after
-            content ''
-            line-height 2px
-            width 12px
-            height 12px
-            position absolute
-            left 50%
-            margin-left -6px
-            bottom -4px
-            opacity 0.55
-            background -webkit-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            background -moz-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            background radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
+        &:hover
+            background rgba(200,200,200,.4)
 
     nav:hover button.close:after
     	content 'x'
