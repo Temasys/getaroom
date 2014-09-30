@@ -14,17 +14,10 @@ define([], function() {
         maxUsers: 16
     };
 
-    // var dev = {
-    //     env: 'dev',
-    //     Skyway: {
-    //         apiKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf'
-    //     },
-    //     maxUsers: 16
-    // };
     var dev = {
         env: 'dev',
         Skyway: {
-            apiKey: '3462e25f-5f0c-44a2-a3e1-f4cb5811f624',
+            apiKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf',
             roomServer: 'http://sgbeta.signaling.temasys.com.sg:8018/'
         },
         maxUsers: 16
