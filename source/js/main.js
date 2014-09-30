@@ -121,7 +121,7 @@ define([
                 if(self.state.users.length === Configs.maxUsers) {
                     Skyway.lockRoom();
                 }
-                else if(state.users.length === 2) {
+                else if(self.state.users.length === 2) {
                     state.controls = false;
                 }
 
