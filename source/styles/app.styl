@@ -37,19 +37,19 @@ body > a {
     left 50%
     top 50%
     margin -300px -200px
-    border-radius 4px
+    border-radius 8px
     height 600px
     width 400px
     background rgba(255,255,255,0.7)
-    box-shadow 1px 1px 1px rgba(0,0,0,.3)
-    transform rotateX(10deg) translateZ(-10px)
+    transform scale(.95)
     transform-origin 70% 50%
-    transition all .2s ease-in
+    transition all .1s ease-in
     opacity 0
+    color darken(color2, 20%)
     z-index 1
 
     &.visible
-        transform rotateX(0) translateZ(0)
+        transform scale(1)
         opacity 1
         z-index 10
 
@@ -59,10 +59,10 @@ body > a {
         width 100px
         height 100px
         border-radius 50px
-        border 2px groove rgba(255,255,255,.5)
         background-color rgba(255,255,255,.08)
         outline 0
         text-align center
+        border 2px solid darken(color2, 10%)
 
         &#videoMute
             float left
@@ -99,12 +99,12 @@ body > a {
             transform rotate(45deg)
             width 4px
             height 50px
-            background red
+            background darken(color3, 20%)
 
         &.muted:after
             content ""
             display block
-            border 4px solid red
+            border 4px solid darken(color3, 20%)
             border-radius 25px
             position absolute
             left 50%
@@ -121,7 +121,7 @@ body > a {
             background-color rgba(200,200,200,.3)
 
     button.mainControl
-        width 100%
+        width 392px
         height auto
         display inline-block
         font-size 1.3em
@@ -129,45 +129,50 @@ body > a {
         padding 15px 25px
         background 0
         border 0
-
-        border-radius 0 0 4px 4px
+        border-radius 6px
         position absolute
-        bottom 0
-        left 0
+        left 4px
+        bottom 4px
+        color #fff
 
         &.joinRoom
-            color #fff
-            background linear-gradient(top, darken(green, 10%) 80%, darken(green, 20%) 100%)
+            background darken(color1, 20%)
+
+            &:active
+                background darken(color1, 30%)
 
         &.leaveRoom
-            color #fff
-            background linear-gradient(top, darken(red, 30%) 80%, darken(red, 40%) 100%)
+            background darken(color3, 40%)
+
+            &:active
+                background darken(color3, 50%)
 
     > div > div
         text-align center
         font-weight 700
 
     .logo
+        color #333
         text-align center
         font-family Lobster
-        font-size 3.5em
-        padding 170px 25px 5px
-        text-shadow 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff, 5px 5px 0 #fff, 5px 5px 0 #fff
+        font-size 4.2em
+        padding 160px 25px 5px
+        text-shadow -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff, 4px 4px 0 #fff, 5px 5px 0 #fff
 
     p
         margin 0
         padding 0 55px 35px
 
     a
-        color #222
+        color darken(color2, 20%)
 
     p:nth-child(2)
-        color #222
         font-weight 200
+        padding-top 40px
 
     .link
         position absolute
-        bottom 65px
+        bottom 85px
         left 0
         right 0
         font-weight 200
@@ -176,7 +181,11 @@ body > a {
             width 330px
             text-align center
             font-size 1em
+            border-radius 4px
             padding 5px 8px
+            background none
+            border 1px solid color2
+            color darken(color2, 20%)
 
     nav
         position relative
@@ -187,52 +196,33 @@ body > a {
         position relative
         margin 8px -2px 0 8px
         width 14px
+        padding 0
+        line-height 14px
         height 14px
         overflow hidden
         display inline-block
-        font bold 12px/14px 'Helvetica', 'Arial'
+        font bold 11px/14px 'Helvetica', 'Arial'
         text-align center
         color #888
-        box-shadow 0 -1px 1px 0 rgba(0, 0, 0, 0.3) inset, 0 1px 3px 0 rgba(0, 0, 0, 0.80) inset, 0 1px 0px 0 rgba(255, 255, 255, 0.40);
         border-radius 7px
-        background #d8d8d8
-        background linear-gradient(top, #ddd 0%, #eee 100%)
+        background rgba(200,200,200,.4)
         pointer default
 
         &.close
-            background #f12519
-            background linear-gradient(top, #f12519 0%, #ff8684 100%)
-            color #630f0a
+            background darken(color3, 30%)
+            color darken(color3, 50%)
+
+            &:after
+                display inline-block
+
+            &:hover
+                background darken(color3, 30%)
 
             &:active
-                background #c84840
+                background darken(color3, 40%)
 
-
-        &:before
-            content ''
-            width 6px
-            height 3px
-            background -webkit-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            background -moz-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            background radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            position absolute
-            left 50%
-            top 1px
-            margin-left -3px
-
-        &:after
-            content ''
-            line-height 2px
-            width 12px
-            height 12px
-            position absolute
-            left 50%
-            margin-left -6px
-            bottom -4px
-            opacity 0.55
-            background -webkit-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            background -moz-radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
-            background radial-gradient(50% 50%, ellipse contain, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)
+        &:hover
+            background rgba(200,200,200,.4)
 
     nav:hover button.close:after
     	content 'x'
@@ -273,7 +263,7 @@ body > a {
             right 0
             bottom 0
 
-    &.split5, &.split6, &.split7, &.split9
+    &.split5, &.split6, &.split7, &.split8, &.split9
         .userarea
             width 33.3vw
             height 33.3vh
