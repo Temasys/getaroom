@@ -12,7 +12,7 @@ color3 = #ff688b
 body
     font-family 'Open Sans', Helvetica, Arial, sans-serif
     user-select none
-    background #fff
+    background #000
 
 body > a {
     position absolute
@@ -26,7 +26,7 @@ body > a {
     perspective-origin 50% 50%
     overflow hidden
 
-#app, #app > div, #app > div > div, #userareas, .userarea, #controls, #controls > div
+#app, #app > div, #app > div > div, #userareas, #controls, #controls > div
     position absolute
     top 0
     left 0
@@ -243,11 +243,15 @@ body > a {
 
     .userarea
         overflow hidden
+        position relative
+        width 25vw
+        height 25vh
+        display inline-block
 
         > div
             position absolute
-            width 100vw
-            height 100vh
+            width 100%
+            height 100%
             margin 0
             background #000
             transition all .5s ease-out
@@ -258,6 +262,21 @@ body > a {
 
             canvas + video
                 display none
+
+    &.split1, &.split2, &.split3, &.split4
+        .userarea
+            width auto
+            height auto
+            position absolute
+            top 0
+            left 0
+            right 0
+            bottom 0
+
+    &.split5, &.split6, &.split7, &.split9
+        .userarea
+            width 33.3vw
+            height 33.3vh
 
     #us0
         transform rotateY(-180deg);
@@ -282,6 +301,8 @@ body > a {
                 left 50%
 
             .userarea > div
+                width 100vw
+                height 100vh
                 margin 0 -25vw
 
         &.split3
@@ -296,7 +317,26 @@ body > a {
                 left 66.7%
 
             .userarea > div
+                width 100vw
+                height 100vh
                 margin 0 -33.3vw
+
+        &.split4
+            .userarea:nth-child(1)
+                right 50%
+                bottom 50%
+
+            .userarea:nth-child(2)
+                left 50%
+                bottom 50%
+
+            .userarea:nth-child(3)
+                top 50%
+                right 50%
+
+            .userarea:nth-child(4)
+                top 50%
+                left 50%
 
 @media all and (max-width: 679px)
     #userareas
