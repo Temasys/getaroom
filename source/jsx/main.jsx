@@ -204,6 +204,7 @@ define([
             });
 
             Skyway.init({
+                roomServer: Configs.Skyway.roomServer,
                 apiKey: Configs.Skyway.apiKey,
                 defaultRoom: room
             });
