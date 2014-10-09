@@ -278,6 +278,22 @@ body > a {
             right 0
             bottom 0
 
+        .userarea:nth-child(1)
+            right 50%
+            bottom 50%
+
+        .userarea:nth-child(2)
+            left 50%
+            bottom 50%
+
+        .userarea:nth-child(3)
+            top 50%
+            right 50%
+
+        .userarea:nth-child(4)
+            top 50%
+            left 50%
+
     &.split5, &.split6, &.split7, &.split8, &.split9
         .userarea
             width 33.33333vw
@@ -325,23 +341,6 @@ body > a {
                 width 100vw
                 height 100vh
                 margin 0 -33.33333vw
-
-        &.split4
-            .userarea:nth-child(1)
-                right 50%
-                bottom 50%
-
-            .userarea:nth-child(2)
-                left 50%
-                bottom 50%
-
-            .userarea:nth-child(3)
-                top 50%
-                right 50%
-
-            .userarea:nth-child(4)
-                top 50%
-                left 50%
 
 @media all and (max-width: 679px)
     #userareas
