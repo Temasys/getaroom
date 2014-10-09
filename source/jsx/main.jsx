@@ -157,8 +157,6 @@ define([
                 }
 
                 self.setState(state);
-
-                clearInterval(self._intervals[peerId]);
             });
 
             Skyway.on("roomLock", function(isLocked) {
