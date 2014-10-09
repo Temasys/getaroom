@@ -162,8 +162,8 @@ define([
             });
 
             Skyway.on('handshakeProgress', function(state, peerId, error) {
-                if(state === skyway.HANDSHAKE_PROGRESS.ERROR)
-                    self.setState(
+                if(state === skyway.HANDSHAKE_PROGRESS.ERROR) {
+                    self.setState({
                         users: self.state.users.map(function (user) {
                             if(user.id === peerId) {
                                 user.error = error

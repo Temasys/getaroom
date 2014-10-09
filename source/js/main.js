@@ -29,7 +29,8 @@ define([
                         name: 'Yourself',
                         stream: null,
                         audioMute: false,
-                        videoMute: false
+                        videoMute: false,
+                        error: null
                     }
                 ],
                 state: Constants.AppState.FOYER,
@@ -158,6 +159,19 @@ define([
                 }
 
                 self.setState(state);
+            });
+
+            Skyway.on('handshakeProgress', function(state, peerId, error) {
+                if(state === skyway.HANDSHAKE_PROGRESS.ERROR) {
+                    self.setState({
+                        users: self.state.users.map(function (user) {
+                            if(user.id === peerId) {
+                                user.error = error
+                            }
+                            return user;
+                        })
+                    });
+                }
             });
 
             Skyway.on("roomLock", function(isLocked) {
