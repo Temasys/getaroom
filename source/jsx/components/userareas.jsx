@@ -74,6 +74,13 @@ define([
                     </span>
                 );
             }
+            else if(this.props.user.error) {
+                res.push(
+                    <span className="userInfo">
+                        Stream could not be established
+                    </span>
+                );
+            }
             else {
                 res.push(React.DOM.video({
                         id: 'us' + this.props.user.id,
