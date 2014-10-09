@@ -17,8 +17,7 @@ define([], function() {
     var dev = {
         env: 'dev',
         Skyway: {
-            apiKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf'//,
-            //roomServer: 'http://sgbeta.signaling.temasys.com.sg:8018/'
+            apiKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf'
         },
         maxUsers: 4
     };
