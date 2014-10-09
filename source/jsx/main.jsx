@@ -208,8 +208,8 @@ define([
             Skyway.init({
                 roomServer: Configs.Skyway.roomServer,
                 apiKey: Configs.Skyway.apiKey,
-                defaultRoom: room,
-                region: 'sg'
+                defaultRoom: room//,
+                //region: 'sg'
             });
         },
         handleShowControls: function(e) {
