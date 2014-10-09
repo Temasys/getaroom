@@ -44,6 +44,7 @@ define([
         componentWillMount: function() {
             var self = this;
 
+            Skyway.setDebugMode(true);
             Skyway.setLogLevel('debug');
 
             Skyway.on('readyStateChange', function(state) {
