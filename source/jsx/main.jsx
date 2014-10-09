@@ -97,9 +97,7 @@ define([
             });
 
             Skyway.on('peerJoined', function(peerId, peerInfo, isSelf) {
-                if(self.state.users.length === Configs.maxUsers || isSelf || self.state.users.filter(function(user) {
-                    return user.id === peerId;
-                })) {
+                if(self.state.users.length === Configs.maxUsers || isSelf) {
                     return;
                 }
 
@@ -162,21 +160,6 @@ define([
                 }
 
                 self.setState(state);
-            });
-
-            Skyway.on('handshakeProgress', function(state, peerId, error) {
-                if(state === Skyway.HANDSHAKE_PROGRESS.ERROR) {
-                    self.setState({
-                        users: self.state.users.concat({
-                            id: peerId,
-                            name: 'Guest ' + peerId,
-                            stream: null,
-                            error: error,
-                            videoMute: null,
-                            audioMute: null
-                        })
-                    });
-                }
             });
 
             Skyway.on("roomLock", function(isLocked) {
