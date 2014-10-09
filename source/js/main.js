@@ -109,8 +109,8 @@ define([
                         name: 'Guest ' + peerId,
                         stream: null,
                         error: null,
-                        videoMute: null,
-                        audioMute: null
+                        videoMute: peerInfo.mediaStatus.videoMuted,
+                        audioMute: peerInfo.mediaStatus.audioMuted
                     })
                 });
             });
@@ -172,8 +172,8 @@ define([
                             name: 'Guest ' + peerId,
                             stream: null,
                             error: error,
-                            videoMute: peerInfo.mediaStatus.videoMuted,
-                            audioMute: peerInfo.mediaStatus.audioMuted
+                            videoMute: null,
+                            audioMute: null
                         })
                     });
                 }
