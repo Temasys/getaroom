@@ -109,8 +109,8 @@ define([
                         name: 'Guest ' + peerId,
                         stream: null,
                         error: null,
-                        videoMute: peerInfo.mediaStatus.videoMuted,
-                        audioMute: peerInfo.mediaStatus.audioMuted
+                        videoMute: null,
+                        audioMute: null
                     })
                 });
             });
