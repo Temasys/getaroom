@@ -171,8 +171,10 @@ define([
                 if(action === skyway.SYSTEM_ACTION.ROOM_LOCKED) {
                     self.setState({
                         room: Utils.extend(self.state.room, {
+                            status: Constants.RoomState.LOCKED,
                             isLocked: true
-                        })
+                        }),
+                        controls: true
                     });
                 }
             });
