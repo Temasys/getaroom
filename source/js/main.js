@@ -42,7 +42,9 @@ define([
             };
         },
         componentWillMount: function() {
-           var self = this;
+            var self = this;
+
+            Skyway.setLogLevel('debug');
 
             Skyway.on('readyStateChange', function(state) {
                 if(state === 0) {
