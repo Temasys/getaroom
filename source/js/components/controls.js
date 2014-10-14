@@ -60,17 +60,17 @@ define([
 
             if(this.props.state.state === Constants.AppState.FOYER) {
                 res.push(
-                    React.DOM.button( {className:"joinRoom mainControl", onClick:this.handleStartRoom},
+                    React.DOM.button( {className:"joinRoom mainControl", onClick:this.handleStartRoom}, 
                         "Start a new call"
                     )
                     );
 
                 res.push(
-                    React.DOM.div( {className:"description"},
-                        React.DOM.p(null,
+                    React.DOM.div( {className:"description"}, 
+                        React.DOM.p(null, 
                             "Start a FREE call",React.DOM.br(null ),"with up to ", Configs.maxUsers, " people"
                         ),
-                        React.DOM.p(null,
+                        React.DOM.p(null, 
                             "Just hit the \"Start a new call\" button below and share the link.",React.DOM.br(null ),React.DOM.br(null ),
                             "This app is a ", React.DOM.a( {href:"https://temasys.github.io", target:"_blank"}, "SkylinkJS"), " tech demo and you can fork the ", React.DOM.a( {href:"https://github.com/serrynaimo/getaroom", target:"_blank"}, "code on github"),"."
                         )
@@ -79,13 +79,13 @@ define([
             }
             else if(this.props.state.state === Constants.AppState.IN_ROOM) {
                 res.push(
-                    React.DOM.button( {className:"leaveRoom mainControl", onClick:this.handleLeaveRoom},
+                    React.DOM.button( {className:"leaveRoom mainControl", onClick:this.handleLeaveRoom}, 
                         "Leave this call"
                     )
                     );
 
                 res.push(
-                    React.DOM.div( {className:"link"},
+                    React.DOM.div( {className:"link"}, 
                         "Share this link to invite others into this call",React.DOM.br(null ),
                         React.DOM.input( {type:"text", value:location.toString(), onClick:this.handleLinkClick, readOnly:true} )
                     )
@@ -111,13 +111,13 @@ define([
             }
 
             return (
-                React.DOM.section( {id:"controls", className:this.props.state.controls ? 'visible' : ''},
-                    React.DOM.nav(null,
+                React.DOM.section( {id:"controls", className:this.props.state.controls ? 'visible' : ''}, 
+                    React.DOM.nav(null, 
                         React.DOM.button( {onClick:this.handleClose, className:this.props.state.state === Constants.AppState.IN_ROOM ? 'close' : ''}),
                         React.DOM.button(null),
                         React.DOM.button(null)
                     ),
-                    React.DOM.div(null,
+                    React.DOM.div(null, 
                         res
                     )
                 )
