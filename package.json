@@ -21,7 +21,7 @@
     "start": "grunt dev"
   },
   "dependencies": {
-    "SkywayJS": "git://github.com/TemasysCommunications/SkywayJS.git"
+    "SkylinkJS": "git://github.com/TemasysCommunications/SkylinkJS.git"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

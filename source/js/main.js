@@ -3,7 +3,7 @@
 define([
     'react',
     'router',
-    'skyway',
+    'skylink',
     'constants',
     'configs',
     'utils',
@@ -12,7 +12,7 @@ define([
 ], function (
     React,
     Router,
-    Skyway,
+    Skylink,
     Constants,
     Configs,
     Utils,
@@ -44,7 +44,7 @@ define([
         componentWillMount: function() {
            var self = this;
 
-            Skyway.on('readyStateChange', function(state) {
+            Skylink.on('readyStateChange', function(state) {
                 if(state === 0) {
                     self.setState({
                         room: Utils.extend(self.state.room, {
@@ -66,7 +66,7 @@ define([
                         })
                     });
 
-                    Skyway.joinRoom({
+                    Skylink.joinRoom({
                         audio: true,
                         video: true
                     });
@@ -80,7 +80,7 @@ define([
                 }
             });
 
-            Skyway.on("channelError", function(error) {
+            Skylink.on("channelError", function(error) {
                 self.setState({
                     room: Utils.extend(self.state.room, {
                         status: Constants.RoomState.IDLE
@@ -92,7 +92,7 @@ define([
                 alert("ERROR: " + error.toString());
             });
 
-            Skyway.on('peerJoined', function(peerId, peerInfo, isSelf) {
+            Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
                 if(self.state.users.length === Configs.maxUsers || isSelf) {
                     return;
                 }
@@ -108,7 +108,7 @@ define([
                 });
             });
 
-            Skyway.on('incomingStream', function(peerId, stream, isSelf) {
+            Skylink.on('incomingStream', function(peerId, stream, isSelf) {
                 var state = {
                     users: self.state.users.map(function (user) {
                         if((isSelf && user.id === 0) || user.id === peerId) {
@@ -119,7 +119,7 @@ define([
                 };
 
                 if(self.state.users.length === Configs.maxUsers) {
-                    Skyway.lockRoom();
+                    Skylink.lockRoom();
                 }
                 else if(state.users.length === 2) {
                     state.controls = false;
@@ -128,7 +128,7 @@ define([
                 self.setState(state);
             });
 
-            Skyway.on('peerUpdated', function(peerId, peerInfo, isSelf) {
+            Skylink.on('peerUpdated', function(peerId, peerInfo, isSelf) {
                 self.setState({
                     users: self.state.users.map(function (user) {
                         if((isSelf && user.id === 0) || user.id === peerId) {
@@ -140,7 +140,7 @@ define([
                 });
             });
 
-            Skyway.on('peerLeft', function(peerId, peerInfo, isSelf) {
+            Skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
                 var state = {
                     users: self.state.users.filter(function(user) {
                             return user.id !== peerId
@@ -148,7 +148,7 @@ define([
                 };
 
                 if(state.users.length === 2) {
-                    Skyway.unlockRoom();
+                    Skylink.unlockRoom();
                 }
                 else if(state.users.length === 1) {
                     state.controls = true;
@@ -159,7 +159,7 @@ define([
                 clearInterval(self._intervals[peerId]);
             });
 
-            Skyway.on("roomLock", function(isLocked) {
+            Skylink.on("roomLock", function(isLocked) {
                 self.setState({
                     room: Utils.extend(self.state.room, {
                         isLocked: isLocked
@@ -203,8 +203,8 @@ define([
                 controls: true
             });
 
-            Skyway.init({
-                apiKey: Configs.Skyway.apiKey,
+            Skylink.init({
+                apiKey: Configs.Skylink.apiKey,
                 defaultRoom: room
             });
         },
@@ -217,8 +217,8 @@ define([
         },
         render: function() {
             return (
-                React.DOM.div(null, 
-                    React.DOM.div( {onClick:this.handleShowControls}, 
+                React.DOM.div(null,
+                    React.DOM.div( {onClick:this.handleShowControls},
                         UserAreas( {state:this.state} )
                     ),
                     Controls( {state:this.state} )
