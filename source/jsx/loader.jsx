@@ -14,9 +14,9 @@ require.config({
         //adapter: 'libs/adapter',
         adapter: '//cdn.temasys.com.sg/adapterjs/0.9.3/' +
             'adapter.min',
-        //skyway: 'libs/skyway',
-        skyway: '//cdn.temasys.com.sg/skyway/skywayjs/' +
-            '0.5.x/skyway.debug',
+        //skylink: 'libs/skylink.debug',
+        skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/' +
+            '0.5.x/skylink.min',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +
@@ -27,15 +27,15 @@ require.config({
     },
 
     shim: {
-        skyway: {
-            exports: 'Skyway',
+        skylink: {
+            exports: 'Skylink',
             deps: [
                 'socketio',
                 'adapter'
             ],
             init: function(io) {
                 window.io = io;
-                return new this.Skyway();
+                return new this.Skylink();
             }
         },
         router: {

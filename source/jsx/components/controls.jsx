@@ -5,14 +5,14 @@ define([
     'utils',
     'constants',
     'configs',
-    'skyway',
+    'skylink',
     'router'
 ], function (
     React,
     Utils,
     Constants,
     Configs,
-    Skyway,
+    Skylink,
     Router
 ) {
 
@@ -22,24 +22,24 @@ define([
             Router.setRoute('/' + room);
         },
         handleLeaveRoom: function() {
-            Skyway.leaveRoom();
+            Skylink.leaveRoom();
             Router.setRoute('/');
         },
         handleVideoMute: function() {
             var user = this.props.state.users.filter(function (user) {
                 return user.id === 0;
             })[0];
-	        Skyway[user.videoMute ? 'enableVideo' : 'disableVideo']();
+	        Skylink[user.videoMute ? 'enableVideo' : 'disableVideo']();
         },
         handleAudioMute: function() {
             var user = this.props.state.users.filter(function (user) {
                 return user.id === 0;
             })[0];
-	        Skyway[user.audioMute ? 'enableAudio' : 'disableAudio']();
+	        Skylink[user.audioMute ? 'enableAudio' : 'disableAudio']();
         },
         handleRoomLock: function() {
             if(this.props.state.users.length < Configs.maxUsers) {
-                Skyway[this.props.state.room.isLocked ? 'unlockRoom' : 'lockRoom']();
+                Skylink[this.props.state.room.isLocked ? 'unlockRoom' : 'lockRoom']();
             }
         },
         handleLinkClick: function (e) {
@@ -72,7 +72,7 @@ define([
                         </p>
                         <p>
                             Just hit the &quot;Start a new call&quot; button below and share the link.<br /><br />
-                            This app is a <a href="https://temasys.github.io" target="_blank">SkywayJS</a> tech demo and you can fork the <a href="https://github.com/serrynaimo/getaroom" target="_blank">code on github</a>.
+                            This app is a <a href="https://temasys.github.io" target="_blank">SkylinkJS</a> tech demo and you can fork the <a href="https://github.com/serrynaimo/getaroom" target="_blank">code on github</a>.
                         </p>
                     </div>
                     );
