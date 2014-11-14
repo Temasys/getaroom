@@ -428,7 +428,7 @@ if (navigator.mozGetUserMedia) {
       return [];
     };
   }
-} else if (navigator.webkitGetUserMedia) {
+} else if (false) { //(navigator.webkitGetUserMedia) {
   webrtcDetectedBrowser = 'chrome';
   webrtcDetectedType = 'webkit';
   webrtcDetectedVersion = parseInt(navigator
