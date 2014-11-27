@@ -173,7 +173,7 @@ define([
             });
 
             Skylink.on("systemAction", function(action, message, reason) {
-                if(action === skyway.SYSTEM_ACTION.ROOM_LOCKED) {
+                if(action === skylink.SYSTEM_ACTION.ROOM_LOCKED) {
                     self.setState({
                         room: Utils.extend(self.state.room, {
                             status: Constants.RoomState.LOCKED,
