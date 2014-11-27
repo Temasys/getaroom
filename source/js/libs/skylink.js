@@ -26,7 +26,7 @@
  *     video: true
  *   });
  *
- *   SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
+ *   SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
  *     if (isSelf) {
  *       attachMediaStream(document.getElementById('selfVideo'), stream);
  *     } else {
@@ -3844,8 +3844,8 @@ Skylink.prototype._EVENTS = {
    *   supposed to be (stream, peerId, isSelf), but instead is received
    *   as (peerId, stream, isSelf) in 0.5.0.
    * @event incomingStream
-   * @param {Object} stream MediaStream object.
    * @param {String} peerId PeerId of the peer that is sending the stream.
+   * @param {Object} stream MediaStream object.
    * @param {JSON} peerInfo Peer's information.
    * @param {Boolean} isSelf Is the peer self.
    * @for Skylink
@@ -5248,7 +5248,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
     // check if users is in the room already
     self._condition('peerJoined', function () {
-      self._trigger('incomingStream', stream, self._user.sid, self._user.info, true);
+      self._trigger('incomingStream', self._user.sid, stream, self._user.info, true);
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
@@ -5327,7 +5327,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
-    this._trigger('incomingStream', event.stream, targetMid,
+    this._trigger('incomingStream', targetMid, event.stream,
       this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
@@ -5908,5 +5908,5 @@ Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {
   }
   return sdpLines;
 };
-Skyway = Skylink;
+window.Skyway = Skylink;
 }).call(this);
