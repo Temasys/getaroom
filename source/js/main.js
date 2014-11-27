@@ -46,7 +46,7 @@ define([
             var self = this;
 
 
-            Skylink.setDebugMode(true);
+            //Skylink.setDebugMode(true);
             Skylink.setLogLevel('debug');
 
 
@@ -234,8 +234,8 @@ define([
         },
         render: function() {
             return (
-                React.DOM.div(null, 
-                    React.DOM.div( {onClick:this.handleShowControls}, 
+                React.DOM.div(null,
+                    React.DOM.div( {onClick:this.handleShowControls},
                         UserAreas( {state:this.state} )
                     ),
                     Controls( {state:this.state} )
