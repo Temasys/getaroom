@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-11-27 */
+/*! skylinkjs - v0.5.4 - 2014-11-20 */
 
 (function() {
 /**
@@ -59,7 +59,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.5';
+  this.VERSION = '0.5.4';
 }
 this.Skylink = Skylink;
 
@@ -102,7 +102,7 @@ Skylink.prototype._dataChannels = [];
  * @trigger dataChannelState
  * @private
  * @for Skylink
- * @since 0.5.5
+ * @since 0.1.0
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
   var self = this;
@@ -124,20 +124,25 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
       log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
       self._trigger('dataChannelState', dc.readyState, peerId);
     }, self.DATA_CHANNEL_STATE.OPEN);
+  }
 
+  if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
+    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
+    self._trigger('dataChannelState', dc.readyState, peerId);
   } else {
-    if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+    dc.onopen = function () {
       log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
       log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
       self._trigger('dataChannelState', dc.readyState, peerId);
-    } else {
-      dc.onopen = function () {
-        log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
-        log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-        self._trigger('dataChannelState', dc.readyState, peerId);
-      };
-    }
+    };
   }
+
+  dc.onopen = function () {
+    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
+    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
+    self._trigger('dataChannelState', dc.readyState, peerId);
+  };
 
   dc.onerror = function(error) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], error);
@@ -190,7 +195,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
 };
 
 /**
- * Sends Message using the datachannel.
+ * Sends data to the datachannel.
  * @method _sendDataChannelMessage
  * @param {String} peerId PeerId of the peer's datachannel to send data.
  * @param {JSON} data The data to send.
@@ -893,19 +898,17 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 };
 
 /**
- * Start a public or private data transfer with peer(s).
- * - Note that peers have the option to accept or reject the receiving data.
+ * Start a data transfer with peer(s).
+ * - Note that peers have the option to download or reject receiving the blob data.
  * - This method is ideal for sending files.
- * - To send a private file to a peer, input the peer Id after the
+ * - To send a private file to a peer, input the peerId after the
  *   data information.
- * - The data transferred is encrypted.
  * @method sendBlobData
- * @param {Object} [data] The data to be sent over. Data has to be a blob.
- * @param {JSON} [dataInfo] Information required about the data transferred
- * @param {String} [dataInfo.name] Data name (name of the file for example).
- * @param {Integer} [dataInfo.timeout=60] The time (in second) before the transfer
- * request is cancelled if not answered.
- * @param {Integer} [dataInfo.size] The data size (in octet)
+ * @param {Object} data The data to be sent over. Data has to be a blob.
+ * @param {JSON} dataInfo The data information.
+ * @param {String} dataInfo.name Data name.
+ * @param {Integer} [dataInfo.timeout=60] The timeout to wait for packets.
+ * @param {Integer} dataInfo.size The data size
  * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
  * @example
@@ -980,10 +983,12 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
 };
 
 /**
- * User's response to accept or reject data transfer request from another user.
+ * User's response to accept or reject data transfer request.
  * @method respondBlobRequest
- * @param {String} [peerId] Id of the peer who sent the request.
- * @param {Boolean} [accept=false] Accept answer.
+ * @param {String} peerId PeerId of the peer that is expected to receive
+ *   the request response.
+ * @param {Boolean} [accept=false] The response of the user to accept the data
+ *   transfer or not.
  * @trigger dataTransferState
  * @since 0.5.0
  * @for Skylink
@@ -1021,7 +1026,7 @@ Skylink.prototype.respondBlobRequest = function (peerId, accept) {
  * @method cancelBlobTransfer
  * @param {String} peerId PeerId of the peer that is expected to receive
  *   the request response.
- * @param {String} transferType Transfer type [Rel: Skylink.DATA_TRANSFER_TYPE]
+ * @param {String} transferType Transfer type [Rel: DATA_TRANSFER_TYPE]
  * @trigger dataTransferState
  * @since 0.5.0
  * @for Skylink
@@ -1053,10 +1058,8 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
 };
 
 /**
- * Send a message using the DataChannel provided by Webrtc.
- * - Can choose between broadcasting to the room (public message) and send
- *   to a specific peer (private message)
- * - Content of the message is automatically encrypted during the transfer
+ * Broadcasts to all P2P datachannel messages and sends to a
+ * peer only when targetPeerId is provided.
  * - This is ideal for sending strings or json objects lesser than 16KB
  *   [as noted in here](http://www.webrtc.org/chrome).
  * - For huge data, please check out function
@@ -1089,8 +1092,8 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     //If there is MCU then directs all messages to MCU
     var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
 
-    //send private P2P message       
-    log.log([targetPeerId, null, useChannel, 'Sending private P2P message to peer']);
+    //send private P2P messageâ€‚ â€‚ â€‚ â€‚
+â€‚ â€‚ log.log([targetPeerId, null, useChannel, 'Sending private P2P message to peer']);
     this._sendDataChannelMessage(useChannel, {
       type: this._DC_PROTOCOL_TYPE.MESSAGE,
       isPrivate: true,
@@ -1135,7 +1138,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     senderPeerId: this._user.sid
   }, this._user.sid, this._user.info, true);
 };
-
 Skylink.prototype._peerCandidatesQueue = [];
 
 /**
@@ -1738,12 +1740,11 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 };
 
 /**
- * If a connection exist with the specified peer connection it closes it and
- *  restart a fresh peer connection.
+ * Refreshes a peer connection.
  * - Please be noted that a peer connection will be refreshed automatically if
- *   user fails to establish a stable connection with peer initially.
+ *   user fails to establish a stable connection with peer.
  * @method refreshConnection
- * @param {String} [peerId] The Id of the peer whose connection you wish to refresh.
+ * @param {String} peerId The peerId of the peer whose connection you wish to refresh.
  * @triggers peerRestart
  * @example
  *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
@@ -1799,29 +1800,26 @@ Skylink.prototype._peerInformations = [];
 Skylink.prototype._user = null;
 
 /**
- * Update/Set the user custom data. This Data can be a simple string or a JSON data.
- * It is let to user choice to decide how this information must be handled.
- * The Skylink demos provided use this parameter as a string for displaying user name.
- * - Please note that the custom data would be totally overwritten.
- * - If you want to modify only some data, please call
+ * Updates the user custom data.
+ * - Please note that the custom data would be overrided so please call
  *   {{#crossLink "Skylink/getUserData:method"}}getUserData(){{/crossLink}}
  *   and then modify the information you want individually.
  * - {{#crossLink "Skylink/peerUpdated:event"}}peerUpdated{{/crossLink}}
- *   event fires only if <b>setUserData()</b> is called after
- *   joining a room.
+ *   only fires after <b>setUserData()</b> is fired.
+ *   after the user joins the room.
  * @method setUserData
  * @param {JSON|String} userData User custom data.
  * @example
  *   // Example 1: Intial way of setting data before user joins the room
  *   SkylinkDemo.setUserData({
  *     displayName: 'Bobby Rays',
- *     fbUserId: '1234'
+ *     fbUserId: 'blah'
  *   });
  *
  *  // Example 2: Way of setting data after user joins the room
  *   var userData = SkylinkDemo.getUserData();
  *   userData.displayName = 'New Name';
- *   userData.fbUserId = '1234';
+ *   userData.fbUserId = 'another Id';
  *   SkylinkDemo.setUserData(userData);
  * @trigger peerUpdated
  * @for Skylink
@@ -1860,8 +1858,6 @@ Skylink.prototype.setUserData = function(userData) {
 
 /**
  * Gets the user custom data.
- * See {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
- *   for more information
  * @method getUserData
  * @return {JSON|String} User custom data.
  * @example
@@ -1876,29 +1872,12 @@ Skylink.prototype.getUserData = function() {
 };
 
 /**
- * Gets the peer information (media settings,media status and personnal data set by the peer).
+ * Gets the peer information.
+ * - If input peerId is user's id or empty, <b>getPeerInfo()</b>
+ *   would return user's peer information.
  * @method getPeerInfo
- * @param {String} [peerId] Id of the peer retrieve we want to retrieve the information.
- * If no id is set, <b>getPeerInfo()</b> returns self peer information.
- * @return {JSON} Peer information:
- *   - settings {JSON}: User stream settings.
- *     - audio {Boolean|JSON}: User audio settings.
- *       - stereo {Boolean} : User has enabled stereo or not.
- *     - video {Boolean|JSON}: User video settings.
- *       - resolution {Boolean|JSON}: User video
- *     resolution set. [Rel: Skylink.VIDEO_RESOLUTION]
- *         - width {Integer}: User video resolution width.
- *         - height {Integer}:User video resolution height.
- *     - frameRate {Integer}: User video minimum
- *     frame rate.
- *   - mediaStatus {JSON}: User MediaStream(s) status.
- *     - audioMuted {Boolean}: Is user's audio muted.
- *     - videoMuted {Boolean}: Is user's vide muted.
- *   - userData {String|JSON}: User's custom data set.See
- *   {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
- *   for more information
- *
- * If peerId doesn't exist return 'null'.
+ * @param {String} peerId PeerId of the peer information to retrieve.
+ * @return {JSON} Peer information.
  * @example
  *   // Example 1: To get other peer's information
  *   var peerInfo = SkylinkDemo.getPeerInfo(peerId);
@@ -1913,7 +1892,6 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     this._peerInformations[peerId] :
     ((this._user) ? this._user.info : null);
 };
-
 Skylink.prototype.HANDSHAKE_PROGRESS = {
   ENTER: 'enter',
   WELCOME: 'welcome',
@@ -2252,34 +2230,27 @@ Skylink.prototype._selectedRoom = null;
 Skylink.prototype._roomLocked = false;
 
 /**
- * Once we have initiated Skylink object we can join a room. Calling this
- * function while you are already connected will disconnect you from the
- * current room and connect you to the new room.
- * - By joining a room you decide to give or not access rights for your video and audio source.
- * It is not possible to give higher rights once you already joined the room.
+ * User to join the room.
  * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
  *   getUserMedia(){{/crossLink}} first if you want to get
- *   MediaStream and join the room later.
- * - If <b>joinRoom()</b> parameters are empty, it uses
- *   any previous media or user data settings if possible (default
- *   values otherwise).
+ *   MediaStream and joining Room seperately.
+ * - If <b>joinRoom()</b> parameters is empty, it simply uses
+ *   any previous media or user data settings.
  * - If no room is specified, user would be joining the default room.
  * @method joinRoom
- * @param {String} [room=init.options.defaultRoom] Room name to join.
- * @param {JSON} [options] Media Constraints
- * @param {JSON|String} [options.userData] User custom data. See
- * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
- *   for more information
- * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
+ * @param {String} [room=init.options.defaultRoom] Room to join user in.
+ * @param {JSON} [options] Media Constraints.
+ * @param {JSON|String} [options.userData] User custom data.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
- * @param {Boolean|JSON} [options.video=false] Enable video stream.
+ * @param {Boolean|JSON} [options.video=false] This call requires video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
- *   The video stream resolution width (in px).
+ *   The video stream resolution width.
  * @param {Integer} [options.video.resolution.height]
- *   The video stream resolution height (in px).
+ *   The video stream resolution height.
  * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
@@ -2289,7 +2260,6 @@ Skylink.prototype._roomLocked = false;
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
- * @param {Function} [callback] The callback fired after peer joins the new room.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -2355,48 +2325,23 @@ Skylink.prototype._roomLocked = false;
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
+Skylink.prototype.joinRoom = function(room, mediaOptions) {
   var self = this;
-
   if (self._inRoom) {
     // check if room is provided
     var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
-
-    /*
-    - check selected room if it is the same
-    - removed because calling use case requires peer to be able to rejoin the same room
+    // check selected room if it is the same
     if (room === self._selectedRoom) {
       log.error([null, 'Socket', self._selectedRoom,
         'Unable to join room as user is currently in the room already']);
       return;
-    }*/
-
-    self.leaveRoom(function(){
-      if (typeof room === 'string') {
-        self._initSelectedRoom(room, function () {
-          self._waitForOpenChannel(mediaOptions, callback);
-        });
-      } else {
-        mediaOptions = room;
-        self._waitForOpenChannel(mediaOptions, callback);
-      }
-    });
-    return;
+    }
+    self.leaveRoom();
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
-  if (typeof room === 'string') {
-    self._initSelectedRoom(room, function () {
-      self._waitForOpenChannel(mediaOptions);
-    });
-  } else {
-    mediaOptions = room;
-    self._waitForOpenChannel(mediaOptions);
-  }
-
-
-  /*self._wait(function () {
+  self._wait(function () {
     if (typeof room === 'string') {
       self._initSelectedRoom(room, function () {
         self._waitForOpenChannel(mediaOptions);
@@ -2409,13 +2354,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     return (self._peerConnections.length === 0 &&
       self._channelOpen === false &&
       self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });*/
+  });
 };
 
 /**
  * Waits for any open channel or opens them.
  * @method _waitForOpenChannel
- * @private
  * @param {JSON} [options] Media Constraints.
  * @param {JSON|String} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
@@ -2423,6 +2367,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *    during call.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
  *   The video stream resolution width.
  * @param {Integer} [options.video.resolution.height]
@@ -2436,12 +2381,11 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
- * @param {Function} [callback] The callback fired after channel message was sent.
  * @trigger peerJoined, incomingStream
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -2462,7 +2406,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
-        }, callback);
+        });
       }, mediaOptions);
     }, function () {
       // open channel first if it's not opened
@@ -2489,34 +2433,24 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.leaveRoom = function(callback) {
-  var self = this;
-  if (!self._inRoom) {
+Skylink.prototype.leaveRoom = function() {
+  if (!this._inRoom) {
     log.warn('Unable to leave room as user is not in any room');
     return;
   }
-  for (var pc_index in self._peerConnections) {
-    if (self._peerConnections.hasOwnProperty(pc_index)) {
-      self._removePeer(pc_index);
+  for (var pc_index in this._peerConnections) {
+    if (this._peerConnections.hasOwnProperty(pc_index)) {
+      this._removePeer(pc_index);
     }
   }
-  self._inRoom = false;
-  self._closeChannel();
-  self._wait(function(){
-      if (typeof callback === 'function'){
-        callback();
-      }
-      log.log([null, 'Socket', self._selectedRoom, 'User left the room']);
-      self._trigger('peerLeft', self._user.sid, self._user.info, true);
-    }, function(){
-      return (self._peerConnections.length === 0 &&
-        self._channelOpen === false &&
-        self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });
+  this._inRoom = false;
+  this._closeChannel();
+  log.log([null, 'Socket', this._selectedRoom, 'User left the room']);
+  this._trigger('peerLeft', this._user.sid, this._user.info, true);
 };
 
 /**
- * Lock the room to prevent other users from joining the room.
+ * Lock the room to prevent peers from joining the room.
  * @method lockRoom
  * @example
  *   SkylinkDemo.lockRoom();
@@ -2537,7 +2471,7 @@ Skylink.prototype.lockRoom = function() {
 };
 
 /**
- * Unlock the room to allow other users to join the room.
+ * Unlock the room to allow peers to join the room.
  * @method unlockRoom
  * @example
  *   SkylinkDemo.unlockRoom();
@@ -2877,14 +2811,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
- * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info, callback) {
+Skylink.prototype._parseInfo = function(info) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -2934,22 +2867,18 @@ Skylink.prototype._parseInfo = function(info, callback) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
-  if (typeof callback === 'function'){
-    callback();
-  }
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
- * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function(callback) {
+Skylink.prototype._loadInfo = function() {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -3004,12 +2933,12 @@ Skylink.prototype._loadInfo = function(callback) {
       });
       return;
     }
-    self._parseInfo(response, callback);
+    self._parseInfo(response);
   });
 };
 
 /**
- * Initialize Skylink to retrieve new connection information based on options.
+ * Initialize Skylink to retrieve new connection information bbasd on options.
  * @method _initSelectedRoom
  * @param {String} [room=Skylink._defaultRoom] The room to connect to.
  * @param {Function} callback The callback fired once Skylink is re-initialized.
@@ -3054,7 +2983,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 /**
- * Initialize Skylink to retrieve connection information.
+ * Intiailize Skylink to retrieve connection information.
  * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
  *   information before joining the room or doing anything else.
  * - If you would like to set the start time and duration of the room,
@@ -3084,7 +3013,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   Please do so at your own risk as it might disrupt the connection.
  * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
- * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] Transport
+ * @param {Boolean} [options.TURNTransport=Skylink.TURN_TRANSPORT.ANY] Transport
  *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
  * @param {JSON} [options.credentials] Credentials options for
  *   setting a static meeting.
@@ -3095,11 +3024,16 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   to set the timing and duration of a meeting.
  * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
  *   audio if failed retrieving video stream.
- * @param {Boolean} [options.forceSSL=false] To force SSL connections to the API server
+ * @param {Boolean} [forceSSL=false] To force SSL connections to the API server
  *   and signaling server.
- * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
- *   and attempt a reconnection. The mininum value is 5000.
- * @param {Function} [callback] The callback fired after room is initiated.
+ * @param {Integer} [socketTimeout=1000] To set the timeout for socket to fail
+ *   and attempt a reconnection. The mininum value is 500.
+ * @param {Integer} [socketReconnectionAttempts=3] To set the reconnection
+ *   attempts when failure to connect to signaling server before aborting.
+ *   This throws a channelConnectionError.
+ *   - 0: Denotes no reconnection
+ *   - -1: Denotes a reconnection always. This is not recommended.
+ *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -3131,9 +3065,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @for Skylink
  * @required
  * @for Skylink
- * @since 0.5.5
+ * @since 0.5.3
  */
-Skylink.prototype.init = function(options, callback) {
+Skylink.prototype.init = function(options) {
   if (!options) {
     log.error('No API key provided');
     return;
@@ -3150,7 +3084,8 @@ Skylink.prototype.init = function(options, callback) {
   var TURNTransport = this.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
-  var socketTimeout = 0;
+  var socketTimeout = 1000;
+  var socketReconnectionAttempts = 3;
 
   log.log('Provided init options:', options);
 
@@ -3192,9 +3127,12 @@ Skylink.prototype.init = function(options, callback) {
     // set the socket timeout option
     socketTimeout = (typeof options.socketTimeout === 'number') ?
       options.socketTimeout : socketTimeout;
-    // set the socket timeout option to be above 5000
-    socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
-
+    // set the socket timeout option to be above 500
+    socketTimeout = (socketTimeout < 500) ? 500 : socketTimeout;
+    // set turn server option
+    socketReconnectionAttempts = (typeof
+      options.socketReconnectionAttempts === 'number') ?
+      options.socketReconnectionAttempts : socketReconnectionAttempts;
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
       // loop out for every transport option
@@ -3251,6 +3189,7 @@ Skylink.prototype.init = function(options, callback) {
   this._audioFallback = audioFallback;
   this._forceSSL = forceSSL;
   this._socketTimeout = socketTimeout;
+  this._socketReconnectionAttempts = socketReconnectionAttempts;
 
   log.log('Init configuration:', {
     serverUrl: this._path,
@@ -3267,14 +3206,14 @@ Skylink.prototype.init = function(options, callback) {
     TURNTransport: this._TURNTransport,
     audioFallback: this._audioFallback,
     forceSSL: this._forceSSL,
-    socketTimeout: this._socketTimeout
+    socketTimeout: this._socketTimeout,
+    socketReconnectionAttempts: this._socketReconnectionAttempts
   });
   // trigger the readystate
   this._readyState = 0;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo(callback);
+  this._loadInfo();
 };
-
 Skylink.prototype.LOG_LEVEL = {
   DEBUG: 4,
   LOG: 3,
@@ -3297,14 +3236,14 @@ var _LOG_KEY = 'SkylinkJS';
  * The log level of Skylink
  * @attribute _logLevel
  * @type String
- * @default Skylink.LOG_LEVEL.ERROR
+ * @default Skylink.LOG_LEVEL.DEBUG
  * @required
  * @global true
  * @private
  * @for Skylink
  * @since 0.5.4
  */
-var _logLevel = 0;
+var _logLevel = 4;
 
 /**
  * The current state if debugging mode is enabled.
@@ -3501,21 +3440,16 @@ var log = {
 };
 
 /**
- * Sets the debugging log level. A log level displays logs of his level and higher:
- * ERROR > WARN > INFO > LOG > DEBUG.
+ * Sets the debugging log level.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {String} logLevel The log level. [Rel: LOG_LEVEL]
  * @example
- *   //Display logs level: Error, warn, info, log and debug.
- *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
+ *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  if(logLevel === undefined) {
-    logLevel = Skylink.LOG_LEVEL.WARN;
-  }
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
@@ -3527,17 +3461,17 @@ Skylink.prototype.setLogLevel = function(logLevel) {
 };
 
 /**
- * Sets Skylink in debugging mode to display log stack trace.
+ * Sets Skylink in debugging mode to display stack trace.
  * - By default, debugging mode is turned off.
  * @method setDebugMode
- * @param {Boolean} [isDebugMode=false] Debugging mode value
+ * @param {Boolean} isDebugMode If debugging mode is turned on or off.
  * @example
  *   SkylinkDemo.setDebugMode(true);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  _enableDebugMode = !!isDebugMode;
+  _enableDebugMode = isDebugMode;
 };
 Skylink.prototype._EVENTS = {
   /**
@@ -3582,14 +3516,14 @@ Skylink.prototype._EVENTS = {
    * - The difference between this and <b>channelError</b> is that
    *   channelError triggers during the connection. This throws
    *   when connection failed to be established.
-   * @event socketError
+   * @event channelConnectionError
    * @param {String} errorCode The error code.
-   *   [Rel: Skylink.SOCKET_ERROR]
+   *   [Rel: Skylink.CHANNEL_CONNECTION_ERROR]
    * @param {Integer} reconnectionAttempt The reconnection attempt
    * @for Skylink
-   * @since 0.5.5
+   * @since 0.5.4
    */
-  socketError: [],
+  channelConnectionError: [],
 
   /**
    * Event fired whether the room is ready for use.
@@ -4027,8 +3961,6 @@ Skylink.prototype._trigger = function(eventName) {
         log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
       }
     }
-  }
-  if (once){
     // for events subscribed on once
     for (var j = 0; j < once.length; j++) {
       if (once[j][1].apply(this, args) === true) {
@@ -4046,14 +3978,13 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
-
   log.log([null, 'Event', eventName, 'Event is triggered']);
 };
 
 /**
  * To register a callback function to an event.
  * @method on
- * @param {String} eventName The Skylink event. See the event list to see what you can register.
+ * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the event is triggered.
  * @example
  *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
@@ -4075,12 +4006,10 @@ Skylink.prototype.on = function(eventName, callback) {
 /**
  * To register a callback function to an event that is fired once a condition is met.
  * @method once
- * @param {String} eventName The Skylink event. See the event list to see what you can register.
+ * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the event is triggered.
- * @param {Function} [condition]
- *   The provided condition that would trigger this event.
- *   If not provided, it will return true when the event is triggered.
- *   Return a true to fire the callback.
+ * @param {Function} condition The provided condition that would trigger this event.
+ *   Return a true to fire the event.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @example
@@ -4093,37 +4022,27 @@ Skylink.prototype.on = function(eventName, callback) {
  * @since 0.5.4
  */
 Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
-  if (typeof condition === 'boolean') {
-    fireAlways = condition;
-    condition = null;
-  }
-  fireAlways = (typeof fireAlways === 'undefined' ? false : fireAlways);
-  condition = (typeof condition !== 'function') ? function () {
-    return true;
-  } : condition;
-
-  if (typeof callback === 'function') {
-
+  if (typeof callback === 'function' && typeof condition === 'function') {
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     // prevent undefined error
     this._onceEvents[eventName] = this._onceEvents[eventName] || [];
     this._onceEvents[eventName].push([callback, condition, fireAlways]);
     log.log([null, 'Event', eventName, 'Event is subscribed on condition']);
   } else {
-    log.error([null, 'Event', eventName, 'Provided callback is not a function']);
+    log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
   }
 };
 
 /**
  * To unregister a callback function from an event.
  * @method off
- * @param {String} eventName The Skylink event. See the event list to see what you can unregister.
+ * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the event is triggered.
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
  *   SkylinkDemo.off('peerJoined', callback);
  * @for Skylink
- * @since 0.5.5
+ * @since 0.1.0
  */
 Skylink.prototype.off = function(eventName, callback) {
   if (callback === undefined) {
@@ -4146,7 +4065,7 @@ Skylink.prototype.off = function(eventName, callback) {
   // unsubscribe events fired only once
   if(once !== undefined) {
     for (var j = 0; j < once.length; j++) {
-      if (once[j][0] === callback) {
+      if (once[j][1] === callback) {
         log.log([null, 'Event', eventName, 'One-time Event is unsubscribed']);
         once.splice(j, 1);
         break;
@@ -4164,11 +4083,9 @@ Skylink.prototype.off = function(eventName, callback) {
  * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the condition is met.
  * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
- *   or it will just subscribe to an event and fire when condition is met.
- * @param {Function} [condition]
- *   The provided condition that would trigger this event.
- *   If not provided, it will return true when the event is triggered.
- *   Return a true to fire the callback.
+ *   or it will just subscribe to an event and fire when checkFirst is met.
+ * @param {Function} condition The provided condition that would trigger this event.
+ *   Return a true to fire the event.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @for Skylink
@@ -4177,11 +4094,8 @@ Skylink.prototype.off = function(eventName, callback) {
  * @since 0.5.5
  */
 Skylink.prototype._condition = function(eventName, callback, checkFirst, condition, fireAlways) {
-  if (typeof condition === 'boolean') {
-    fireAlways = condition;
-    condition = null;
-  }
-  if (typeof callback === 'function' && typeof checkFirst === 'function') {
+  if (typeof callback === 'function' && typeof checkFirst === 'function' &&
+    typeof condition === 'function') {
     if (checkFirst()) {
       log.log([null, 'Event', eventName, 'First condition is met. Firing callback']);
       callback();
@@ -4190,7 +4104,7 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
     log.log([null, 'Event', eventName, 'First condition is not met. Subscribing to event']);
     this.once(eventName, callback, condition, fireAlways);
   } else {
-    log.error([null, 'Event', eventName, 'Provided callback or checkFirst is not a function']);
+    log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
   }
 };
 
@@ -4232,7 +4146,7 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
     }
   }
 };
-Skylink.prototype.SOCKET_ERROR = {
+Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
   CONNECTION_ABORTED: -2,
@@ -4263,16 +4177,6 @@ Skylink.prototype._signalingServer = null;
 
 /**
  * The signaling server protocol to use.
- * <ul>
- * <li><code>https:</code>
- * <ul><li>Default port is <code>443</code>.</li>
- *     <li>Fallback port is <code>3443</code>.</li>
- * </ul></li>
- * <li><code>http:</code>
- * <ul><li>Default port is <code>80</code>.</li>
- *     <li>Fallback port is <code>3000</code>.</li>
- * </ul></li>
- * </ul>
  * @attribute _signalingServerProtocol
  * @type String
  * @private
@@ -4306,11 +4210,6 @@ Skylink.prototype._socket = null;
 
 /**
  * The socket connection timeout
- * <ul>
- * <li><code>0</code> Uses the default timeout from socket.io
- *     <code>20000</code>ms.</li>
- * <li><code>>0</code> Uses the user set timeout</li>
- * </ul>
  * @attribute _socketTimeout
  * @type Integer
  * @default 0
@@ -4334,18 +4233,40 @@ Skylink.prototype._socketTimeout = 0;
 Skylink.prototype._socketUseXDR = false;
 
 /**
+ * The socket connection reconnection attempts before it aborts.
+ * @attribute _socketReconnectionAttempts
+ * @type Integer
+ * @default 3
+ * @required
+ * @private
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._socketReconnectionAttempts = 3;
+
+/**
+ * The current state if the socket reconnection is aborted.
+ * @attribute _socketReconnectionAborted
+ * @type Boolean
+ * @required
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._socketReconnectionAborted = false;
+
+/**
  * Sends a message to the signaling server.
  * - Not to be confused with method
  *   {{#crossLink "Skylink/sendMessage:method"}}sendMessage(){{/crossLink}}
  *   that broadcasts messages. This is for sending socket messages.
  * @method _sendChannelMessage
  * @param {JSON} message
- * @param {Function} [callback] The callback fired after message was sent to signaling server.
  * @private
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._sendChannelMessage = function(message, callback) {
+Skylink.prototype._sendChannelMessage = function(message) {
   if (!this._channelOpen) {
     return;
   }
@@ -4353,76 +4274,82 @@ Skylink.prototype._sendChannelMessage = function(message, callback) {
   log.debug([(message.target ? message.target : 'server'), null, null,
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
   this._socket.send(messageString);
-  if (typeof callback === 'function'){
-    callback();
-  }
 };
 
 /**
  * Create the socket object to refresh connection.
  * @method _createSocket
- * @param {JSON} options The socket connection options.
- * @param {Boolean} [isReconnection=false] If the socket connection is a reconnection.
+ * @param {JSON} socketOptions The socket connection options.
  * @private
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._createSocket = function (options, isReconnection) {
+Skylink.prototype._createSocket = function (socketOptions) {
   var self = this;
-
+  // set the protocol
+  self._signalingServerProtocol = (self._forceSSL) ? 'https:' : self._signalingServerProtocol;
+  // set the port
+  self._signalingServerPort = (self._forceSSL) ? ((self._signalingServerPort !== 3443) ?
+    443 : 3443) : self._signalingServerPort;
   // create the sig url
   var ip_signaling = self._signalingServerProtocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
 
-  if (self._socketTimeout !== 0) {
-    options.timeout = self._socketTimeout;
-  }
-
   log.log('Opening channel with signaling server url:', {
     url: ip_signaling,
     useXDR: self._socketUseXDR
-  }, options);
-
-  self._socket = io.connect(ip_signaling, options);
+  });
 
   // first-time reconnection
-  if (isReconnection) {
+  if (socketOptions.init === true) {
+    delete socketOptions.init;
+    self._socket = io.connect(ip_signaling, socketOptions);
+
+    self._socket.on('connect_error', function (error) {
+      self._channelOpen = false;
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED, error);
+
+      if (socketOptions._socketReconnectionAttempts !== 0) {
+        // set to fallback port
+        self._signalingServerPort = (self._forceSSL || self._signalingServerProtocol === 'https') ?
+          3443 : 3000;
+        // set the socket.io to reconnect
+        socketOptions.reconnection = true;
+        // set the socket reconnection attempts
+        socketOptions.reconnectionAttempts = (self._socketReconnectionAttempts !== -1) ?
+          self._socketReconnectionAttempts : 0;
+        if (self._socketTimeout !== 0) {
+          socketOptions.reconnectionDelay = self._socketTimeout;
+        }
+        if (self._socket) {
+          self._socket.close();
+        }
+        self._socket = null;
+        self._createSocket(socketOptions);
+      }
+    });
+  } else {
+    // NOTE: should we throw a socket error when its a native WebSocket API error
+    // attempt to do a reconnection instead
+    self._socket = io.connect(ip_signaling, socketOptions);
+
     self._socket.on('reconnect_attempt', function (attempt) {
       self._channelOpen = false;
-      self._socketCurrentReconnectionAttempt = attempt;
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT, attempt);
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT, attempt);
     });
 
     self._socket.on('reconnect_error', function (error) {
       self._channelOpen = false;
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED, error);
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED, error);
     });
 
     self._socket.on('reconnect_failed', function (error) {
       self._channelOpen = false;
-      self._socketReconnectionAborted = true;
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, error);
-    });
-
-  } else {
-    self._socket.on('connect_error', function (error) {
-      self._channelOpen = false;
-      self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, error);
-
-      // set to fallback port
-      self._signalingServerPort = (self._signalingServerProtocol === 'https:') ?
-        3443 : 3000;
-      // set the socket.io to reconnect
-      options.reconnection = true;
-      // set the socket timeout
-      if (self._socketTimeout !== 0) {
-        options.reconnectionDelay = self._socketTimeout;
-      }
-      if (self._socket) {
-        self._socket.disconnect();
-        self._socket = null;
-      }
-      self._createSocket(options, true);
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED, error);
     });
   }
 
@@ -4439,7 +4366,6 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
   });
 
   self._socket.on('disconnect', function() {
-    self._channelOpen = false;
     self._trigger('channelClose');
     log.log([null, 'Socket', null, 'Channel closed']);
   });
@@ -4466,22 +4392,19 @@ Skylink.prototype._openChannel = function() {
       'as readyState is not ready or there is already an ongoing channel connection']);
     return;
   }
-
-  // set if forceSSL
-  if (self._forceSSL) {
-    self._signalingServerProtocol = 'https:';
-    self._signalingServerPort = 443;
-  } else {
-    self._signalingServerProtocol = window.location.protocol;
-    self._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
-  }
+  // set the protocol
+  self._signalingServerProtocol = (self._forceSSL) ? 'https:' : self._signalingServerProtocol;
+  // set the port
+  self._signalingServerPort = (self._forceSSL) ? 443 : self._signalingServerPort;
+  // create the sig url
 
   self._createSocket({
     forceNew: true,
     //'sync disconnect on unload' : true,
     reconnection: false,
-    transports: ['websocket']
-  }, false);
+    transports: ['websocket'],
+    init: true
+  });
 };
 
 /**
@@ -4489,19 +4412,16 @@ Skylink.prototype._openChannel = function() {
  * @method _closeChannel
  * @private
  * @for Skylink
- * @since 0.5.5
+ * @since 0.1.0
  */
 Skylink.prototype._closeChannel = function() {
   if (!this._channelOpen) {
     return;
   }
-  if (this._socket) {
-    this._socket.disconnect();
-    this._socket = null;
-  }
+  this._socket.disconnect();
+  this._socket = null;
   this._channelOpen = false;
   this._socketCurrentReconnectionAttempt = 0;
-  this._socketReconnectionAborted = false;
 };
 Skylink.prototype._SIG_MESSAGE_TYPE = {
   JOIN_ROOM: 'joinRoom',
@@ -5132,15 +5052,12 @@ Skylink.prototype._answerHandler = function(message) {
 };
 
 /**
- * Send a message to one or all peer(s) in room.
+ * Broadcast a message to all peers.
  * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
  *   in JSON, so refrain from using map arrays.
- * - Message is sent using websockets, we don't ensure protection of your message content
- * with this method. Prefer using
- * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
  * @param {String|JSON} message The message data to send.
- * @param {String}  targetPeerId PeerId of the peer to send a private
+ * @param {String} targetPeerId PeerId of the peer to send a private
  *   message data to.
  * @example
  *   // Example 1: Send to all peers
@@ -5639,11 +5556,11 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
 };
 
 /**
- * Gets the default video source and microphone source.
- * - This is an implemented function for Skylink.
- * - Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.
+ * Gets the default webcam and microphone.
+ * - Please do not be confused with the [MediaStreamConstraints](http://dev.w3.
  *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
- *   -mediastreamconstraints-members) specified in the w3c specs.
+ *   -mediastreamconstraints-members) specified in the original w3c specs.
+ * - This is an implemented function for Skylink.
  * @method getUserMedia
  * @param {JSON} [options]  MediaStream constraints.
  * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
@@ -5653,9 +5570,9 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
- *   The video stream resolution width (in px).
+ *   The video stream resolution width.
  * @param {Integer} [options.video.resolution.height]
- *   The video stream resolution height (in px).
+ *   The video stream resolution height.
  * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
  * @example
@@ -5742,12 +5659,9 @@ Skylink.prototype.getUserMedia = function(options) {
 
 /**
  * Enable microphone.
- * - Try to start the audio source.
- * - If no audio source was initialy set, this function has no effect.
- * - If you want to activate your audio but haven't initially enabled it you would need to
- *   reinitiate your connection with
+ * - If microphone is not enabled from the beginning, user would have to reinitate the
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   process and set the audio parameter to true.
+ *   process and ask for microphone again.
  * @method enableAudio
  * @trigger peerUpdated
  * @example
@@ -5761,8 +5675,7 @@ Skylink.prototype.enableAudio = function() {
 
 /**
  * Disable microphone.
- * - Try to disable the microphone.
- * - If no microphone was initially set, this function has no effect.
+ * - If microphone is not enabled from the beginning, there is no effect.
  * @method disableAudio
  * @example
  *   SkylinkDemo.disableAudio();
@@ -5776,12 +5689,9 @@ Skylink.prototype.disableAudio = function() {
 
 /**
  * Enable webcam video.
- * - Try to start the video source.
- * - If no video source was initialy set, this function has no effect.
- * - If you want to activate your video but haven't initially enabled it you would need to
- *   reinitiate your connection with
+ * - If webcam is not enabled from the beginning, user would have to reinitate the
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   process and set the video parameter to true.
+ *   process and ask for webcam again.
  * @method enableVideo
  * @example
  *   SkylinkDemo.enableVideo();
@@ -5794,9 +5704,11 @@ Skylink.prototype.enableVideo = function() {
 };
 
 /**
- * Disable video source.
- * - Try to disable the video source.
- * - If no video source was initially set, this function has no effect.
+ * Disable webcam video.
+ * - If webcam is not enabled from the beginning, there is no effect.
+ * - Note that in a Chrome-to-chrome session, each party's peer audio
+ *   may appear muted in when the audio is muted.
+ * - You may follow up the bug on [here](https://github.com/Temasys/SkylinkJS/issues/14).
  * @method disableVideo
  * @example
  *   SkylinkDemo.disableVideo();
