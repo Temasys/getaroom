@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-11-27 */
+/*! skylinkjs - v0.5.5 - 2014-11-28 */
 
 (function() {
 
@@ -1897,10 +1897,10 @@ Skylink.prototype.getUserData = function() {
  *   - mediaStatus {JSON}: User MediaStream(s) status.
  *     - audioMuted {Boolean}: Is user's audio muted.
  *     - videoMuted {Boolean}: Is user's vide muted.
- *   - userData {String|JSON}: User's custom data set.See
+ *   - userData {String|JSON}: User's custom data set.See 
  *   {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
  *   for more information
- *
+ * 
  * If peerId doesn't exist return 'null'.
  * @example
  *   // Example 1: To get other peer's information
@@ -2264,13 +2264,13 @@ Skylink.prototype._roomLocked = false;
  *   getUserMedia(){{/crossLink}} first if you want to get
  *   MediaStream and join the room later.
  * - If <b>joinRoom()</b> parameters are empty, it uses
- *   any previous media or user data settings if possible (default
+ *   any previous media or user data settings if possible (default 
  *   values otherwise).
  * - If no room is specified, user would be joining the default room.
  * @method joinRoom
  * @param {String} [room=init.options.defaultRoom] Room name to join.
  * @param {JSON} [options] Media Constraints
- * @param {JSON|String} [options.userData] User custom data. See
+ * @param {JSON|String} [options.userData] User custom data. See 
  * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
  *   for more information
  * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
@@ -2849,11 +2849,11 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   }
 
   xhr.onload = function () {
-    xhr.response = xhr.responseText || xhr.response;
-    xhr.status = xhr.status || 200;
+    var response = xhr.responseText || xhr.response;
+    var status = xhr.status || 200;
     log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters'],
-      JSON.parse(xhr.response || '{}'));
-    callback(xhr.status, JSON.parse(xhr.response || '{}'));
+      JSON.parse(response || '{}'));
+    callback(status, JSON.parse(response || '{}'));
   };
 
   xhr.onerror = function () {
@@ -3336,7 +3336,7 @@ var _enableDebugMode = false;
  * @required
  * @global true
  * @for Skylink
- * @since 0.5.4
+ * @since 0.5.5
  */
 var _logFn = function(logLevel, message, debugObject) {
   var levels = ['error', 'warn', 'info', 'log', 'debug'];
@@ -3360,17 +3360,24 @@ var _logFn = function(logLevel, message, debugObject) {
     } else {
       outputLog += ' - ' + message;
     }
-    // Fallback to log if failure
-    var enableDebugOutputLog = '++ ' + levels[logLevel].toUpperCase() + ' ++  ' + outputLog;
 
+    // Fallback to log if failure
     logLevel = (typeof console[levels[logLevel]] === 'undefined') ? 3 : logLevel;
 
     if (_enableDebugMode) {
       var logConsole = (typeof console.trace === 'undefined') ? logLevel[3] : 'trace';
       if (typeof debugObject !== 'undefined') {
-        console[logConsole](enableDebugOutputLog, debugObject);
+        console[levels[logLevel]](outputLog, debugObject);
+        // output if supported
+        if (typeof console.trace !== 'undefined') {
+          console.trace('');
+        }
       } else {
-        console[logConsole](enableDebugOutputLog);
+        console[levels[logLevel]](outputLog);
+        // output if supported
+        if (typeof console.trace !== 'undefined') {
+          console.trace('');
+        }
       }
     } else {
       if (typeof debugObject !== 'undefined') {
@@ -5747,7 +5754,7 @@ Skylink.prototype.getUserMedia = function(options) {
  * Enable microphone.
  * - Try to start the audio source.
  * - If no audio source was initialy set, this function has no effect.
- * - If you want to activate your audio but haven't initially enabled it you would need to
+ * - If you want to activate your audio but haven't initially enabled it you would need to 
  *   reinitiate your connection with
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
  *   process and set the audio parameter to true.
@@ -5781,7 +5788,7 @@ Skylink.prototype.disableAudio = function() {
  * Enable webcam video.
  * - Try to start the video source.
  * - If no video source was initialy set, this function has no effect.
- * - If you want to activate your video but haven't initially enabled it you would need to
+ * - If you want to activate your video but haven't initially enabled it you would need to 
  *   reinitiate your connection with
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
  *   process and set the video parameter to true.

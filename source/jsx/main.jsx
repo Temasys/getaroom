@@ -46,8 +46,8 @@ define([
             var self = this;
 
 
-            Skylink.setDebugMode(true);
-            Skylink.setLogLevel('debug');
+            //Skylink.setDebugMode(true);
+            //Skylink.setLogLevel('debug');
 
 
             Skylink.on('readyStateChange', function(state) {
@@ -173,7 +173,7 @@ define([
             });
 
             Skylink.on("systemAction", function(action, message, reason) {
-                if(action === skyway.SYSTEM_ACTION.ROOM_LOCKED) {
+                if(reason === skyway.SYSTEM_ACTION_REASON.ROOM_LOCKED) {
                     self.setState({
                         room: Utils.extend(self.state.room, {
                             status: Constants.RoomState.LOCKED,

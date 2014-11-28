@@ -47,7 +47,7 @@ define([
 
 
             //Skylink.setDebugMode(true);
-            Skylink.setLogLevel('debug');
+            //Skylink.setLogLevel('debug');
 
 
             Skylink.on('readyStateChange', function(state) {
@@ -173,7 +173,7 @@ define([
             });
 
             Skylink.on("systemAction", function(action, message, reason) {
-                if(reason === Skylink.SYSTEM_ACTION_REASON.ROOM_LOCKED) {
+                if(reason === skyway.SYSTEM_ACTION_REASON.ROOM_LOCKED) {
                     self.setState({
                         room: Utils.extend(self.state.room, {
                             status: Constants.RoomState.LOCKED,
@@ -234,8 +234,8 @@ define([
         },
         render: function() {
             return (
-                React.DOM.div(null,
-                    React.DOM.div( {onClick:this.handleShowControls},
+                React.DOM.div(null, 
+                    React.DOM.div( {onClick:this.handleShowControls}, 
                         UserAreas( {state:this.state} )
                     ),
                     Controls( {state:this.state} )
