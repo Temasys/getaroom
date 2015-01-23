@@ -16,7 +16,7 @@ require.config({
             'adapter.min',
         //skylink: 'libs/skylink',
         skylink: '//cdn.temasys.co.sg/skylink/skylinkjs/0.5.x/' +
-            '/skylink.min',
+            'skylink.min',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +
