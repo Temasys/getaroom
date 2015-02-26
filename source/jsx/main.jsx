@@ -71,11 +71,6 @@ define([
                             status: Constants.RoomState.CONNECTED
                         })
                     });
-
-                    Skylink.joinRoom({
-                        audio: true,
-                        video: true
-                    });
                 }
                 else if(state === -1) {
                     self.setState({
@@ -223,6 +218,11 @@ define([
                 roomServer: Configs.Skylink.roomServer,
                 apiKey: Configs.Skylink.apiKey,
                 defaultRoom: room
+            }, function() {
+                Skylink.joinRoom({
+                    audio: true,
+                    video: true
+                });
             });
         },
         handleShowControls: function(e) {
