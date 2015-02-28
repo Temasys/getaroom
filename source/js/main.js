@@ -47,7 +47,7 @@ define([
 
 
             //Skylink.setDebugMode(true);
-            //Skylink.setLogLevel('debug');
+            Skylink.setLogLevel('debug');
 
 
             Skylink.on('readyStateChange', function(state) {
