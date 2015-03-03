@@ -67,6 +67,13 @@ define([
                     </span>
                 );
             }
+            else if(this.props.user.error) {
+                res.push(
+                    <span className="userInfo">
+                        Stream could not be established
+                    </span>
+                );
+            }
             else if(this.props.user.stream === null) {
                 res.push(
                     <span className="userInfo">

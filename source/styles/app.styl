@@ -12,7 +12,7 @@ color3 = #ff688b
 body
     font-family 'Open Sans', Helvetica, Arial, sans-serif
     user-select none
-    background #fff
+    background #000
 
 body > a {
     position absolute
@@ -26,7 +26,7 @@ body > a {
     perspective-origin 50% 50%
     overflow hidden
 
-#app, #app > div, #app > div > div, #userareas, .userarea, #controls, #controls > div
+#app, #app > div, #app > div > div, #userareas, #controls, #controls > div
     position absolute
     top 0
     left 0
@@ -233,12 +233,16 @@ body > a {
 
     .userarea
         overflow hidden
+        position relative
+        width 25vw
+        height 25vh
+        display inline-block
 
         > div
             position absolute
-            width 100vw
-            height 100vh
-            margin 0
+            width 200%
+            height 200%
+            margin -20% -50%
             background #000
             transition all .5s ease-out
 
@@ -248,6 +252,52 @@ body > a {
 
             canvas + video
                 display none
+
+    &.split1, &.split2, &.split3
+        .userarea
+            width auto
+            height auto
+            position absolute
+            top 0
+            left 0
+            right 0
+            bottom 0
+
+            > div
+                width 100vw
+                height 100vh
+                margin 0
+
+    &.split4
+        .userarea
+            width auto
+            height auto
+            position absolute
+            top 0
+            left 0
+            right 0
+            bottom 0
+
+        .userarea:nth-child(1)
+            right 50%
+            bottom 50%
+
+        .userarea:nth-child(2)
+            left 50%
+            bottom 50%
+
+        .userarea:nth-child(3)
+            top 50%
+            right 50%
+
+        .userarea:nth-child(4)
+            top 50%
+            left 50%
+
+    &.split5, &.split6, &.split7, &.split8, &.split9
+        .userarea
+            width 33.33333vw
+            height 33.33333vh
 
     #us0
         transform rotateY(-180deg);
@@ -272,21 +322,25 @@ body > a {
                 left 50%
 
             .userarea > div
+                width 100vw
+                height 100vh
                 margin 0 -25vw
 
         &.split3
             .userarea:nth-child(1)
-                right 66.7%
+                right 66.66666%
 
             .userarea:nth-child(2)
-                left 33.3%
-                right 33.3%
+                left 33.33333%
+                right 33.33333%
 
             .userarea:nth-child(3)
-                left 66.7%
+                left 66.66666%
 
             .userarea > div
-                margin 0 -33.3vw
+                width 100vw
+                height 100vh
+                margin 0 -33.33333vw
 
 @media all and (max-width: 679px)
     #userareas
@@ -305,17 +359,17 @@ body > a {
 
         &.split3
             .userarea:nth-child(1)
-                bottom 66.7%
+                bottom 66.66666%
 
             .userarea:nth-child(2)
-                top 33.3%
-                bottom 33.3%
+                top 33.33333%
+                bottom 33.33333%
 
             .userarea:nth-child(3)
-                top 66.7%
+                top 66.66666%
 
             .userarea > div
-                margin -33.3vh 0
+                margin -33.33333vh 0
 
             .userInfo
                 top 40%

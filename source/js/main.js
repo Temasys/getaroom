@@ -29,7 +29,8 @@ define([
                         name: 'Yourself',
                         stream: null,
                         audioMute: false,
-                        videoMute: false
+                        videoMute: false,
+                        error: null
                     }
                 ],
                 state: Constants.AppState.FOYER,
@@ -42,7 +43,12 @@ define([
             };
         },
         componentWillMount: function() {
-           var self = this;
+            var self = this;
+
+
+            //Skylink.setDebugMode(true);
+            //Skylink.setLogLevel('debug');
+
 
             Skylink.on('readyStateChange', function(state) {
                 if(state === 0) {
@@ -102,6 +108,7 @@ define([
                         id: peerId,
                         name: 'Guest ' + peerId,
                         stream: null,
+                        error: null,
                         videoMute: peerInfo.mediaStatus.videoMuted,
                         audioMute: peerInfo.mediaStatus.audioMuted
                     })
@@ -121,7 +128,7 @@ define([
                 if(self.state.users.length === Configs.maxUsers) {
                     Skylink.lockRoom();
                 }
-                else if(state.users.length === 2) {
+                else if(self.state.users.length >= 2) {
                     state.controls = false;
                 }
 
@@ -155,8 +162,6 @@ define([
                 }
 
                 self.setState(state);
-
-                clearInterval(self._intervals[peerId]);
             });
 
             Skylink.on("roomLock", function(isLocked) {
@@ -167,6 +172,17 @@ define([
                 });
             });
 
+            Skylink.on("systemAction", function(action, message, reason) {
+                if(reason === Skylink.SYSTEM_ACTION_REASON.ROOM_LOCKED) {
+                    self.setState({
+                        room: Utils.extend(self.state.room, {
+                            status: Constants.RoomState.LOCKED,
+                            isLocked: true
+                        }),
+                        controls: true
+                    });
+                }
+            });
         },
         componentDidMount: function() {
             Router.configure({
@@ -204,6 +220,7 @@ define([
             });
 
             Skylink.init({
+                roomServer: Configs.Skylink.roomServer,
                 apiKey: Configs.Skylink.apiKey,
                 defaultRoom: room
             });

@@ -67,6 +67,13 @@ define([
                     )
                 );
             }
+            else if(this.props.user.error) {
+                res.push(
+                    React.DOM.span( {className:"userInfo"}, 
+                        "Stream could not be established"
+                    )
+                );
+            }
             else if(this.props.user.stream === null) {
                 res.push(
                     React.DOM.span( {className:"userInfo"}, 

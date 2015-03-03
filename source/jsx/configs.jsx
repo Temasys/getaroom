@@ -11,7 +11,7 @@ define([], function() {
         Skylink: {
             apiKey: '4fbc45b1-a458-4396-aeb6-579d58ffda1b'
         },
-        maxUsers: 3
+        maxUsers: 4
     };
 
     var dev = {
@@ -19,7 +19,7 @@ define([], function() {
         Skylink: {
             apiKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf'
         },
-        maxUsers: 3
+        maxUsers: 4
     };
 
     var prod = {
@@ -27,7 +27,7 @@ define([], function() {
         Skylink: {
             apiKey: '7e31b061-71e6-4dd7-bd55-516579973930'
         },
-        maxUsers: 3
+        maxUsers: 4
     };
 
     return location.host === 'getaroom.io' ? prod : (
