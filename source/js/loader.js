@@ -12,7 +12,7 @@ require.config({
         socketio: '//cdn.temasys.com.sg/libraries/'
             + 'socket.io-client/1.0.6/socket.io',
         //adapter: 'libs/adapter',
-        adapter: '//cdn.temasys.com.sg/adapterjs/0.10.x/' +
+        adapter: '//cdn.temasys.com.sg/adapterjs/0.10.4/' +
             'adapter.min',
         //skylink: 'libs/skylink',
         skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.5.x/' +
