@@ -42,6 +42,20 @@ define([
                 Skylink[this.props.state.room.isLocked ? 'unlockRoom' : 'lockRoom']();
             }
         },
+        handleScreenshare: function() {
+            if(this.props.state.users.length > 1) {
+                var user = this.props.state.users.filter(function (user) {
+                    return user.id === 0;
+                })[0];
+
+                if(!this.props.state.room.screensharing) {
+                    Dispatcher.sharescreen(true);
+                }
+                else if(user.screensharing) {
+                    Dispatcher.sharescreen(false);
+                }
+            }
+        },
         handleLinkClick: function (e) {
             e.target.setSelectionRange(0, e.target.value.length);
         },
@@ -106,6 +120,10 @@ define([
 
                     res.push(
                         <button id="audioMute" onClick={this.handleAudioMute} className={user.audioMute ? 'muted' : ''} title="Mute/Unmute Audio"></button>
+                        );
+
+                    res.push(
+                        <button id="screenshare" onClick={this.handleScreenshare} className={user.screensharing ? 'on' : (this.props.state.room.screensharing ? 'muted' : '')} title="Share your screen"></button>
                         );
                 }
             }

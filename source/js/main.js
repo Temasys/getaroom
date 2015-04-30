@@ -134,21 +134,30 @@ define([
             });
 
             Skylink.on('peerUpdated', function(peerId, peerInfo, isSelf) {
-                self.setState({
+                var state = {
                     users: self.state.users.map(function (user) {
                         if((isSelf && user.id === 0) || user.id === peerId) {
                             user.audioMute = peerInfo.mediaStatus.audioMuted;
                             user.videoMute = peerInfo.mediaStatus.videoMuted;
+                            user.screensharing = peerInfo.userData.screensharing;
                         }
                         return user;
                     })
-                });
+                };
+
+                if(self.state.users[0].screensharing === false) {
+                    state.room = Utils.extend(self.state.room, {
+                        screensharing: peerInfo.userData.screensharing
+                    });
+                }
+
+                self.setState(state);
             });
 
             Skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
                 var state = {
                     users: self.state.users.filter(function(user) {
-                            return user.id !== peerId
+                            return user.id !== peerId;
                         })
                 };
 
@@ -184,6 +193,25 @@ define([
                     });
                 }
             });
+
+            Dispatcher = {
+                sharescreen: function (enable) {
+                    self.setState({
+                        users: self.state.users.map(function (user) {
+                            if(user.id === 0) {
+                                user.screensharing = enable;
+                            }
+                            return user;
+                        }),
+                        room: Utils.extend(self.state.room, {
+                            screensharing: enable
+                        })
+                    });
+                    Skylink.setUserData({
+                        screensharing: enable
+                    })
+                }
+            }
         },
         componentDidMount: function() {
             Router.configure({

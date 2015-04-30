@@ -7,6 +7,7 @@
 color1 = #1abc9c
 color2 = #3498db
 color3 = #ff688b
+color4 = rgba(191,255,0,0.2)
 
 
 body
@@ -55,10 +56,10 @@ body > a {
 
     button
         position relative
-        margin 20px 25px
-        width 100px
-        height 100px
-        border-radius 50px
+        margin 20px
+        width 70px
+        height 70px
+        border-radius 35px
         background-color rgba(255,255,255,.08)
         outline 0
         text-align center
@@ -71,14 +72,21 @@ body > a {
             background-image url(/img/camera.svg)
             background-repeat no-repeat
             background-position 50% 50%
-            background-size 20% 20%
+            background-size 30% 30%
 
         &#audioMute
             font-face Helvetica Neue, Helvetica, Arial, sans-serif
             background-image url(/img/microphone.svg)
             background-repeat no-repeat
             background-position 50% 50%
-            background-size 30% 30%
+            background-size 40% 40%
+
+        &#screenshare
+            font-face Helvetica Neue, Helvetica, Arial, sans-serif
+            background-image url(/img/screen.svg)
+            background-repeat no-repeat
+            background-position 50% 50%
+            background-size 50% 50%
 
         &#roomLock
             float right
@@ -87,7 +95,7 @@ body > a {
             background-image url(/img/lock.svg)
             background-repeat no-repeat
             background-position 50% 50%
-            background-size 30% 30%
+            background-size 40% 40%
 
         &.muted:before
             content ""
@@ -119,6 +127,15 @@ body > a {
 
         &:active
             background-color rgba(200,200,200,.3)
+
+        &.on
+            background-color color4
+
+            &:hover
+                background-color lighten(color4, 10%)
+
+            &:active
+                background-color darken(color4, 20%)
 
     button.mainControl
         width 392px
