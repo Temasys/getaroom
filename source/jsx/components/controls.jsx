@@ -43,17 +43,15 @@ define([
             }
         },
         handleScreenshare: function() {
-            if(this.props.state.users.length > 1) {
-                var user = this.props.state.users.filter(function (user) {
-                    return user.id === 0;
-                })[0];
+            var user = this.props.state.users.filter(function (user) {
+                return user.id === 0;
+            })[0];
 
-                if(!this.props.state.room.screensharing) {
-                    Dispatcher.sharescreen(true);
-                }
-                else if(user.screensharing) {
-                    Dispatcher.sharescreen(false);
-                }
+            if(!this.props.state.room.screensharing) {
+                Dispatcher.sharescreen(true);
+            }
+            else if(user.screensharing) {
+                Dispatcher.sharescreen(false);
             }
         },
         handleLinkClick: function (e) {
@@ -111,15 +109,15 @@ define([
 
                 if(this.props.state.room.status === Constants.RoomState.CONNECTED && user.stream != null) {
                     res.push(
-                        <button id="roomLock" onClick={this.handleRoomLock} className={this.props.state.room.isLocked ? 'muted' : ''} title="Lock/Unlock Room"></button>
+                        <button id="roomLock" onClick={this.handleRoomLock} className={this.props.state.room.isLocked ? '' : 'on'} title="Lock/Unlock Room"></button>
                         );
 
                     res.push(
-                        <button id="videoMute" onClick={this.handleVideoMute} className={user.videoMute ? 'muted' : ''} title="Mute/Unmute Video"></button>
+                        <button id="videoMute" onClick={this.handleVideoMute} className={user.videoMute ? '' : 'on'} title="Mute/Unmute Video"></button>
                         );
 
                     res.push(
-                        <button id="audioMute" onClick={this.handleAudioMute} className={user.audioMute ? 'muted' : ''} title="Mute/Unmute Audio"></button>
+                        <button id="audioMute" onClick={this.handleAudioMute} className={user.audioMute ? '' : 'on'} title="Mute/Unmute Audio"></button>
                         );
 
                     res.push(
