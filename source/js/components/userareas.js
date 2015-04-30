@@ -18,7 +18,7 @@ define([
                  React.DOM.div( {id:"noUser"})
 
             return (
-                React.DOM.section( {id:"userareas", className:'split' + this.props.state.users.length}, 
+                React.DOM.section( {id:"userareas", className:this.props.state.room.screensharing ? 'screensharing' : 'split' + this.props.state.users.length}, 
                     showList
                 )
                 )
@@ -29,7 +29,7 @@ define([
         render: function() {
             var userareas = this.props.users.map(function(user) {
                     return (
-                        React.DOM.div( {className:"userarea"}, 
+                        React.DOM.div( {className:'userarea' + (user.screensharing ? ' screensharing' : '')}, 
                             UserArea( {user:user} )
                         )
                         );

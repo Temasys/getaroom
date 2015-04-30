@@ -1,27 +1,27 @@
 {
   "name": "getaroomio",
   "description": "FREE and hassle free audio/video real-time chat for desktop and mobile.",
-  "version": "0.2.0",
-  "homepage": "http://github.com/serrynaimo/getaroom",
+  "version": "0.3.0",
+  "homepage": "http://github.com/Temasys/getaroom",
   "author": {
     "name": "Thomas Gorissen",
     "email": "mail@serrynaimo.com"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com/serrynaimo/getaroom.git"
+    "url": "git@github.com/Temasys/getaroom.git"
   },
   "licenses": [
     {
       "type": "All rights reserved",
-      "url": "http://github.com/serrynaimo/getaroom"
+      "url": "http://github.com/Temasys/getaroom"
     }
   ],
   "scripts": {
     "start": "grunt dev"
   },
   "dependencies": {
-    "SkylinkJS": "git://github.com/Temasys/SkylinkJS.git"
+    "SkylinkJS": "^0.5.9"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

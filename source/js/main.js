@@ -30,7 +30,8 @@ define([
                         stream: null,
                         audioMute: false,
                         videoMute: false,
-                        error: null
+                        error: null,
+                        screensharing: false
                     }
                 ],
                 state: Constants.AppState.FOYER,
@@ -38,6 +39,7 @@ define([
                 room: {
                     id: '',
                     isLocked: false,
+                    screensharing: false,
                     status: Constants.RoomState.IDLE
                 }
             };
