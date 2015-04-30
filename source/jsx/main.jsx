@@ -106,6 +106,7 @@ define([
                         name: 'Guest ' + peerId,
                         stream: null,
                         error: null,
+                        screensharing: false,
                         videoMute: peerInfo.mediaStatus.videoMuted,
                         audioMute: peerInfo.mediaStatus.audioMuted
                     })
@@ -156,6 +157,9 @@ define([
                 }
                 else if(state.users.length === 1) {
                     state.controls = true;
+                    state.room = Utils.extend(self.state.room, {
+                        screensharing: false
+                    });
                 }
 
                 self.setState(state);
