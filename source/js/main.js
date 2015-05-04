@@ -86,7 +86,8 @@ define([
             Skylink.on("channelError", function(error) {
                 self.setState({
                     room: Utils.extend(self.state.room, {
-                        status: Constants.RoomState.IDLE
+                        status: Constants.RoomState.IDLE,
+                        screensharing: false
                     }),
                     state: Constants.AppState.FOYER,
                     controls: true
@@ -166,6 +167,12 @@ define([
                 }
                 else if(state.users.length === 1) {
                     state.controls = true;
+
+                    if(!self.state.users[0].screensharing) {
+                        state.room = Utils.extend(self.state.room, {
+                            screensharing: false
+                        });
+                    }
                 }
 
                 self.setState(state);
@@ -224,7 +231,8 @@ define([
             this.setState({
                 state: Constants.AppState.FOYER,
                 room: Utils.extend(this.state.room, {
-                    status: Constants.RoomState.IDLE
+                    status: Constants.RoomState.IDLE,
+                    screensharing: false
                 }),
                 controls: true
             });
@@ -240,7 +248,8 @@ define([
                 state: Constants.AppState.IN_ROOM,
                 room: Utils.extend(this.state.room, {
                     id: room,
-                    status: Constants.RoomState.IDLE
+                    status: Constants.RoomState.IDLE,
+                    screensharing: false
                 }),
                 controls: true
             });

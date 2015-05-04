@@ -58,7 +58,7 @@ define([
             e.target.setSelectionRange(0, e.target.value.length);
         },
         handleClose: function(e) {
-            e.target.parentElement.parentElement.parentElement.children[0].click()
+            e.target.parentElement.parentElement.parentElement.children[0].click();
         },
         render: function() {
             var res = [];
