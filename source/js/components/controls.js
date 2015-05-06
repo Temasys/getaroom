@@ -48,6 +48,12 @@ define([
             })[0];
 
             if(!this.props.state.room.screensharing) {
+
+                Skylink.getUserMedia({
+                    audio: true,
+                    video: true,
+                }, null, true);
+
                 Dispatcher.sharescreen(true);
             }
             else if(user.screensharing) {
