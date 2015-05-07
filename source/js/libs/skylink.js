@@ -7395,6 +7395,18 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @for Skylink
  * @since 0.5.6
  */
+
+window.addEventListener('message', function (event) {
+    if (event.data == 'rtcmulticonnection-extension-loaded') {
+        console.log('loaded extension');
+    }
+
+    if (event.data.sourceId) {
+      console.log('got sourceId ' + event.data.sourceId);
+      window.chromeCallback(event.data.sourceId);
+    }
+});
+
 Skylink.prototype.getUserMedia = function(options,callback,screenshare) {
   var self = this;
 
@@ -7416,12 +7428,49 @@ Skylink.prototype.getUserMedia = function(options,callback,screenshare) {
   self._parseMediaStreamSettings(options);
 
   if(screenshare) {
-    self._getUserMediaSettings.video.optional = [{
-        sourceId: 'Screensharing'
-    }];
     self._getUserMediaSettings.audio = false;
+
+    if(webrtcDetectedBrowser === 'chrome') {
+
+      window.chromeCallback = function(sourceId) {
+        self._getUserMediaSettings.video = {
+          mandatory: {
+            chromeMediaSource: 'desktop',
+            maxWidth: window.screen.width > 1920 ? window.screen.width : 1920,
+            maxHeight: window.screen.height > 1080 ? window.screen.height : 1080
+          },
+          optional: []
+        };
+
+        if (sourceId) {
+          self._getUserMediaSettings.video.mandatory.chromeMediaSourceId = sourceId;
+        }
+
+        self._getUserMedia(self, options);
+      };
+
+      window.postMessage('get-sourceId', '*');
+      return;
+    }
+    else if(webrtcDetectedBrowser === 'firefox') {
+      self._getUserMediaSettings.video = {
+          mozMediaSource: 'window',
+          mediaSource: 'window'
+      };
+    }
+    else if(AdapterJS.WebRTCPlugin.pluginState === 4) {
+      self._getUserMediaSettings.video.optional = [{
+          sourceId: 'Screensharing'
+      }];
+    }
   }
 
+  self._getUserMedia(self, options);
+
+};
+
+
+Skylink.prototype._getUserMedia = function(self, options) {
   // if audio and video is false, do not call getUserMedia
   if (!(options.audio === false && options.video === false)) {
     // clear previous mediastreams
@@ -7447,7 +7496,9 @@ Skylink.prototype.getUserMedia = function(options,callback,screenshare) {
   } else {
     log.warn([null, 'MediaStream', null, 'Not retrieving stream']);
   }
-};
+}
+
+
 
 /**
  * Resends a Local MediaStreams. This overrides all previous MediaStreams sent.

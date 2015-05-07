@@ -99,17 +99,25 @@ define([
                     return;
                 }
 
-                self.setState({
+                var state = {
                     users: self.state.users.concat({
                         id: peerId,
                         name: 'Guest ' + peerId,
                         stream: null,
                         error: null,
-                        screensharing: false,
+                        screensharing: peerInfo.userData.screensharing,
                         videoMute: peerInfo.mediaStatus.videoMuted,
                         audioMute: peerInfo.mediaStatus.audioMuted
                     })
-                });
+                };
+
+                if(peerInfo.userData.screensharing) {
+                    state.room = Utils.extend(self.state.room, {
+                        screensharing: peerInfo.userData.screensharing
+                    });
+                }
+
+                self.setState(state);
             });
 
             Skylink.on('incomingStream', function(peerId, stream, isSelf) {
