@@ -49,20 +49,12 @@ define([
 
             if(!this.props.state.room.screensharing) {
 
+                Dispatcher.sharescreen(true);
+
                 Skylink.sendStream({
                     audio: false,
                     video: true
-                }, function(error) {
-                    if(error) {
-                        Skylink.sendStream({
-                            audio: true,
-                            video: true
-                        });
-                    }
-                    else {
-                        Dispatcher.sharescreen(true);
-                    }
-                }, true);
+                }, null, true);
             }
             else if(user.screensharing) {
 
