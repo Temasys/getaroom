@@ -49,20 +49,28 @@ define([
 
             if(!this.props.state.room.screensharing) {
 
-                Skylink.getUserMedia({
+                Skylink.sendStream({
                     audio: false,
-                    video: true,
-                }, function() {
-                    Dispatcher.sharescreen(true);
+                    video: true
+                }, function(error) {
+                    if(error) {
+                        Skylink.sendStream({
+                            audio: true,
+                            video: true
+                        });
+                    }
+                    else {
+                        Dispatcher.sharescreen(true);
+                    }
                 }, true);
             }
             else if(user.screensharing) {
 
-                Skylink.getUserMedia({
+                Dispatcher.sharescreen(false);
+
+                Skylink.sendStream({
                     audio: true,
                     video: true,
-                }, function() {
-                    Dispatcher.sharescreen(false);
                 });
             }
         },

@@ -7244,7 +7244,7 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
+Skylink.prototype._waitForLocalMediaStream = function(callback, options, screenshare) {
   var self = this;
   options = options || {};
 
@@ -7275,7 +7275,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
     self.getUserMedia({
       audio: options.audio,
       video: options.video
-    });
+    }, null, screenshare);
   }
 
   // clear previous mediastreams
@@ -7397,13 +7397,17 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  */
 
 window.addEventListener('message', function (event) {
+    if (event.data == 'PermissionDeniedError') {
+      window.chromeCallback(event.data);
+    }
+
     if (event.data == 'rtcmulticonnection-extension-loaded') {
         console.log('loaded extension');
     }
 
     if (event.data.sourceId) {
       console.log('got sourceId ' + event.data.sourceId);
-      window.chromeCallback(event.data.sourceId);
+      window.chromeCallback(null, event.data.sourceId);
     }
 });
 
@@ -7432,20 +7436,21 @@ Skylink.prototype.getUserMedia = function(options,callback,screenshare) {
 
     if(webrtcDetectedBrowser === 'chrome') {
 
-      window.chromeCallback = function(sourceId) {
-        self._getUserMediaSettings.video = {
-          mandatory: {
-            chromeMediaSource: 'desktop',
-            maxWidth: window.screen.width > 1920 ? window.screen.width : 1920,
-            maxHeight: window.screen.height > 1080 ? window.screen.height : 1080
-          },
-          optional: []
-        };
+      window.chromeCallback = function(error, sourceId) {
+        if(!error) {
+          self._getUserMediaSettings.video = {
+            mandatory: {
+              chromeMediaSource: 'desktop',
+              maxWidth: window.screen.width > 1920 ? window.screen.width : 1920,
+              maxHeight: window.screen.height > 1080 ? window.screen.height : 1080
+            },
+            optional: []
+          };
 
-        if (sourceId) {
-          self._getUserMediaSettings.video.mandatory.chromeMediaSourceId = sourceId;
+          if (sourceId) {
+            self._getUserMediaSettings.video.mandatory.chromeMediaSourceId = sourceId;
+          }
         }
-
         self._getUserMedia(self, callback, options);
       };
 
@@ -7559,7 +7564,7 @@ Skylink.prototype._getUserMedia = function(self, callback, options) {
  * @since 0.5.6
  */
 
-Skylink.prototype.sendStream = function(stream, callback) {
+Skylink.prototype.sendStream = function(stream, callback, screenshare) {
   var self = this;
   var restartCount = 0;
   var peerCount = Object.keys(self._peerConnections).length;
@@ -7649,7 +7654,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
       }
 
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-    }, stream);
+    }, stream, screenshare);
   }
 };
 
