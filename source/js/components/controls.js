@@ -52,18 +52,18 @@ define([
                 Skylink.getUserMedia({
                     audio: false,
                     video: true,
-                }, null, true);
-
-                Dispatcher.sharescreen(true);
+                }, function() {
+                    Dispatcher.sharescreen(true);
+                }, true);
             }
             else if(user.screensharing) {
 
                 Skylink.getUserMedia({
                     audio: true,
                     video: true,
+                }, function() {
+                    Dispatcher.sharescreen(false);
                 });
-
-                Dispatcher.sharescreen(false);
             }
         },
         handleLinkClick: function (e) {

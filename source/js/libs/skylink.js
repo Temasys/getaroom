@@ -7446,7 +7446,7 @@ Skylink.prototype.getUserMedia = function(options,callback,screenshare) {
           self._getUserMediaSettings.video.mandatory.chromeMediaSourceId = sourceId;
         }
 
-        self._getUserMedia(self, options);
+        self._getUserMedia(self, callback, options);
       };
 
       window.postMessage('get-sourceId', '*');
@@ -7465,12 +7465,12 @@ Skylink.prototype.getUserMedia = function(options,callback,screenshare) {
     }
   }
 
-  self._getUserMedia(self, options);
+  self._getUserMedia(self, callback, options);
 
 };
 
 
-Skylink.prototype._getUserMedia = function(self, options) {
+Skylink.prototype._getUserMedia = function(self, callback, options) {
   // if audio and video is false, do not call getUserMedia
   if (!(options.audio === false && options.video === false)) {
     // clear previous mediastreams
