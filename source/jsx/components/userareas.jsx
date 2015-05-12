@@ -18,7 +18,7 @@ define([
                  <div id='noUser'></div>
 
             return (
-                <section id="userareas" className={this.props.state.room.screensharing ? 'screensharing' : 'split' + this.props.state.users.length}>
+                <section id="userareas" className={'split' + this.props.state.users.length}>
                     {showList}
                 </section>
                 )
@@ -29,7 +29,7 @@ define([
         render: function() {
             var userareas = this.props.users.map(function(user) {
                     return (
-                        <div className={'userarea' + (user.screensharing ? ' screensharing' : '')}>
+                        <div className="userarea">
                             <UserArea user={user} />
                         </div>
                         );
