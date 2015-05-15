@@ -8465,8 +8465,13 @@ Skylink.prototype.shareScreen = function (callback) {
       if (self._mediaStream !== null && self._mediaStream &&
         window.webrtcDetectedBrowser !== 'firefox') {
         try {
-          self._mediaScreenClone = self._mediaStream.clone();
-          stream.addTrack(self._mediaScreenClone.getAudioTracks()[0]);
+          if (window.webrtcDetectedBrowser !== 'safari' &&
+            window.webrtcDetectedBrowser !== 'IE') {
+            self._mediaScreenClone = self._mediaStream.clone();
+            stream.addTrack(self._mediaScreenClone.getAudioTracks()[0]);
+          } else {
+            stream.addTrack(self._mediaStream.getAudioTracks()[0]);
+          }
           self._streamSettings.audio = true;
 
         } catch (error) {
@@ -8521,8 +8526,13 @@ Skylink.prototype.stopScreen = function () {
     if (this._mediaStream !== null && this._mediaStream &&
       window.webrtcDetectedBrowser !== 'firefox') {
       try {
-        this._mediaScreenClone.stop();
-        this._mediaScreenClone = null;
+        if (window.webrtcDetectedBrowser !== 'safari' &&
+            window.webrtcDetectedBrowser !== 'IE') {
+          this._mediaScreenClone.stop();
+          this._mediaScreenClone = null;
+        } else {
+          this._mediaScreen.removeTrack(this._mediaStream.getAudioTracks()[0]);
+        }
 
       } catch (error) {
         console.error('Failed removing track from screensharing stream', error);
