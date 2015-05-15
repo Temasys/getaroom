@@ -51,19 +51,13 @@ define([
 
                 Dispatcher.sharescreen(true);
 
-                Skylink.sendStream({
-                    audio: false,
-                    video: true
-                }, null, true);
+                Skylink.shareScreen();
             }
             else if(user.screensharing) {
 
                 Dispatcher.sharescreen(false);
 
-                Skylink.sendStream({
-                    audio: true,
-                    video: true,
-                });
+                Skylink.stopScreen();
             }
         },
         handleLinkClick: function (e) {
@@ -133,7 +127,7 @@ define([
                         );
 
                     res.push(
-                        <button id="screenshare" onClick={this.handleScreenshare} className={user.screensharing ? 'on' : (this.props.state.room.screensharing ? 'muted' : '')} title="Share your screen"></button>
+                        <button id="screenshare" onClick={this.handleScreenshare} className={user.screensharing ? 'on' : (this.props.state.room.screensharing || window.webrtcDetectedBrowser === 'opera' ? 'muted' : '')} title="Share your screen"></button>
                         );
                 }
             }

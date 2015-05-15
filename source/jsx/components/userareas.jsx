@@ -46,9 +46,29 @@ define([
     var UserArea = React.createClass({
         attachStream: function() {
             if(this.props.user.stream !== null) {
-                window.attachMediaStream(
-                    document.getElementById('us' + this.props.user.id),
+                var video = document.getElementById('us' + this.props.user.id);
+
+                if (window.webrtcDetectedBrowser === 'safari' || window.webrtcDetectedBrowser === 'IE') {
+                    console.info('is tag', video.tagName);
+                    if (video.tagName === 'object') {
+                        var replace = document.createElement('video');
+                        replace.id = 'us' + this.props.user.id;
+                        replace.autoplay = 'autoplay';
+                        replace.muted = this.props.user.id === 0 ? 'muted' : '';
+
+                        video.parentNode.replaceChild(replace, video);
+
+                        attachMediaStream(replace, this.props.user.stream);
+
+                    } else {
+                        window.attachMediaStream(video,
+                            this.props.user.stream);
+                    }
+
+                } else {
+                    window.attachMediaStream(video,
                         this.props.user.stream);
+                }
             }
         },
         componentDidMount: function() {
