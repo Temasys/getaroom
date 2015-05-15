@@ -7136,6 +7136,17 @@ Skylink.prototype._mediaStream = null;
 Skylink.prototype._mediaScreen = null;
 
 /**
+ * Stores the cloned local MediaStream for screensharing.
+ * @attribute _mediaScreenClone
+ * @type Object
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._mediaScreenClone = null;
+
+/**
  * The user stream settings.
  * @attribute _defaultStreamSettings
  * @type JSON
@@ -7768,6 +7779,24 @@ Skylink.prototype._muteLocalMediaStreams = function () {
   if (this._mediaScreen && this._mediaScreen !== null) {
     audioTracks = this._mediaScreen.getAudioTracks();
     videoTracks = this._mediaScreen.getVideoTracks();
+
+    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
+    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
+
+    // loop audio tracks
+    for (a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+    }
+    // loop video tracks
+    for (v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+    }
+  }
+
+  // mute screen clone
+  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
+    audioTracks = this._mediaScreenClone.getAudioTracks();
+    videoTracks = this._mediaScreenClone.getVideoTracks();
 
     hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
     hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
@@ -8436,7 +8465,8 @@ Skylink.prototype.shareScreen = function (callback) {
       if (self._mediaStream !== null && self._mediaStream &&
         window.webrtcDetectedBrowser !== 'firefox') {
         try {
-          stream.addTrack(self._mediaStream.getAudioTracks()[0]);
+          self._mediaScreenClone = self._mediaStream.clone();
+          stream.addTrack(self._mediaScreenClone.getAudioTracks()[0]);
           self._streamSettings.audio = true;
 
         } catch (error) {
@@ -8491,7 +8521,8 @@ Skylink.prototype.stopScreen = function () {
     if (this._mediaStream !== null && this._mediaStream &&
       window.webrtcDetectedBrowser !== 'firefox') {
       try {
-        this._mediaScreen.removeTrack(this._mediaStream.getAudioTracks()[0]);
+        this._mediaScreenClone.stop();
+        this._mediaScreenClone = null;
 
       } catch (error) {
         console.error('Failed removing track from screensharing stream', error);
@@ -8512,6 +8543,8 @@ Skylink.prototype.stopScreen = function () {
     this._mediaScreen = null;
 
     if (!endSession) {
+      this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
+        this.getPeerInfo(), false);
       this.refreshConnection();
     }
   }
