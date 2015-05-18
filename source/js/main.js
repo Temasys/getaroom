@@ -204,6 +204,8 @@ define([
                 }
             });
 
+            window.sw = Skylink;
+
             Dispatcher = {
                 sharescreen: function (enable) {
                     self.setState({

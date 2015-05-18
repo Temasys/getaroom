@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Fri May 15 2015 00:11:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Mon May 18 2015 13:41:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -624,7 +624,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   //If there is MCU then directs all messages to MCU
   if(this._hasMCU && targetPeerId !== 'MCU'){
-    //TODO It can be possible that even if we have a MCU in
+    //TODO It can be possible that even if we have a MCU in 
     //the room we are directly connected to the peer (hybrid/Threshold MCU)
     if(isPrivate){
       this._sendBlobDataToPeer(data, dataInfo, 'MCU', isPrivate);
@@ -1184,7 +1184,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       {
         log.error([peerId, null, null, 'Datachannel does not exist']);
       }
-    }
+    }    
   }
   if (noOfPeersSent > 0) {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED,
@@ -1882,14 +1882,12 @@ Skylink.prototype._peerConnections = [];
  * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
- * @param {Boolean} [isSS=false] The flag that indicates if sending
- *   stream is screensharing mode.
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
+Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
   var self = this;
   if (self._peerConnections[targetMid] && !restartConn) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
@@ -1902,7 +1900,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     enableDataChannel: self._enableDataChannel
   });
   if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
+    self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
   }
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   if (!receiveOnly) {
@@ -1929,15 +1927,13 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @param {Boolean} isConnectionRestart The flag that indicates whether the restarting action
  *   is caused by connectivity issues.
  * @param {Function} [callback] The callback once restart peer connection is completed.
- * @param {Boolean} [isSS=false] The flag that indicates if sending
- *   stream is screensharing mode.
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.8
  */
 /* jshint ignore:start */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, isSS) {
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback) {
 /* jshint ignore:end */
   var self = this;
 
@@ -1952,8 +1948,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   // get the value of receiveOnly
   var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
-  var isSS = !!isSS || (self._peerConnections[peerId] ?
-    !!self._peerConnections[peerId].isScreenSharing : false);
 
   // close the peer connection and remove the reference
   var iceConnectionStateClosed = false;
@@ -1999,7 +1993,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     // Set one second tiemout before sending the offer or the message gets received
     setTimeout(function () {
       self._peerConnections[peerId].receiveOnly = receiveOnly;
-      self._peerConnections[peerId].isScreenSharing = isSS;
 
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
@@ -2023,8 +2016,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           lastRestart: lastRestart,
           receiveOnly: receiveOnly,
           enableIceTrickle: self._enableIceTrickle,
-          enableDataChannel: self._enableDataChannel,
-          isScreenSharing: !!self._mediaScreen && self._mediaScreen !== null
+          enableDataChannel: self._enableDataChannel
         });
       }
 
@@ -2100,16 +2092,14 @@ Skylink.prototype._removePeer = function(peerId) {
  * Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.
  * All the peerconnection callbacks are set up here. This is a quite central piece.
  * @method _createPeerConnection
- * @param {String} targetMid The peer target id.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates if sending
- *   stream is screensharing mode.
+ * @param {String} targetMid
  * @return {Object} The created peer connection object.
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.1
  */
-Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
+Skylink.prototype._createPeerConnection = function(targetMid) {
   var pc, self = this;
   try {
     pc = new window.RTCPeerConnection(
@@ -2128,7 +2118,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.setOffer = '';
   pc.setAnswer = '';
   pc.hasStream = false;
-  pc.isScreenSharing = !!isScreenSharing;
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
@@ -2141,8 +2130,13 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     }
   };
   pc.onaddstream = function(event) {
+    if (pc.hasStream) {
+      pc.hasScreen = true;
+    }
+
     pc.hasStream = true;
-    self._onRemoteStreamAdded(targetMid, event, pc.isScreenSharing);
+
+    self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
@@ -2529,8 +2523,7 @@ Skylink.prototype._peerHSPriorities = {};
  */
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   var self = this;
-  // BUG: potential bug case
-  var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser, true);
+  var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
   log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var inputConstraints = self._room.connection.offerConstraints;
@@ -2594,8 +2587,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
         target: targetMid,
-        weight: -1,
-        isScreenSharing: !!self._mediaScreen && self._mediaScreen !== null
+        weight: -1
       });
     }
   }, inputConstraints);
@@ -3205,12 +3197,6 @@ Skylink.prototype.leaveRoom = function(callback) {
   self._inRoom = false;
   self._closeChannel();
   self.stopStream();
-
-  if (self._mediaScreen !== null && self._mediaScreen) {
-    self._mediaScreen.endSession = true;
-  }
-
-  self.stopScreen();
 
   self._wait(function(){
     if (typeof callback === 'function'){
@@ -6367,8 +6353,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
-    receiveOnly: self._receiveOnly,
-    isScreenSharing: !!self._mediaScreen && self._mediaScreen !== null
+    receiveOnly: self._receiveOnly
   });
 };
 
@@ -6407,8 +6392,6 @@ Skylink.prototype._inRoomHandler = function(message) {
  *   The flag to indicate that the Peer's video stream is muted or disabled.
  * @param {String|JSON} message.userInfo.userData
  *   The custom User data.
- * @param {Boolean} [message.isScreenSharing=false] The flag that indicates if sending
- *   stream is screensharing mode.
  * @param {String} message.type Protocol step: <code>"enter"</code>.
  * @trigger handshakeProgress, peerJoined
  * @private
@@ -6467,7 +6450,7 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ?
+    receiveOnly: self._peerConnections[targetMid] ? 
       !!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
@@ -6476,8 +6459,7 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
-    weight: weight,
-    isScreenSharing: !!self._mediaScreen && self._mediaScreen !== null
+    weight: weight
   });
 };
 
@@ -6521,8 +6503,6 @@ Skylink.prototype._enterHandler = function(message) {
  * @param {String|JSON} message.userInfo.userData
  *   The custom User data.
  * @param {String} message.target The peerId of the peer to respond the enter message to.
- * @param {Boolean} [message.isScreenSharing=false] The flag that indicates if sending
- *   stream is screensharing mode.
  * @param {String} message.type Protocol step: <code>"restart"</code>.
  * @trigger handshakeProgress, peerRestart
  * @private
@@ -6576,7 +6556,7 @@ Skylink.prototype._restartHandler = function(message){
       agent: message.agent,
       version: message.version,
       os: message.os || window.navigator.platform
-    }, true, true, message.receiveOnly, message.isScreenSharing);
+    }, true, true, message.receiveOnly);
 
     self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
 
@@ -6636,8 +6616,6 @@ Skylink.prototype._restartHandler = function(message){
  * <li><code>-2</code> Enforce create offer and re-creating of Peer connection to happen without
  *    any priority weight check.</li>
  * </ul>
- * @param {Boolean} [message.isScreenSharing=false] The flag that indicates if sending
- *   stream is screensharing mode.
  * @param {String} message.type Protocol step: <code>"welcome"</code>.
  * @trigger handshakeProgress, peerJoined
  * @private
@@ -7136,7 +7114,7 @@ Skylink.prototype._mediaStream = null;
 Skylink.prototype._mediaScreen = null;
 
 /**
- * Stores the cloned local MediaStream for screensharing.
+ * Stores the local MediaStream clone for audio screensharing.
  * @attribute _mediaScreenClone
  * @type Object
  * @private
@@ -7183,28 +7161,6 @@ Skylink.prototype._defaultStreamSettings = {
     data: 1638400
   }
 };
-
-/**
- * The stores the previous stream settings for screensharing mode.
- * @attribute _screenStreamSettings
- * @type JSON
- * @param {Boolean|JSON} [audio=false] This call requires audio
- * @param {Boolean} [audio.stereo] Enabled stereo or not
- * @param {Boolean|JSON} [video=false] This call requires video
- * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [video.resolution.width] Video width
- * @param {Number} [video.resolution.height] Video height
- * @param {Number} [video.frameRate] Maximum frameRate of Video
- * @param {String} [bandwidth] Bandwidth settings
- * @param {String} [bandwidth.audio] Audio Bandwidth
- * @param {String} [bandwidth.video] Video Bandwidth
- * @param {String} [bandwidth.data] Data Bandwidth.
- * @private
- * @component Stream
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._screenStreamSettings = null;
 
 /**
  * The user stream settings.
@@ -7753,11 +7709,12 @@ Skylink.prototype.stopStream = function () {
 Skylink.prototype._muteLocalMediaStreams = function () {
   var hasAudioTracks = false;
   var hasVideoTracks = false;
-  var a, v;
+
   var audioTracks;
   var videoTracks;
+  var a, v;
 
-  // Loop and enable tracks accordingly
+  // Loop and enable tracks accordingly (mediaStream)
   if (this._mediaStream && this._mediaStream !== null) {
     audioTracks = this._mediaStream.getAudioTracks();
     videoTracks = this._mediaStream.getVideoTracks();
@@ -7775,7 +7732,7 @@ Skylink.prototype._muteLocalMediaStreams = function () {
     }
   }
 
-  // mute screen
+  // Loop and enable tracks accordingly (mediaScreen)
   if (this._mediaScreen && this._mediaScreen !== null) {
     audioTracks = this._mediaScreen.getAudioTracks();
     videoTracks = this._mediaScreen.getVideoTracks();
@@ -7793,18 +7750,12 @@ Skylink.prototype._muteLocalMediaStreams = function () {
     }
   }
 
-  // mute screen clone
+  // Loop and enable tracks accordingly (mediaScreenClone)
   if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-    audioTracks = this._mediaScreenClone.getAudioTracks();
-    videoTracks = this._mediaScreenClone.getVideoTracks();
+    videoTracks = this._mediaScreen.getVideoTracks();
 
-    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
     hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
 
-    // loop audio tracks
-    for (a = 0; a < audioTracks.length; a++) {
-      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
-    }
     // loop video tracks
     for (v = 0; v < videoTracks.length; v++) {
       videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
@@ -8395,10 +8346,9 @@ Skylink.prototype.disableVideo = function() {
 
 /**
  * Shares the current screen with users.
+ * - If multi-stream is not supported, you will not be able to use it.
  * - You will require our own Temasys Skylink extension to do screensharing.
  *   Currently, opera does not support this feature.
- * - Not every screen sharing session has audio bundled. This depends on
- *   the browser's support.
  * @method shareScreen
  * @param {Function} [callback] The callback fired after media was successfully accessed.
  *   Default signature: function(error object, success object)
@@ -8423,72 +8373,50 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype.shareScreen = function (callback) {
   var self = this;
 
-  if (!self._inRoom) {
-    if (typeof callback === 'function') {
-      callback(new Error('User is not in any room!'), null);
-    }
-    return;
-  }
+  var constraints = {
+    video: {
+      mediaSource: 'window'
+    },
+    audio: false
+  };
 
-  if (window.webrtcDetectedBrowser === 'opera') {
-    if (typeof callback === 'function') {
-      callback(new Error('The current browser does not support screensharing'), null);
-    }
-    return;
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    constraints.audio = true;
   }
 
   try {
-    var constraints = {
-      video: {
-        mediaSource: 'window'
-      }
-    };
-
-    if (self._screenStreamSettings === null) {
-      self._screenStreamSettings = self._streamSettings;
-    }
-
-    self._streamSettings = {
-      video: true,
-      audio: false
-    };
-
-    if (window.webrtcDetectedBrowser === 'firefox') {
-      constraints.audio = true;
-      self._streamSettings.audio = true;
-    }
-
-
-
     window.getUserMedia(constraints, function (stream) {
-      // for non-firefox, addTrack
-      if (self._mediaStream !== null && self._mediaStream &&
-        window.webrtcDetectedBrowser !== 'firefox') {
-        try {
-          if (window.webrtcDetectedBrowser !== 'safari' &&
-            window.webrtcDetectedBrowser !== 'IE') {
-            self._mediaScreenClone = self._mediaStream.clone();
-            stream.addTrack(self._mediaScreenClone.getAudioTracks()[0]);
-          } else {
-            stream.addTrack(self._mediaStream.getAudioTracks()[0]);
+
+      if (window.webrtcDetectedBrowser !== 'firefox') {
+        window.getUserMedia({
+          audio: true
+        }, function (audioStream) {
+          try {
+            audioStream.addTrack(stream.getVideoTracks()[0]);
+            self._mediaScreenClone = stream;
+            self._onUserMediaSuccess(audioStream, true);
+
+          } catch (error) {
+            console.warn('This screensharing session will not support audio streaming', error);
+            self._onUserMediaSuccess(stream, true);
           }
-          self._streamSettings.audio = true;
 
-        } catch (error) {
+        }, function (error) {
           console.warn('This screensharing session will not support audio streaming', error);
-        }
 
+          self._onUserMediaSuccess(stream, true);
+        });
       } else {
-        console.warn('This screensharing session will not support audio streaming');
+        self._onUserMediaSuccess(stream, true);
       }
-
-      self._onUserMediaSuccess(stream, true);
 
       self._wait(function () {
-        self.refreshConnection();
-
-        if (typeof callback === 'function') {
-          callback(null, stream);
+        if (self._inRoom) {
+          self.refreshConnection();
+        } else {
+          if (typeof callback === 'function') {
+            callback(null, stream);
+          }
         }
       }, function () {
         return self._mediaScreen && self._mediaScreen !== null;
@@ -8522,35 +8450,17 @@ Skylink.prototype.stopScreen = function () {
 
   if (this._mediaScreen && this._mediaScreen !== null) {
     endSession = !!this._mediaScreen.endSession;
-
-    if (this._mediaStream !== null && this._mediaStream &&
-      window.webrtcDetectedBrowser !== 'firefox') {
-      try {
-        if (window.webrtcDetectedBrowser !== 'safari' &&
-            window.webrtcDetectedBrowser !== 'IE') {
-          this._mediaScreenClone.stop();
-          this._mediaScreenClone = null;
-        } else {
-          this._mediaScreen.removeTrack(this._mediaStream.getAudioTracks()[0]);
-        }
-
-      } catch (error) {
-        console.error('Failed removing track from screensharing stream', error);
-      }
-
-    }
-
     this._mediaScreen.stop();
   }
 
-  if (this._screenStreamSettings !== null) {
-    this._streamSettings = this._screenStreamSettings;
-    this._screenStreamSettings = null;
+  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
+    this._mediaScreenClone.stop();
   }
 
   if (this._mediaScreen && this._mediaScreen !== null) {
     this._trigger('mediaAccessStopped', true);
     this._mediaScreen = null;
+    this._mediaScreenClone = null;
 
     if (!endSession) {
       this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
