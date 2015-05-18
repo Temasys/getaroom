@@ -204,8 +204,6 @@ define([
                 }
             });
 
-            window.sw = Skylink;
-
             Dispatcher = {
                 sharescreen: function (enable) {
                     self.setState({
@@ -283,15 +281,15 @@ define([
         render: function() {
             return (
                 React.DOM.div(null, 
-                    React.DOM.div({onClick: this.handleShowControls}, 
-                        UserAreas({state: this.state})
-                    ), 
-                    Controls({state: this.state})
+                    React.DOM.div( {onClick:this.handleShowControls}, 
+                        UserAreas( {state:this.state} )
+                    ),
+                    Controls( {state:this.state} )
                 )
                 )
         }
     });
 
-    React.renderComponent(App(null),
+    React.renderComponent(App(null ),
         document.getElementById('app'));
 });
