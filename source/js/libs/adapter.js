@@ -1,9 +1,14 @@
-/*! adapterjs - v0.10.6 - 2015-04-01 */
+/*! adapterjs - v0.10.6 - 2015-05-27 */
 
 // Adapter's interface.
-var AdapterJS = AdapterJS || {};
+window.AdapterJS = window.AdapterJS || {};
 
-AdapterJS.options = {};
+// Browserify compatibility
+if(typeof exports !== 'undefined') {
+  module.exports = AdapterJS;
+}
+
+AdapterJS.options = AdapterJS.options || {};
 
 // uncomment to get virtual webcams
 // AdapterJS.options.getAllCams = true;
@@ -117,11 +122,6 @@ AdapterJS.WebRTCPlugin.WaitForPluginReady = null;
 
 // This methid will use an interval to wait for the plugin to be ready.
 AdapterJS.WebRTCPlugin.callWhenPluginReady = null;
-
-// This function will be called if the plugin is needed (browser different
-// from Chrome or Firefox), but the plugin is not installed.
-// Override it according to your application logic.
-AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb = null;
 
 // !!!! WARNING: DO NOT OVERRIDE THIS FUNCTION. !!!
 // This function will be called when plugin is ready. It sends necessary
@@ -261,6 +261,64 @@ AdapterJS.addEvent = function(elem, evnt, func) {
   } else { // No much to do
     elem[evnt] = func;
   }
+};
+
+AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink) {
+  // only inject once the page is ready
+  if (document.readyState !== 'complete') {
+    return;
+  }
+
+  var w = window;
+  var i = document.createElement('iframe');
+  i.style.position = 'fixed';
+  i.style.top = '-41px';
+  i.style.left = 0;
+  i.style.right = 0;
+  i.style.width = '100%';
+  i.style.height = '40px';
+  i.style.backgroundColor = '#ffffe1';
+  i.style.border = 'none';
+  i.style.borderBottom = '1px solid #888888';
+  i.style.zIndex = '9999999';
+  if(typeof i.style.webkitTransition === 'string') {
+    i.style.webkitTransition = 'all .5s ease-out';
+  } else if(typeof i.style.transition === 'string') {
+    i.style.transition = 'all .5s ease-out';
+  }
+  document.body.appendChild(i);
+  c = (i.contentWindow) ? i.contentWindow :
+    (i.contentDocument.document) ? i.contentDocument.document : i.contentDocument;
+  c.document.open();
+  c.document.write('<span style="font-family: Helvetica, Arial,' +
+    'sans-serif; font-size: .9rem; padding: 7px; vertical-align: ' +
+    'middle; cursor: default;">' + text + '</span>');
+  if(buttonText && buttonLink) {
+    c.document.write('<button id="okay">' + buttonText + '</button><button>Cancel</button>');
+    c.document.close();
+    AdapterJS.addEvent(c.document.getElementById('okay'), 'click', function(e) {
+      window.open(buttonLink, '_top');
+      e.preventDefault();
+      try {
+        event.cancelBubble = true;
+      } catch(error) { }
+    });
+  }
+  else {
+    c.document.close();
+  }
+  AdapterJS.addEvent(c.document, 'click', function() {
+    w.document.body.removeChild(i);
+  });
+  setTimeout(function() {
+    if(typeof i.style.webkitTransform === 'string') {
+      i.style.webkitTransform = 'translateY(40px)';
+    } else if(typeof i.style.transform === 'string') {
+      i.style.transform = 'translateY(40px)';
+    } else {
+      i.style.top = '0px';
+    }
+  }, 300);
 };
 
 // -----------------------------------------------------------
@@ -835,9 +893,8 @@ if (navigator.mozGetUserMedia) {
     };
 
     getUserMedia = function (constraints, successCallback, failureCallback) {
-      if (!constraints.audio) {
-        constraints.audio = false;
-      }
+      constraints.audio = constraints.audio || false;
+      constraints.video = constraints.video || false;
 
       AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
         AdapterJS.WebRTCPlugin.plugin.
@@ -964,6 +1021,8 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.injectPlugin();
   };
 
+  // This function will be called if the plugin is needed (browser different
+  // from Chrome or Firefox), but the plugin is not installed.
   AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb = AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb ||
     function() {
       AdapterJS.addEvent(document,
@@ -991,69 +1050,12 @@ if (navigator.mozGetUserMedia) {
         'to work on this browser.';
       }
 
-      AdapterJS.WebRTCPlugin.renderNotificationBar(popupString, 'Install Now', downloadLink);
+      AdapterJS.renderNotificationBar(popupString, 'Install Now', downloadLink);
     } else { // no download link, just print a generic explanation
-      AdapterJS.WebRTCPlugin.renderNotificationBar('Your browser does not support WebRTC.');
+      AdapterJS.renderNotificationBar('Your browser does not support WebRTC.');
     }
   };
 
-  AdapterJS.WebRTCPlugin.renderNotificationBar = function (text, buttonText, buttonLink) {
-    // only inject once the page is ready
-    if (document.readyState !== 'complete') {
-      return;
-    }
-
-    var w = window;
-    var i = document.createElement('iframe');
-    i.style.position = 'fixed';
-    i.style.top = '-41px';
-    i.style.left = 0;
-    i.style.right = 0;
-    i.style.width = '100%';
-    i.style.height = '40px';
-    i.style.backgroundColor = '#ffffe1';
-    i.style.border = 'none';
-    i.style.borderBottom = '1px solid #888888';
-    i.style.zIndex = '9999999';
-    if(typeof i.style.webkitTransition === 'string') {
-      i.style.webkitTransition = 'all .5s ease-out';
-    } else if(typeof i.style.transition === 'string') {
-      i.style.transition = 'all .5s ease-out';
-    }
-    document.body.appendChild(i);
-    c = (i.contentWindow) ? i.contentWindow :
-      (i.contentDocument.document) ? i.contentDocument.document : i.contentDocument;
-    c.document.open();
-    c.document.write('<span style="font-family: Helvetica, Arial,' +
-      'sans-serif; font-size: .9rem; padding: 7px; vertical-align: ' +
-      'middle; cursor: default;">' + text + '</span>');
-    if(buttonText && buttonLink) {
-      c.document.write('<button id="okay">' + buttonText + '</button><button>Cancel</button>');
-      c.document.close();
-      AdapterJS.addEvent(c.document.getElementById('okay'), 'click', function(e) {
-        window.open(buttonLink, '_top');
-        e.preventDefault();
-        try {
-          event.cancelBubble = true;
-        } catch(error) { }
-      });
-    }
-    else {
-      c.document.close();
-    }
-    AdapterJS.addEvent(c.document, 'click', function() {
-      w.document.body.removeChild(i);
-    });
-    setTimeout(function() {
-      if(typeof i.style.webkitTransform === 'string') {
-        i.style.webkitTransform = 'translateY(40px)';
-      } else if(typeof i.style.transform === 'string') {
-        i.style.transform = 'translateY(40px)';
-      } else {
-        i.style.top = '0px';
-      }
-    }, 300);
-  };
   // Try to detect the plugin and act accordingly
   AdapterJS.WebRTCPlugin.isPluginInstalled(
     AdapterJS.WebRTCPlugin.pluginInfo.prefix,
@@ -1062,137 +1064,170 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/* screensharing overrides */
-if (window.navigator.mozGetUserMedia) {
-  var tempGetUserMedia = window.navigator.getUserMedia;
+(function () {
 
-  window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
-    constraints = constraints || {};
+  'use strict';
 
-    if (constraints.video ? !!constraints.video.mediaSource : false) {
-      constraints.video.mediaSource = 'window';
-      constraints.video.mozMediaSource = 'window';
-    }
+  var tempGetUserMedia = null;
 
-    window.test = constraints;
+  // start
+  if (window.navigator.mozGetUserMedia) {
+    tempGetUserMedia = window.navigator.getUserMedia;
 
-    tempGetUserMedia(constraints, successCb, failureCb);
-  };
+    window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
+      constraints = constraints || {};
 
-  window.getUserMedia = window.navigator.getUserMedia;
+      if (constraints.video ? !!constraints.video.mediaSource : false) {
+        constraints.video.mediaSource = 'window';
+        constraints.video.mozMediaSource = 'window';
 
-  window.hasMultiStreamSupport = window.webrtcDetectedVersion > 37;
-
-} else if (window.navigator.webkitGetUserMedia) {
-  var tempGetUserMedia = window.navigator.getUserMedia;
-
-  /* Listener that shows if extension is installed */
-  window.addEventListener('message', function (event) {
-    if (event.data == 'PermissionDeniedError') {
-      window.chromeCallback(event.data);
-    }
-
-    if (event.data == 'rtcmulticonnection-extension-loaded') {
-        console.log('loaded extension');
-    }
-
-    if (event.data.sourceId) {
-      console.log('got sourceId ' + event.data.sourceId);
-      window.chromeCallback(null, event.data.sourceId);
-    }
-  });
-
-  window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
-    constraints = constraints || {};
-
-    if (constraints.video ? !!constraints.video.mediaSource : false) {
-      if (window.webrtcDetectedBrowser !== 'chrome') {
-        throw new Error('Current browser does not support screensharing');
-      }
-
-      window.chromeCallback = function(error, sourceId) {
-        if(!error) {
-          constraints.video.mandatory = constraints.video.mandatory || {};
-          constraints.video.mandatory.chromeMediaSource = 'desktop';
-          constraints.video.mandatory.maxWidth = window.screen.width > 1920 ? window.screen.width : 1920;
-          constraints.video.mandatory.maxHeight = window.screen.height > 1080 ? window.screen.height : 1080;
-
-          if (sourceId) {
-            constraints.video.mandatory.chromeMediaSourceId = sourceId;
+        AdapterJS.screensharingCallback = function (error, success) {
+          if (error) {
+            failureCb(error);
           }
-          window.test = constraints;
+          if (success) {
+            successCb(success);
+          }
+        };
 
-          delete constraints.video.mediaSource;
+        postFrameMessage({
+          mozConstraints: constraints
+        });
 
-          tempGetUserMedia(constraints, successCb, failureCb);
-
-        } else {
-          throw new Error('Failed retrieving selected screen');
-        }
-      };
-
-      window.postMessage('get-sourceId', '*');
-
-    } else {
-      window.test = constraints;
-
-      tempGetUserMedia(constraints, successCb, failureCb);
-    }
-  };
-
-  window.getUserMedia = window.navigator.getUserMedia;
-
-  window.hasMultiStreamSupport = window.webrtcDetectedVersion > 39;
-
-} else {
-  var tempGetUserMedia = window.navigator.getUserMedia;
-
-  window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
-    constraints = constraints || {};
-
-    if (constraints.video ? !!constraints.video.mediaSource : false) {
-      // check if plugin is ready
-      if(AdapterJS.WebRTCPlugin.pluginState === 4) {
-        // check if screensharing feature is available
-        if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature &&
-          !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
-          // set the constraints
-          constraints.video.optional = constraints.video.optional || [];
-          constraints.video.optional.push({
-            sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey || 'Screensharing'
-          });
-
-          delete constraints.video.mediaSource;
-        } else {
-          throw new Error('The plugin installed does not support screensharing');
-        }
       } else {
-        throw new Error('The plugin is currently not yet available');
+        tempGetUserMedia(constraints, successCb, failureCb);
       }
-    }
+    };
 
-    window.test = constraints;
+    window.getUserMedia = window.navigator.getUserMedia;
 
-    tempGetUserMedia(constraints, successCb, failureCb);
-  };
+  } else if (window.navigator.webkitGetUserMedia) {
+    tempGetUserMedia = window.navigator.getUserMedia;
 
-  window.getUserMedia = window.navigator.getUserMedia;
+    window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
+      constraints = constraints || {};
 
-  if (!!window.AdapterJS.WebRTCPlugin.plugin) {
-    var parts = (window.AdapterJS.WebRTCPlugin.plugin.version || '0.0.0').split('.');
+      if (constraints.video ? !!constraints.video.mediaSource : false) {
+        if (window.webrtcDetectedBrowser !== 'chrome') {
+          throw new Error('Current browser does not support screensharing');
+        }
 
-    if ( parseInt(parts[0], 10) > 0 ) {
-      window.hasMultiStreamSupport = true;
-    } else if ( parseInt(parts[1], 10) > 8 ) {
-      window.hasMultiStreamSupport = true;
+        var chromeCallback = function(error, sourceId) {
+          if(!error) {
+            constraints.video.mandatory = constraints.video.mandatory || {};
+            constraints.video.mandatory.chromeMediaSource = 'desktop';
+            constraints.video.mandatory.maxWidth = window.screen.width > 1920 ? window.screen.width : 1920;
+            constraints.video.mandatory.maxHeight = window.screen.height > 1080 ? window.screen.height : 1080;
 
-    } else if ( parseInt(parts[2], 10) > 829) {
-      window.hasMultiStreamSupport = true;
-    } else {
-      window.hasMultiStreamSupport = false;
-    }
+            if (sourceId) {
+              constraints.video.mandatory.chromeMediaSourceId = sourceId;
+            }
+
+            delete constraints.video.mediaSource;
+
+            tempGetUserMedia(constraints, successCb, failureCb);
+
+          } else {
+            if (error === 'permission-denied') {
+              throw new Error('Permission denied for screen retrieval');
+            } else {
+              throw new Error('Failed retrieving selected screen');
+            }
+          }
+        };
+
+        var onIFrameCallback = function (event) {
+          if (!event.data) {
+            return;
+          }
+
+          if (event.data.chromeMediaSourceId) {
+            if (event.data.chromeMediaSourceId === 'PermissionDeniedError') {
+                chromeCallback('permission-denied');
+            } else {
+              chromeCallback(null, event.data.chromeMediaSourceId);
+            }
+          }
+
+          if (event.data.chromeExtensionStatus) {
+            chromeCallback(event.data.chromeExtensionStatus, null);
+          }
+
+          // this event listener is no more needed
+          window.removeEventListener('message', onIFrameCallback);
+        };
+
+        window.addEventListener('message', onIFrameCallback);
+
+        postFrameMessage({
+          captureSourceId: true
+        });
+
+      } else {
+        tempGetUserMedia(constraints, successCb, failureCb);
+      }
+    };
+
+    window.getUserMedia = window.navigator.getUserMedia;
 
   } else {
-    window.hasMultiStreamSupport = false;
+    tempGetUserMedia = window.navigator.getUserMedia;
+
+    window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
+      constraints = constraints || {};
+
+      if (constraints.video ? !!constraints.video.mediaSource : false) {
+        // check if plugin is ready
+        if(AdapterJS.WebRTCPlugin.pluginState === 4) {
+          // check if screensharing feature is available
+          if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature &&
+            !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
+            // set the constraints
+            constraints.video.optional = constraints.video.optional || [];
+            constraints.video.optional.push({
+              sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey || 'Screensharing'
+            });
+
+            delete constraints.video.mediaSource;
+          } else {
+            throw new Error('The plugin installed does not support screensharing');
+          }
+        } else {
+          throw new Error('The plugin is currently not yet available');
+        }
+      }
+
+      tempGetUserMedia(constraints, successCb, failureCb);
+    };
+
+    window.getUserMedia = window.navigator.getUserMedia;
   }
-}
+
+  if (window.webrtcDetectedBrowser === 'firefox' || window.webrtcDetectedBrowser === 'chrome') {
+    var iframe = document.createElement('iframe');
+
+    iframe.onload = function() {
+      iframe.isLoaded = true;
+    };
+
+    iframe.src = window.location.hostname === 'localhost' ?
+      'https://cdn.temasys.com.sg/skylink/extensions/detection-script-dev/detectRTC.html' :
+      'https://cdn.temasys.com.sg/skylink/extensions/detection-script/detectRTC.html';
+    iframe.style.display = 'none';
+
+    (document.body || document.documentElement).appendChild(iframe);
+
+    var postFrameMessage = function (object) {
+      object = object || {};
+
+      if (!iframe.isLoaded) {
+        setTimeout(function () {
+          iframe.contentWindow.postMessage(object, '*');
+        }, 100);
+        return;
+      }
+
+      iframe.contentWindow.postMessage(object, '*');
+    };
+  }
+})();
