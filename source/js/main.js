@@ -31,7 +31,9 @@ define([
                         audioMute: false,
                         videoMute: false,
                         error: null,
-                        screensharing: false
+                        screensharing: false,
+                        currentStreamRender: 0,
+                        updatedStreamRender: 0
                     }
                 ],
                 state: Constants.AppState.FOYER,
@@ -48,7 +50,7 @@ define([
             var self = this;
 
             //Skylink.setDebugMode(true);
-            Skylink.setLogLevel(Skylink.LOG_LEVEL.DEBUG);
+            Skylink.setLogLevel(Skylink.LOG_LEVEL.ERROR);
 
             Skylink.on('readyStateChange', function(state) {
                 if(state === 0) {
@@ -107,7 +109,9 @@ define([
                         error: null,
                         screensharing: peerInfo.userData.screensharing,
                         videoMute: peerInfo.mediaStatus.videoMuted,
-                        audioMute: peerInfo.mediaStatus.audioMuted
+                        audioMute: peerInfo.mediaStatus.audioMuted,
+                        currentStreamRender: 0,
+                        updatedStreamRender: 0
                     })
                 };
 
@@ -125,6 +129,7 @@ define([
                     users: self.state.users.map(function (user) {
                         if((isSelf && user.id === 0) || user.id === peerId) {
                             user.stream = stream;
+                            user.updatedStreamRender += 1;
                         }
                         return user;
                     })
