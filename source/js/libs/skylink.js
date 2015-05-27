@@ -8480,8 +8480,6 @@ Skylink.prototype.stopScreen = function () {
     this._mediaScreenClone = null;
 
     if (!endSession) {
-      this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
-        this.getPeerInfo(), false);
       this.refreshConnection();
     }
   }
