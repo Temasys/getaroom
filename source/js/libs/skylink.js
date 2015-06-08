@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Wed May 27 2015 15:00:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Fri Jun 05 2015 16:56:39 GMT+0800 (SGT) */
 
 (function() {
 
@@ -179,9 +179,11 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
     // give it some time to set the variable before actually closing and checking.
     setTimeout(function () {
+      // redefine pc
+      pc = self._peerConnections[peerId];
       // if closes because of firefox, reopen it again
       // if it is closed because of a restart, ignore
-      if (pc ? !pc.dataChannelClosed : false) {
+      if (!!pc ? !pc.dataChannelClosed : false) {
         log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel in ' +
           'on-going connection']);
 
@@ -992,6 +994,12 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   var transferStatus = this._downloadDataSessions[peerId];
   log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
     'Received data chunk from peer. Data type:'], dataType);
+
+  if (!transferStatus) {
+    log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
+      'Ignoring data received as download data session is empty']);
+    return;
+  }
 
   var transferId = transferStatus.transferId;
 
@@ -1871,6 +1879,19 @@ Skylink.prototype._retryCount = 0;
 Skylink.prototype._peerConnections = [];
 
 /**
+ * Stores the list of restart weights received that would be compared against
+ * to indicate if User should initiates a restart or Peer should.
+ * In general, the one that sends restart later is the one who initiates the restart.
+ * @attribute _peerRestartPriorities
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._peerRestartPriorities = {};
+
+/**
  * Initiates a Peer connection with either a response to an answer or starts
  * a connection with an offer.
  * @method _addPeer
@@ -1888,9 +1909,7 @@ Skylink.prototype._peerConnections = [];
  * @for Skylink
  * @since 0.5.4
  */
-/* jshint ignore:start */
 Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
-/* jshint ignore:end */
   var self = this;
   if (self._peerConnections[targetMid] && !restartConn) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
@@ -1923,9 +1942,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
   // do a peer connection health check
   this._startPeerConnectionHealthCheck(targetMid, toOffer);
-/* jshint ignore:start */
 };
-/* jshint ignore:end */
 
 /**
  * Restarts a Peer connection.
@@ -1941,9 +1958,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @for Skylink
  * @since 0.5.8
  */
-/* jshint ignore:start */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback) {
-/* jshint ignore:end */
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -1980,6 +1995,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   });
 
   delete self._peerConnectionHealth[peerId];
+  delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 
@@ -2015,6 +2031,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
         var lastRestart = Date.now() || function() { return +new Date(); };
 
+        var weight = (new Date()).valueOf();
+        self._peerRestartPriorities[peerId] = weight;
+
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.RESTART,
           mid: self._user.sid,
@@ -2026,10 +2045,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           target: peerId,
           isConnectionRestart: !!isConnectionRestart,
           lastRestart: lastRestart,
+          weight: weight,
           receiveOnly: receiveOnly,
           enableIceTrickle: self._enableIceTrickle,
           enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+          explicit: !!explicit
         });
       }
 
@@ -2043,9 +2064,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   }, function () {
     return iceConnectionStateClosed && peerConnectionStateClosed;
   });
-/* jshint ignore:start */
 };
-/* jshint ignore:end */
 
 /**
  * Removes and closes a Peer connection.
@@ -2086,6 +2105,9 @@ Skylink.prototype._removePeer = function(peerId) {
   // check the handshake priorities and remove them accordingly
   if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
+  }
+  if (typeof this._peerRestartPriorities[peerId] !== 'undefined') {
+    delete this._peerRestartPriorities[peerId];
   }
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
@@ -2191,7 +2213,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true, null);
+        self._restartPeerConnection(targetMid, true, true, null, false);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -2284,7 +2306,7 @@ Skylink.prototype.refreshConnection = function(peerId) {
         return;
       }
       // do a hard reset on variable object
-      self._restartPeerConnection(peer, true);
+      self._restartPeerConnection(peer, true, false, null, true);
     };
     fn();
   };
@@ -2693,7 +2715,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true);
+      self._restartPeerConnection(peerId, true, true, null, false);
     }
   }, timer);
 };
@@ -2798,10 +2820,18 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   // set video codec
-  sdpLines = self._setSDPVideoCodec(sdpLines);
+  if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
+    sdpLines = self._setSDPVideoCodec(sdpLines);
+  } else {
+    log.log([targetMid, null, null, 'Not setting any video codec']);
+  }
 
   // set audio codec
-  sdpLines = self._setSDPAudioCodec(sdpLines);
+  if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
+    sdpLines = self._setSDPAudioCodec(sdpLines);
+  } else {
+    log.log([targetMid, null, null, 'Not setting any audio codec']);
+  }
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
@@ -3317,6 +3347,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} NO_PATH No path is loaded yet.
  * @param {Number} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
  *   when retrieving information.
+ * @param {Number} ADAPTER_NO_LOADED AdapterJS dependency is not loaded.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -3339,7 +3370,8 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   NO_WEBRTC_SUPPORT: 3,
   NO_PATH: 4,
   INVALID_XMLHTTPREQUEST_STATUS: 5,
-  SCRIPT_ERROR: 6
+  SCRIPT_ERROR: 6,
+  ADAPTER_NO_LOADED: 7
 };
 
 /**
@@ -3692,6 +3724,7 @@ Skylink.prototype._parseInfo = function(info) {
  */
 Skylink.prototype._loadInfo = function() {
   var self = this;
+
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
@@ -3900,198 +3933,222 @@ Skylink.prototype.init = function(options, callback) {
     }
     return;
   }
-  var apiKey, room, defaultRoom, region;
-  var startDateTime, duration, credentials;
-  var roomServer = self._roomServer;
-  // NOTE: Should we get all the default values from the variables
-  // rather than setting it?
-  var enableIceTrickle = true;
-  var enableDataChannel = true;
-  var enableSTUNServer = true;
-  var enableTURNServer = true;
-  var TURNTransport = self.TURN_TRANSPORT.ANY;
-  var audioFallback = false;
-  var forceSSL = false;
-  var socketTimeout = 0;
-  var audioCodec = self.AUDIO_CODEC.OPUS;
-  var videoCodec = self.VIDEO_CODEC.VP8;
 
-  log.log('Provided init options:', options);
+  var adapter = (function () {
+    try {
+      return window.AdapterJS || AdapterJS;
+    } catch (error) {
+      return false;
+    }
+  })();
 
-  if (typeof options === 'string') {
-    // set all the default api key, default room and room
-    apiKey = options;
-    defaultRoom = apiKey;
-    room = apiKey;
-  } else {
-    // set the api key
-    apiKey = options.apiKey;
-    // set the room server
-    roomServer = options.roomServer || roomServer;
-    // check room server if it ends with /. Remove the extra /
-    roomServer = (roomServer.lastIndexOf('/') ===
-      (roomServer.length - 1)) ? roomServer.substring(0,
-      roomServer.length - 1) : roomServer;
-    // set the region
-    region = options.region || region;
-    // set the default room
-    defaultRoom = options.defaultRoom || apiKey;
-    // set the selected room
-    room = defaultRoom;
-    // set ice trickle option
-    enableIceTrickle = (typeof options.enableIceTrickle === 'boolean') ?
-      options.enableIceTrickle : enableIceTrickle;
-    // set data channel option
-    enableDataChannel = (typeof options.enableDataChannel === 'boolean') ?
-      options.enableDataChannel : enableDataChannel;
-    // set stun server option
-    enableSTUNServer = (typeof options.enableSTUNServer === 'boolean') ?
-      options.enableSTUNServer : enableSTUNServer;
-    // set turn server option
-    enableTURNServer = (typeof options.enableTURNServer === 'boolean') ?
-      options.enableTURNServer : enableTURNServer;
-    // set the force ssl always option
-    forceSSL = (typeof options.forceSSL === 'boolean') ?
-      options.forceSSL : forceSSL;
-    // set the socket timeout option
-    socketTimeout = (typeof options.socketTimeout === 'number') ?
-      options.socketTimeout : socketTimeout;
-    // set the socket timeout option to be above 5000
-    socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
-    // set the preferred audio codec
-    audioCodec = typeof options.audioCodec === 'string' ?
-      options.audioCodec : audioCodec;
-    // set the preferred video codec
-    videoCodec = typeof options.videoCodec === 'string' ?
-      options.videoCodec : videoCodec;
+  if (!!adapter ? typeof adapter.webRTCReady === 'function' : false) {
+    adapter.webRTCReady(function () {
 
-    // set turn transport option
-    if (typeof options.TURNServerTransport === 'string') {
-      // loop out for every transport option
-      for (var type in self.TURN_TRANSPORT) {
-        if (self.TURN_TRANSPORT.hasOwnProperty(type)) {
-          // do a check if the transport option is valid
-          if (self.TURN_TRANSPORT[type] === options.TURNServerTransport) {
-            TURNTransport = options.TURNServerTransport;
-            break;
+      var apiKey, room, defaultRoom, region;
+      var startDateTime, duration, credentials;
+      var roomServer = self._roomServer;
+      // NOTE: Should we get all the default values from the variables
+      // rather than setting it?
+      var enableIceTrickle = true;
+      var enableDataChannel = true;
+      var enableSTUNServer = true;
+      var enableTURNServer = true;
+      var TURNTransport = self.TURN_TRANSPORT.ANY;
+      var audioFallback = false;
+      var forceSSL = false;
+      var socketTimeout = 0;
+      var audioCodec = self.AUDIO_CODEC.AUTO;
+      var videoCodec = self.VIDEO_CODEC.AUTO;
+
+      log.log('Provided init options:', options);
+
+      if (typeof options === 'string') {
+        // set all the default api key, default room and room
+        apiKey = options;
+        defaultRoom = apiKey;
+        room = apiKey;
+      } else {
+        // set the api key
+        apiKey = options.apiKey;
+        // set the room server
+        roomServer = options.roomServer || roomServer;
+        // check room server if it ends with /. Remove the extra /
+        roomServer = (roomServer.lastIndexOf('/') ===
+          (roomServer.length - 1)) ? roomServer.substring(0,
+          roomServer.length - 1) : roomServer;
+        // set the region
+        region = options.region || region;
+        // set the default room
+        defaultRoom = options.defaultRoom || apiKey;
+        // set the selected room
+        room = defaultRoom;
+        // set ice trickle option
+        enableIceTrickle = (typeof options.enableIceTrickle === 'boolean') ?
+          options.enableIceTrickle : enableIceTrickle;
+        // set data channel option
+        enableDataChannel = (typeof options.enableDataChannel === 'boolean') ?
+          options.enableDataChannel : enableDataChannel;
+        // set stun server option
+        enableSTUNServer = (typeof options.enableSTUNServer === 'boolean') ?
+          options.enableSTUNServer : enableSTUNServer;
+        // set turn server option
+        enableTURNServer = (typeof options.enableTURNServer === 'boolean') ?
+          options.enableTURNServer : enableTURNServer;
+        // set the force ssl always option
+        forceSSL = (typeof options.forceSSL === 'boolean') ?
+          options.forceSSL : forceSSL;
+        // set the socket timeout option
+        socketTimeout = (typeof options.socketTimeout === 'number') ?
+          options.socketTimeout : socketTimeout;
+        // set the socket timeout option to be above 5000
+        socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
+        // set the preferred audio codec
+        audioCodec = typeof options.audioCodec === 'string' ?
+          options.audioCodec : audioCodec;
+        // set the preferred video codec
+        videoCodec = typeof options.videoCodec === 'string' ?
+          options.videoCodec : videoCodec;
+
+        // set turn transport option
+        if (typeof options.TURNServerTransport === 'string') {
+          // loop out for every transport option
+          for (var type in self.TURN_TRANSPORT) {
+            if (self.TURN_TRANSPORT.hasOwnProperty(type)) {
+              // do a check if the transport option is valid
+              if (self.TURN_TRANSPORT[type] === options.TURNServerTransport) {
+                TURNTransport = options.TURNServerTransport;
+                break;
+              }
+            }
           }
         }
+        // set audio fallback option
+        audioFallback = options.audioFallback || audioFallback;
+        // Custom default meeting timing and duration
+        // Fallback to default if no duration or startDateTime provided
+        if (options.credentials) {
+          // set start data time
+          startDateTime = options.credentials.startDateTime ||
+            (new Date()).toISOString();
+          // set the duration
+          duration = options.credentials.duration || 200;
+          // set the credentials
+          credentials = options.credentials.credentials;
+        }
       }
+      // api key path options
+      self._apiKey = apiKey;
+      self._roomServer = roomServer;
+      self._defaultRoom = defaultRoom;
+      self._selectedRoom = room;
+      self._serverRegion = region;
+      self._path = roomServer + '/api/' + apiKey + '/' + room;
+      // set credentials if there is
+      if (credentials) {
+        self._roomStart = startDateTime;
+        self._roomDuration = duration;
+        self._roomCredentials = credentials;
+        self._path += (credentials) ? ('/' + startDateTime + '/' +
+          duration + '?&cred=' + credentials) : '';
+      }
+
+      self._path += ((credentials) ? '&' : '?') + 'rand=' + (new Date()).toISOString();
+
+      // check if there is a other query parameters or not
+      if (region) {
+        self._path += '&rg=' + region;
+      }
+      // skylink functionality options
+      self._enableIceTrickle = enableIceTrickle;
+      self._enableDataChannel = enableDataChannel;
+      self._enableSTUN = enableSTUNServer;
+      self._enableTURN = enableTURNServer;
+      self._TURNTransport = TURNTransport;
+      self._audioFallback = audioFallback;
+      self._forceSSL = forceSSL;
+      self._socketTimeout = socketTimeout;
+      self._selectedAudioCodec = audioCodec;
+      self._selectedVideoCodec = videoCodec;
+
+      log.log('Init configuration:', {
+        serverUrl: self._path,
+        readyState: self._readyState,
+        apiKey: self._apiKey,
+        roomServer: self._roomServer,
+        defaultRoom: self._defaultRoom,
+        selectedRoom: self._selectedRoom,
+        serverRegion: self._serverRegion,
+        enableDataChannel: self._enableDataChannel,
+        enableIceTrickle: self._enableIceTrickle,
+        enableTURNServer: self._enableTURN,
+        enableSTUNServer: self._enableSTUN,
+        TURNTransport: self._TURNTransport,
+        audioFallback: self._audioFallback,
+        forceSSL: self._forceSSL,
+        socketTimeout: self._socketTimeout,
+        audioCodec: self._selectedAudioCodec,
+        videoCodec: self._selectedVideoCodec
+      });
+      // trigger the readystate
+      self._readyState = 0;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT);
+      self._loadInfo();
+
+      if (typeof callback === 'function'){
+        //Success callback fired if readyStateChange is completed
+        self.once('readyStateChange',function(readyState, error){
+            log.log([null, 'Socket', null, 'Firing callback. ' +
+            'Ready state change has met provided state ->'], readyState);
+            callback(null,{
+              serverUrl: self._path,
+              readyState: self._readyState,
+              apiKey: self._apiKey,
+              roomServer: self._roomServer,
+              defaultRoom: self._defaultRoom,
+              selectedRoom: self._selectedRoom,
+              serverRegion: self._serverRegion,
+              enableDataChannel: self._enableDataChannel,
+              enableIceTrickle: self._enableIceTrickle,
+              enableTURNServer: self._enableTURN,
+              enableSTUNServer: self._enableSTUN,
+              TURNTransport: self._TURNTransport,
+              audioFallback: self._audioFallback,
+              forceSSL: self._forceSSL,
+              socketTimeout: self._socketTimeout,
+              audioCodec: self._selectedAudioCodec,
+              videoCodec: self._selectedVideoCodec
+            });
+          },
+          function(state){
+            return state === self.READY_STATE_CHANGE.COMPLETED;
+          },
+          false
+        );
+
+        //Error callback fired if readyStateChange is error
+        self.once('readyStateChange',function(readyState, error){
+            log.log([null, 'Socket', null, 'Firing callback. ' +
+            'Ready state change has met provided state ->'], readyState);
+            callback(error,null);
+          },
+          function(state){
+            return state === self.READY_STATE_CHANGE.ERROR;
+          },
+          false
+        );
+      }
+    });
+  } else {
+    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+      status: null,
+      content: 'AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used',
+      errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED
+    });
+
+    if (typeof callback === 'function'){
+      callback(new Error('AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used'),null);
     }
-    // set audio fallback option
-    audioFallback = options.audioFallback || audioFallback;
-    // Custom default meeting timing and duration
-    // Fallback to default if no duration or startDateTime provided
-    if (options.credentials) {
-      // set start data time
-      startDateTime = options.credentials.startDateTime ||
-        (new Date()).toISOString();
-      // set the duration
-      duration = options.credentials.duration || 200;
-      // set the credentials
-      credentials = options.credentials.credentials;
-    }
-  }
-  // api key path options
-  self._apiKey = apiKey;
-  self._roomServer = roomServer;
-  self._defaultRoom = defaultRoom;
-  self._selectedRoom = room;
-  self._serverRegion = region;
-  self._path = roomServer + '/api/' + apiKey + '/' + room;
-  // set credentials if there is
-  if (credentials) {
-    self._roomStart = startDateTime;
-    self._roomDuration = duration;
-    self._roomCredentials = credentials;
-    self._path += (credentials) ? ('/' + startDateTime + '/' +
-      duration + '?&cred=' + credentials) : '';
-  }
-
-  self._path += ((credentials) ? '&' : '?') + 'rand=' + (new Date()).toISOString();
-
-  // check if there is a other query parameters or not
-  if (region) {
-    self._path += '&rg=' + region;
-  }
-  // skylink functionality options
-  self._enableIceTrickle = enableIceTrickle;
-  self._enableDataChannel = enableDataChannel;
-  self._enableSTUN = enableSTUNServer;
-  self._enableTURN = enableTURNServer;
-  self._TURNTransport = TURNTransport;
-  self._audioFallback = audioFallback;
-  self._forceSSL = forceSSL;
-  self._socketTimeout = socketTimeout;
-  self._selectedAudioCodec = audioCodec;
-  self._selectedVideoCodec = videoCodec;
-
-  log.log('Init configuration:', {
-    serverUrl: self._path,
-    readyState: self._readyState,
-    apiKey: self._apiKey,
-    roomServer: self._roomServer,
-    defaultRoom: self._defaultRoom,
-    selectedRoom: self._selectedRoom,
-    serverRegion: self._serverRegion,
-    enableDataChannel: self._enableDataChannel,
-    enableIceTrickle: self._enableIceTrickle,
-    enableTURNServer: self._enableTURN,
-    enableSTUNServer: self._enableSTUN,
-    TURNTransport: self._TURNTransport,
-    audioFallback: self._audioFallback,
-    forceSSL: self._forceSSL,
-    socketTimeout: self._socketTimeout,
-    audioCodec: self._selectedAudioCodec,
-    videoCodec: self._selectedVideoCodec
-  });
-  // trigger the readystate
-  self._readyState = 0;
-  self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT);
-  self._loadInfo();
-
-  if (typeof callback === 'function'){
-    //Success callback fired if readyStateChange is completed
-    self.once('readyStateChange',function(readyState, error){
-        log.log([null, 'Socket', null, 'Firing callback. ' +
-        'Ready state change has met provided state ->'], readyState);
-        callback(null,{
-          serverUrl: self._path,
-          readyState: self._readyState,
-          apiKey: self._apiKey,
-          roomServer: self._roomServer,
-          defaultRoom: self._defaultRoom,
-          selectedRoom: self._selectedRoom,
-          serverRegion: self._serverRegion,
-          enableDataChannel: self._enableDataChannel,
-          enableIceTrickle: self._enableIceTrickle,
-          enableTURNServer: self._enableTURN,
-          enableSTUNServer: self._enableSTUN,
-          TURNTransport: self._TURNTransport,
-          audioFallback: self._audioFallback,
-          forceSSL: self._forceSSL,
-          socketTimeout: self._socketTimeout,
-          audioCodec: self._selectedAudioCodec,
-          videoCodec: self._selectedVideoCodec
-        });
-      },
-      function(state){
-        return state === self.READY_STATE_CHANGE.COMPLETED;
-      },
-      false
-    );
-
-    //Error callback fired if readyStateChange is error
-    self.once('readyStateChange',function(readyState, error){
-        log.log([null, 'Socket', null, 'Firing callback. ' +
-        'Ready state change has met provided state ->'], readyState);
-        callback(error,null);
-      },
-      function(state){
-        return state === self.READY_STATE_CHANGE.ERROR;
-      },
-      false
-    );
   }
 };
 
@@ -5886,7 +5943,7 @@ Skylink.prototype._closeChannel = function() {
   this._channelOpen = false;
   this._trigger('channelClose');
 };
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.0';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
 /**
  * The Message protocol list. The <code>message</code> object is an
@@ -6545,6 +6602,18 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
+  //Otherwise go ahead with peer's restart
+  if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
+    //Peer's restart message was older --> ignore
+    if (self._peerRestartPriorities[targetMid] > message.weight){
+      log.log([targetMid, null, message.type, 'Peer\'s generated restart weight ' +
+          'is lesser than user\'s. Ignoring message'
+          ], this._peerRestartPriorities[targetMid] + ' > ' + message.weight);
+      return;
+    }
+  }
+
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -6580,7 +6649,7 @@ Skylink.prototype._restartHandler = function(message){
 
   // do a peer connection health check
     self._startPeerConnectionHealthCheck(targetMid);
-  });
+  }, message.explicit);
 };
 
 /**
@@ -6943,6 +7012,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 };
 
 Skylink.prototype.VIDEO_CODEC = {
+  AUTO: 'auto',
   VP8: 'VP8',
   H264: 'H264'
 };
@@ -6954,6 +7024,7 @@ Skylink.prototype.VIDEO_CODEC = {
  *   codec set.
  * - The available audio codecs are:
  * @attribute AUDIO_CODEC
+ * @param {String} AUTO The default option. This means to use any audio codec given by generated sdp.
  * @param {String} OPUS Use the OPUS audio codec.
  *   This is the common and mandantory audio codec used. This codec supports stereo.
  * @param {String} ISAC Use the ISAC audio codec.
@@ -6965,6 +7036,7 @@ Skylink.prototype.VIDEO_CODEC = {
  * @since 0.5.10
  */
 Skylink.prototype.AUDIO_CODEC = {
+  AUTO: 'auto',
   ISAC: 'ISAC',
   OPUS: 'opus'
 };
@@ -6979,7 +7051,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedAudioCodec = 'opus';
+Skylink.prototype._selectedAudioCodec = 'auto';
 
 /**
  * Stores the preferred video codec.
@@ -6991,14 +7063,16 @@ Skylink.prototype._selectedAudioCodec = 'opus';
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedVideoCodec = 'VP8';
+Skylink.prototype._selectedVideoCodec = 'auto';
 
 
 /**
  * The list of recommended video resolutions.
  * - Note that the higher the resolution, the connectivity speed might
  *   be affected.
- * - The available video resolutions type are:
+ * - The available video resolutions type are: (See
+ * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
+ *   for more information)
  * @param {JSON} QQVGA QQVGA resolution.
  * @param {Number} QQVGA.width 160
  * @param {Number} QQVGA.height 120
@@ -7009,7 +7083,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HQVGA.aspectRatio 3:2
  * @param {JSON} QVGA QVGA resolution.
  * @param {Number} QVGA.width 320
- * @param {Number} QVGA.height 180
+ * @param {Number} QVGA.height 240
  * @param {String} QVGA.aspectRatio 4:3
  * @param {JSON} WQVGA WQVGA resolution.
  * @param {Number} WQVGA.width 384
@@ -7021,7 +7095,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HVGA.aspectRatio 3:2
  * @param {JSON} VGA VGA resolution.
  * @param {Number} VGA.width 640
- * @param {Number} VGA.height 360
+ * @param {Number} VGA.height 480
  * @param {String} VGA.aspectRatio 4:3
  * @param {JSON} WVGA WVGA resolution.
  * @param {Number} WVGA.width 768
@@ -7089,10 +7163,10 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
 Skylink.prototype.VIDEO_RESOLUTION = {
   QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
   HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
-  QVGA: { width: 320, height: 180, aspectRatio: '4:3' },
+  QVGA: { width: 320, height: 240, aspectRatio: '4:3' },
   WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
   HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
-  VGA: { width: 640, height: 360, aspectRatio: '4:3' },
+  VGA: { width: 640, height: 480, aspectRatio: '4:3' },
   WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
   FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
   SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
@@ -7335,7 +7409,6 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
  */
 Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
   var self = this;
-  log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
   if (self._audioFallback && self._streamSettings.video && !isScreenSharing) {
     // redefined the settings for video as false
     self._streamSettings.video = false;
@@ -7383,7 +7456,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenShar
     }
 
     if (!self._peerInformations[targetMid].settings.audio &&
-      !self._peerInformations[targetMid].settings.video) {
+      !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
       log.log([targetMid, 'MediaStream', event.stream.id,
         'Receive remote stream but ignoring stream as it is empty ->'
         ], event.stream);
@@ -7662,31 +7735,29 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   try {
     log.log([peerId, null, null, 'Adding local stream']);
 
-    if (this._mediaStream && this._mediaStream !== null) {
-      var pc = this._peerConnections[peerId];
+    var pc = this._peerConnections[peerId];
 
-      if (pc) {
-        if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-          if (this._mediaScreen && this._mediaScreen !== null) {
-            pc.addStream(this._mediaScreen);
+    if (pc) {
+      if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+        if (this._mediaScreen && this._mediaScreen !== null) {
+          pc.addStream(this._mediaScreen);
+          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
 
-            log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
-          } else {
-            pc.addStream(this._mediaStream);
-
-            log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
-          }
+        } else if (this._mediaStream && this._mediaStream !== null) {
+          pc.addStream(this._mediaStream);
+          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
 
         } else {
-          log.warn([peerId, 'MediaStream', this._mediaStream,
-            'Not adding stream as signalingState is closed']);
+          log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
         }
+
       } else {
         log.warn([peerId, 'MediaStream', this._mediaStream,
-          'Not adding stream as peerconnection object does not exists']);
+          'Not adding stream as signalingState is closed']);
       }
     } else {
-      log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
+      log.warn([peerId, 'MediaStream', this._mediaStream,
+        'Not adding stream as peerconnection object does not exists']);
     }
   } catch (error) {
     // Fix errors thrown like NS_ERROR_UNEXPECTED
@@ -8132,7 +8203,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     for (var peer in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true);
+        self._restartPeerConnection(peer, true, false, null, true);
       }
     }
 
@@ -8163,7 +8234,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
 
@@ -8239,7 +8310,7 @@ Skylink.prototype.muteStream = function(options) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
@@ -8363,7 +8434,6 @@ Skylink.prototype.disableVideo = function() {
 
 /**
  * Shares the current screen with users.
- * - If multi-stream is not supported, you will not be able to use it.
  * - You will require our own Temasys Skylink extension to do screensharing.
  *   Currently, opera does not support this feature.
  * @method shareScreen
@@ -8429,7 +8499,11 @@ Skylink.prototype.shareScreen = function (callback) {
 
       self._wait(function () {
         if (self._inRoom) {
-          self.refreshConnection();
+          for (var peer in self._peerConnections) {
+            if (self._peerConnections.hasOwnProperty(peer)) {
+              self._restartPeerConnection(peer, true, false, null, true);
+            }
+          }
         } else {
           if (typeof callback === 'function') {
             callback(null, stream);
@@ -8460,7 +8534,7 @@ Skylink.prototype.shareScreen = function (callback) {
  * Stops screensharing playback and streaming.
  * @method stopScreen
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.11
  */
 Skylink.prototype.stopScreen = function () {
   var endSession = false;
@@ -8480,7 +8554,14 @@ Skylink.prototype.stopScreen = function () {
     this._mediaScreenClone = null;
 
     if (!endSession) {
-      this.refreshConnection();
+      this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
+        this.getPeerInfo(), false);
+
+      for (var peer in this._peerConnections) {
+        if (this._peerConnections.hasOwnProperty(peer)) {
+          this._restartPeerConnection(peer, true, false, null, true);
+        }
+      }
     }
   }
 };
@@ -8696,6 +8777,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
+  log.log('Setting video codec', this._selectedVideoCodec);
   var codecFound = false;
   var payload = 0;
 
@@ -8751,6 +8833,7 @@ Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
+  log.log('Setting audio codec', this._selectedAudioCodec);
   var codecFound = false;
   var payload = 0;
 
