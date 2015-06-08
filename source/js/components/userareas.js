@@ -14,11 +14,11 @@ define([
         render: function() {
             var showList =
                 this.props.state.room.status === Constants.RoomState.CONNECTED ?
-                 UserAreaList({users: this.props.state.users}) :
-                 React.DOM.div({id: "noUser"})
+                 UserAreaList( {users:this.props.state.users} ) :
+                 React.DOM.div( {id:"noUser"})
 
             return (
-                React.DOM.section({id: "userareas", className: this.props.state.room.screensharing ? 'screensharing' : 'split' + this.props.state.users.length}, 
+                React.DOM.section( {id:"userareas", className:this.props.state.room.screensharing ? 'screensharing' : 'split' + this.props.state.users.length}, 
                     showList
                 )
                 )
@@ -29,8 +29,8 @@ define([
         render: function() {
             var userareas = this.props.users.map(function(user) {
                     return (
-                        React.DOM.div({className: 'userarea' + (user.screensharing ? ' screensharing' : '')}, 
-                            UserArea({user: user})
+                        React.DOM.div( {className:'userarea' + (user.screensharing ? ' screensharing' : '')}, 
+                            UserArea( {user:user} )
                         )
                         );
                 });
@@ -64,21 +64,21 @@ define([
 
             if(this.props.user.stream === null && this.props.user.id === 0) {
                 res.push(
-                    React.DOM.span({className: "userInfo"}, 
+                    React.DOM.span( {className:"userInfo"}, 
                         "Share your camera and microphone to participate in the call"
                     )
                 );
             }
             else if(this.props.user.error) {
                 res.push(
-                    React.DOM.span({className: "userInfo"}, 
+                    React.DOM.span( {className:"userInfo"}, 
                         "Stream could not be established"
                     )
                 );
             }
             else if(this.props.user.stream === null) {
                 res.push(
-                    React.DOM.span({className: "userInfo"}, 
+                    React.DOM.span( {className:"userInfo"}, 
                         "Joining..."
                     )
                 );
@@ -101,7 +101,7 @@ define([
 
                 if(muted.length > 0) {
                     res.push(
-                        React.DOM.span({className: "userInfo"}, 
+                        React.DOM.span( {className:"userInfo"}, 
                             muted.join('/'), " muted"
                         )
                     );
