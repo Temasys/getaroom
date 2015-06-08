@@ -115,10 +115,6 @@ define([
 
                 if(this.props.state.room.status === Constants.RoomState.CONNECTED && user.stream != null) {
                     res.push(
-                        React.DOM.button( {id:"roomLock", onClick:this.handleRoomLock, className:this.props.state.room.isLocked ? '' : 'on', title:"Lock/Unlock Room"})
-                        );
-
-                    res.push(
                         React.DOM.button( {id:"videoMute", onClick:this.handleVideoMute, className:user.videoMute ? '' : 'on', title:"Mute/Unmute Video"})
                         );
 
@@ -129,6 +125,11 @@ define([
                     res.push(
                         React.DOM.button( {id:"screenshare", onClick:this.handleScreenshare, className:user.screensharing ? 'on' : (this.props.state.room.screensharing || window.webrtcDetectedBrowser === 'opera' ? 'muted' : ''), title:"Share your screen"})
                         );
+
+                    res.push(
+                        React.DOM.button( {id:"roomLock", onClick:this.handleRoomLock, className:this.props.state.room.isLocked ? '' : 'on', title:"Lock/Unlock Room"})
+                        );
+
                 }
             }
 
