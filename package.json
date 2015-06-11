@@ -21,7 +21,7 @@
     "start": "grunt dev"
   },
   "dependencies": {
-    "skylinkjs": "^0.5.11"
+    "skylinkjs": "^0.6.0"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
