@@ -42,11 +42,29 @@ define([
                 Skylink[this.props.state.room.isLocked ? 'unlockRoom' : 'lockRoom']();
             }
         },
+        handleScreenshare: function() {
+            var user = this.props.state.users.filter(function (user) {
+                return user.id === 0;
+            })[0];
+
+            if(!this.props.state.room.screensharing) {
+
+                Dispatcher.sharescreen(true);
+
+                Skylink.shareScreen();
+            }
+            else if(user.screensharing) {
+
+                Dispatcher.sharescreen(false);
+
+                Skylink.stopScreen();
+            }
+        },
         handleLinkClick: function (e) {
             e.target.setSelectionRange(0, e.target.value.length);
         },
         handleClose: function(e) {
-            e.target.parentElement.parentElement.parentElement.children[0].click()
+            e.target.parentElement.parentElement.parentElement.children[0].click();
         },
         render: function() {
             var res = [];
@@ -97,16 +115,21 @@ define([
 
                 if(this.props.state.room.status === Constants.RoomState.CONNECTED && user.stream != null) {
                     res.push(
-                        <button id="roomLock" onClick={this.handleRoomLock} className={this.props.state.room.isLocked ? 'muted' : ''} title="Lock/Unlock Room"></button>
+                        <button id="videoMute" onClick={this.handleVideoMute} className={user.videoMute ? '' : 'on'} title="Mute/Unmute Video"></button>
                         );
 
                     res.push(
-                        <button id="videoMute" onClick={this.handleVideoMute} className={user.videoMute ? 'muted' : ''} title="Mute/Unmute Video"></button>
+                        <button id="audioMute" onClick={this.handleAudioMute} className={user.audioMute ? '' : 'on'} title="Mute/Unmute Audio"></button>
                         );
 
                     res.push(
-                        <button id="audioMute" onClick={this.handleAudioMute} className={user.audioMute ? 'muted' : ''} title="Mute/Unmute Audio"></button>
+                        <button id="screenshare" onClick={this.handleScreenshare} className={user.screensharing ? 'on' : (this.props.state.room.screensharing || window.webrtcDetectedBrowser === 'opera' ? 'muted' : '')} title="Share your screen"></button>
                         );
+
+                    res.push(
+                        <button id="roomLock" onClick={this.handleRoomLock} className={this.props.state.room.isLocked ? '' : 'on'} title="Lock/Unlock Room"></button>
+                        );
+
                 }
             }
 

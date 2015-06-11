@@ -11,12 +11,12 @@ require.config({
     paths: {
         socketio: '//cdn.temasys.com.sg/libraries/'
             + 'socket.io-client/1.0.6/socket.io',
-        //adapter: 'libs/adapter',
-        adapter: '//cdn.temasys.com.sg/adapterjs/0.10.x/' +
-            'adapter.min',
-        //skylink: 'libs/skylink',
-        skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.5.x/' +
-            'skylink.min',
+        adapter: 'libs/adapter',
+        /*adapter: '//cdn.temasys.com.sg/adapterjs/0.10.x/' +
+            'adapter.debug',*/
+        skylink: 'libs/skylink',
+        //skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.5.x/' +
+        //    'skylink.debug',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +

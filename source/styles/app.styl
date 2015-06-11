@@ -7,6 +7,7 @@
 color1 = #1abc9c
 color2 = #3498db
 color3 = #ff688b
+color4 = rgba(191,255,0,0.2)
 
 
 body
@@ -55,10 +56,10 @@ body > a {
 
     button
         position relative
-        margin 20px 25px
-        width 100px
-        height 100px
-        border-radius 50px
+        margin 12px
+        width 70px
+        height 70px
+        border-radius 35px
         background-color rgba(255,255,255,.08)
         outline 0
         text-align center
@@ -67,27 +68,35 @@ body > a {
         &#videoMute
             float left
             font-face Helvetica Neue, Helvetica, Arial, sans-serif
-            margin-right 0
+            margin-left 24px
             background-image url(/img/camera.svg)
             background-repeat no-repeat
             background-position 50% 50%
-            background-size 20% 20%
+            background-size 30% 30%
 
         &#audioMute
+            float left
             font-face Helvetica Neue, Helvetica, Arial, sans-serif
             background-image url(/img/microphone.svg)
             background-repeat no-repeat
             background-position 50% 50%
-            background-size 30% 30%
+            background-size 40% 40%
+
+        &#screenshare
+            float left
+            font-face Helvetica Neue, Helvetica, Arial, sans-serif
+            background-image url(/img/screen.svg)
+            background-repeat no-repeat
+            background-position 50% 50%
+            background-size 50% 50%
 
         &#roomLock
-            float right
+            float left
             font-face Helvetica Neue, Helvetica, Arial, sans-serif
-            margin-left -1px
             background-image url(/img/lock.svg)
             background-repeat no-repeat
             background-position 50% 50%
-            background-size 30% 30%
+            background-size 40% 40%
 
         &.muted:before
             content ""
@@ -119,6 +128,15 @@ body > a {
 
         &:active
             background-color rgba(200,200,200,.3)
+
+        &.on
+            background-color color4
+
+            &:hover
+                background-color lighten(color4, 10%)
+
+            &:active
+                background-color darken(color4, 20%)
 
     button.mainControl
         width 392px
@@ -246,7 +264,7 @@ body > a {
             background #000
             transition all .5s ease-out
 
-            video, canvas
+            video, object, canvas
                 width 100%
                 height 100%
 
@@ -311,6 +329,62 @@ body > a {
         margin 0 -100px
         left 50%
         top 23%
+
+    &.screensharing
+        width 25vw
+        right auto
+
+        #us0
+            transform rotateY(0deg);
+
+        .userarea
+            height 33.3vh
+
+            > div
+                width 120%
+                height 120%
+                margin -10% -12%
+
+        .userarea.screensharing
+            position absolute
+            left 25vw
+            top 0
+            width 75vw
+            height 100vh
+            line-height 155vh
+
+            > div
+                display inline-block
+                vertical-align bottom
+                margin 0
+                width 100%
+                height 100%
+
+            .userInfo
+                top auto
+
+
+@media all and (max-width:1000px)
+    #userareas
+        &.screensharing
+            width 100vw
+            height 33.3vh
+            right 0
+            left 0
+            bottom 0
+            top auto
+
+            .userarea
+                height 33.3vh
+                width 33.3vw
+
+            .userarea.screensharing
+                top -66.6vh
+                left 0
+                width 100vw
+                height 66.6vh
+                line-height 100vh
+
 
 @media all and (min-width: 680px)
     #userareas

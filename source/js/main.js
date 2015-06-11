@@ -30,7 +30,9 @@ define([
                         stream: null,
                         audioMute: false,
                         videoMute: false,
-                        error: null
+                        screensharing: false,
+                        currentStreamRender: 0,
+                        updatedStreamRender: 0
                     }
                 ],
                 state: Constants.AppState.FOYER,
@@ -45,10 +47,8 @@ define([
         componentWillMount: function() {
             var self = this;
 
-
             //Skylink.setDebugMode(true);
-            //Skylink.setLogLevel('debug');
-
+            Skylink.setLogLevel(Skylink.LOG_LEVEL.ERROR);
 
             Skylink.on('readyStateChange', function(state) {
                 if(state === 0) {
@@ -71,11 +71,6 @@ define([
                             status: Constants.RoomState.CONNECTED
                         })
                     });
-
-                    Skylink.joinRoom({
-                        audio: true,
-                        video: true
-                    });
                 }
                 else if(state === -1) {
                     self.setState({
@@ -89,7 +84,8 @@ define([
             Skylink.on("channelError", function(error) {
                 self.setState({
                     room: Utils.extend(self.state.room, {
-                        status: Constants.RoomState.IDLE
+                        status: Constants.RoomState.IDLE,
+                        screensharing: false
                     }),
                     state: Constants.AppState.FOYER,
                     controls: true
@@ -103,16 +99,27 @@ define([
                     return;
                 }
 
-                self.setState({
+                var state = {
                     users: self.state.users.concat({
                         id: peerId,
                         name: 'Guest ' + peerId,
                         stream: null,
                         error: null,
+                        screensharing: peerInfo.userData.screensharing,
                         videoMute: peerInfo.mediaStatus.videoMuted,
-                        audioMute: peerInfo.mediaStatus.audioMuted
+                        audioMute: peerInfo.mediaStatus.audioMuted,
+                        currentStreamRender: 0,
+                        updatedStreamRender: 0
                     })
-                });
+                };
+
+                if(peerInfo.userData.screensharing) {
+                    state.room = Utils.extend(self.state.room, {
+                        screensharing: peerInfo.userData.screensharing
+                    });
+                }
+
+                self.setState(state);
             });
 
             Skylink.on('incomingStream', function(peerId, stream, isSelf) {
@@ -120,6 +127,7 @@ define([
                     users: self.state.users.map(function (user) {
                         if((isSelf && user.id === 0) || user.id === peerId) {
                             user.stream = stream;
+                            user.updatedStreamRender += 1;
                         }
                         return user;
                     })
@@ -136,21 +144,30 @@ define([
             });
 
             Skylink.on('peerUpdated', function(peerId, peerInfo, isSelf) {
-                self.setState({
+                var state = {
                     users: self.state.users.map(function (user) {
                         if((isSelf && user.id === 0) || user.id === peerId) {
                             user.audioMute = peerInfo.mediaStatus.audioMuted;
                             user.videoMute = peerInfo.mediaStatus.videoMuted;
+                            user.screensharing = peerInfo.userData.screensharing;
                         }
                         return user;
                     })
-                });
+                };
+
+                if(self.state.users[0].screensharing === false) {
+                    state.room = Utils.extend(self.state.room, {
+                        screensharing: peerInfo.userData.screensharing
+                    });
+                }
+
+                self.setState(state);
             });
 
             Skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
                 var state = {
                     users: self.state.users.filter(function(user) {
-                            return user.id !== peerId
+                            return user.id !== peerId;
                         })
                 };
 
@@ -159,6 +176,12 @@ define([
                 }
                 else if(state.users.length === 1) {
                     state.controls = true;
+
+                    if(!self.state.users[0].screensharing) {
+                        state.room = Utils.extend(self.state.room, {
+                            screensharing: false
+                        });
+                    }
                 }
 
                 self.setState(state);
@@ -183,6 +206,25 @@ define([
                     });
                 }
             });
+
+            Dispatcher = {
+                sharescreen: function (enable) {
+                    self.setState({
+                        users: self.state.users.map(function (user) {
+                            if(user.id === 0) {
+                                user.screensharing = enable;
+                            }
+                            return user;
+                        }),
+                        room: Utils.extend(self.state.room, {
+                            screensharing: enable
+                        })
+                    });
+                    Skylink.setUserData({
+                        screensharing: enable
+                    })
+                }
+            }
         },
         componentDidMount: function() {
             Router.configure({
@@ -198,7 +240,8 @@ define([
             this.setState({
                 state: Constants.AppState.FOYER,
                 room: Utils.extend(this.state.room, {
-                    status: Constants.RoomState.IDLE
+                    status: Constants.RoomState.IDLE,
+                    screensharing: false
                 }),
                 controls: true
             });
@@ -214,7 +257,8 @@ define([
                 state: Constants.AppState.IN_ROOM,
                 room: Utils.extend(this.state.room, {
                     id: room,
-                    status: Constants.RoomState.IDLE
+                    status: Constants.RoomState.IDLE,
+                    screensharing: false
                 }),
                 controls: true
             });
@@ -223,6 +267,11 @@ define([
                 roomServer: Configs.Skylink.roomServer,
                 apiKey: Configs.Skylink.apiKey,
                 defaultRoom: room
+            }, function() {
+                Skylink.joinRoom({
+                    audio: true,
+                    video: true
+                });
             });
         },
         handleShowControls: function(e) {
