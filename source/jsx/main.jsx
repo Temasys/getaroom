@@ -32,7 +32,6 @@ define([
                         videoMute: false,
                         error: null,
                         screensharing: false,
-                        currentStreamRender: 0,
                         updatedStreamRender: 0
                     }
                 ],
@@ -110,7 +109,6 @@ define([
                         screensharing: peerInfo.userData.screensharing,
                         videoMute: peerInfo.mediaStatus.videoMuted,
                         audioMute: peerInfo.mediaStatus.audioMuted,
-                        currentStreamRender: 0,
                         updatedStreamRender: 0
                     })
                 };
