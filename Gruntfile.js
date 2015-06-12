@@ -86,11 +86,20 @@ module.exports = function (grunt) {
         },
         react: {
             staging: {
-              files: {
+              files: [
+                {
+                  expand: true,
+                  cwd: '<%= staging %>/jsx',
+                  src: ['**/*.jsx'],
+                  dest: '<%= staging %>/js',
+                  ext: '.js'
+                }
+              ]
+              /*files: {
                 '<%= staging %>/js/combined.js': [
-                  '<%= staging %>/jsx/**/*.jsx'
+                  '<%= staging %>/jsx/**.jsx'
                 ]
-              }
+              }*/
             },
             dev: {
               files: [
@@ -190,9 +199,9 @@ module.exports = function (grunt) {
             compile: {
                 options: {
                     baseUrl: '<%= staging %>/js',
-                    mainConfigFile: '<%= staging %>/js/combined.js',
-                    out: '<%= staging %>/js/combined.js',
-                    name: 'combined',
+                    mainConfigFile: '<%= staging %>/js/loader.js',
+                    out: '<%= staging %>/js/loader.js',
+                    name: 'loader',
                     optimize: 'uglify',
                     // generateSourceMaps: true,
                     preserveLicenseComments: false
@@ -220,8 +229,12 @@ module.exports = function (grunt) {
             production: {
                 options: {
                     base: '<%= production %>/',
-                    port: 80,
-                    open: 'http://getaroom.io'
+                    port: 8080,
+                    open: 'https://localhost:8080',
+                    protocol: 'https',
+                    key: grunt.file.read('server.key').toString(),
+                    cert: grunt.file.read('server.crt').toString(),
+                    ca: grunt.file.read('ca.crt').toString()
                 }
             }
         },
@@ -337,7 +350,8 @@ module.exports = function (grunt) {
 
     grunt.registerTask('publish', [
         'clean:production',
-        'copy:production'
+        'copy:production',
+        'connect:production:keepalive'
     ]);
 
     grunt.registerTask('dev', [
