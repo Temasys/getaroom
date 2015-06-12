@@ -350,8 +350,8 @@ module.exports = function (grunt) {
 
     grunt.registerTask('publish', [
         'clean:production',
-        'copy:production',
-        'connect:production:keepalive'
+        'copy:production'
+        //'connect:production:keepalive'
     ]);
 
     grunt.registerTask('dev', [
