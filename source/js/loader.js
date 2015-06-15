@@ -22,8 +22,9 @@ require.config({
         fastclick: '//cdnjs.cloudflare.com/' +
             'ajax/libs/fastclick/0.6.11/fastclick.min',
         router: 'libs/director',
+        //marked: 'libs/marked',
         react: '//cdnjs.cloudflare.com/' +
-            'ajax/libs/react/0.10.0/react.min'
+            'ajax/libs/react/0.10.0/react'
     },
 
     shim: {
@@ -43,7 +44,7 @@ require.config({
             init: function() {
                 return new this.Router();
             }
-        },
+        }
         // facebook: {
         //     exports: 'FB'
         // },

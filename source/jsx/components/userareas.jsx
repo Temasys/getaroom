@@ -29,7 +29,7 @@ define([
         render: function() {
             var userareas = this.props.users.map(function(user) {
                     return (
-                        <div className={'userarea' + (user.screensharing ? ' screensharing' : '')}>
+                        <div key={user.id} className={'userarea' + (user.screensharing ? ' screensharing' : '')}>
                             <UserArea user={user} />
                         </div>
                         );

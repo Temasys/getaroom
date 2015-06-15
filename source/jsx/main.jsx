@@ -8,7 +8,8 @@ define([
     'configs',
     'utils',
     'components/userareas',
-    'components/controls'
+    'components/controls',
+    'components/chat'
 ], function (
     React,
     Router,
@@ -17,7 +18,8 @@ define([
     Configs,
     Utils,
     UserAreas,
-    Controls
+    Controls,
+    Chat
 ) {
 
     var App = React.createClass({
@@ -26,7 +28,7 @@ define([
                 users: [
                     {
                         id: 0,
-                        name: 'Yourself',
+                        name: '',
                         stream: null,
                         audioMute: false,
                         videoMute: false,
@@ -36,8 +38,10 @@ define([
                 ],
                 state: Constants.AppState.FOYER,
                 controls: true,
+                chat: true,
                 room: {
                     id: '',
+                    messages: [],
                     isLocked: false,
                     status: Constants.RoomState.IDLE
                 }
@@ -47,7 +51,7 @@ define([
             var self = this;
 
             //Skylink.setDebugMode(true);
-            Skylink.setLogLevel(Skylink.LOG_LEVEL.ERROR);
+            Skylink.setLogLevel(Skylink.LOG_LEVEL.DEBUG);
 
             Skylink.on('readyStateChange', function(state) {
                 if(state === 0) {
@@ -148,6 +152,7 @@ define([
                             user.audioMute = peerInfo.mediaStatus.audioMuted;
                             user.videoMute = peerInfo.mediaStatus.videoMuted;
                             user.screensharing = peerInfo.userData.screensharing;
+                            user.name = peerInfo.userData.name;
                         }
                         return user;
                     })
@@ -160,6 +165,25 @@ define([
                 }
 
                 self.setState(state);
+            });
+
+           Skylink.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
+                var newMessage = {
+                    user: isSelf ? 0 : peerId,
+                    name: peerInfo.userData.name,
+                    type: Constants.MessageType.MESSAGE,
+                    content: message.content.message,
+                    date: message.content.date
+                };
+
+                var messages = self.state.room.messages;
+                messages.push(newMessage);
+
+                self.setState({
+                    room: Utils.extend(self.state.room, {
+                        messages: messages
+                    })
+                });
             });
 
             Skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
@@ -219,8 +243,41 @@ define([
                         })
                     });
                     Skylink.setUserData({
+                        name: self.state.users[0].name,
                         screensharing: enable
-                    })
+                    });
+                },
+                setName: function(name) {
+                    self.setState({
+                        users: self.state.users.map(function (user) {
+                            if(user.id === 0) {
+                                user.name = name;
+                            }
+                            return user;
+                        })
+                    });
+                    Skylink.setUserData({
+                        name: name,
+                        screensharing: self.state.users[0].screensharing
+                    });
+                },
+                sendMessage: function(message, type) {
+                    Skylink.sendP2PMessage({
+                        message: message,
+                        type: type
+                    });
+                },
+                toggleChat: function(state) {
+                    self.setState({
+                        chat: state !== undefined ? state : !self.state.chat
+                    });
+                },
+                toggleControls: function(state) {
+                    if(self.state.room.status === Constants.RoomState.CONNECTED) {
+                        self.setState({
+                            controls: state !== undefined ? state : !self.state.controls
+                        });
+                    }
                 }
             }
         },
@@ -239,7 +296,8 @@ define([
                 state: Constants.AppState.FOYER,
                 room: Utils.extend(this.state.room, {
                     status: Constants.RoomState.IDLE,
-                    screensharing: false
+                    screensharing: false,
+                    messages: []
                 }),
                 controls: true
             });
@@ -273,19 +331,26 @@ define([
             });
         },
         handleShowControls: function(e) {
-            if(this.state.room.status === Constants.RoomState.CONNECTED) {
-                this.setState({
-                    controls: !this.state.controls
-                });
-            }
+            Dispatcher.toggleControls();
         },
         render: function() {
+
+            var className = '';
+
+            if(this.state.controls) {
+                className = className + 'controls';
+            }
+            if(this.state.chat) {
+                className = className + ' chat';
+            }
+
             return (
-                <div>
+                <div className={className}>
                     <div onClick={this.handleShowControls}>
                         <UserAreas state={this.state} />
                     </div>
                     <Controls state={this.state} />
+                    <Chat state={this.state} />
                 </div>
                 )
         }

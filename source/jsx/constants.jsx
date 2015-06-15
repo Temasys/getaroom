@@ -9,6 +9,10 @@ define([], function() {
             CONNECTING: 'Connecting',
             LOCKED: 'Room is locked',
             CONNECTED: 'Connected'
+        },
+        MessageType: {
+            MESSAGE: 0,
+            ACTION: 1
         }
     };
 });

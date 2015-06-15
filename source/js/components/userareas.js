@@ -29,7 +29,7 @@ define([
         render: function() {
             var userareas = this.props.users.map(function(user) {
                     return (
-                        React.DOM.div( {className:'userarea' + (user.screensharing ? ' screensharing' : '')}, 
+                        React.DOM.div( {key:user.id, className:'userarea' + (user.screensharing ? ' screensharing' : '')}, 
                             UserArea( {user:user} )
                         )
                         );

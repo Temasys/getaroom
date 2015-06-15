@@ -49,11 +49,6 @@ body > a {
     color darken(color2, 20%)
     z-index 1
 
-    &.visible
-        transform scale(1)
-        opacity 1
-        z-index 10
-
     button
         position relative
         margin 12px
@@ -244,6 +239,11 @@ body > a {
 
     nav:hover button.close:after
     	content 'x'
+
+.controls #controls
+    transform scale(1)
+    opacity 1
+    z-index 10
 
 
 #userareas
@@ -505,3 +505,67 @@ body > a {
     80%
         transform translate(40px, 50px)
 
+
+#chat
+    position absolute
+    bottom 0
+    left 50%
+    width 400px
+    margin 0 -200px;
+    background rgba(255,255,255,0.7)
+    border-radius 8px 8px 0 0
+    box-shadow 5px 5px 8px rgba(0,0,0,.2)
+    z-index 9
+    display none
+
+    #input
+        height 50px
+        transition height .2s linear
+
+    #messages
+        width 100%
+        height 0
+        min-height 100%
+        max-height 200px
+        overflow-y auto
+        position relative
+        -webkit-overflow-scrolling touch
+
+        .message
+            width 100%
+            padding 10px 10px 5px
+
+            .name
+                display block
+                padding-bottom 5px
+                font-weight bold
+
+
+    #messageInput
+        position absolute
+        border 0
+        outline 0
+        left 0
+        right 0
+        font-size 1.2em
+        line-height 1.6em
+        padding 10px 13px 5px
+        border-radius 8px 8px 0 0
+        background transparent
+
+    &.expanded
+        #messages
+            height auto
+            max-height 250px
+
+.chat #chat
+    display block
+
+.controls.chat #chat
+    opacity .6
+
+    #messages
+        max-height 50px
+
+    #input
+        height 0px
