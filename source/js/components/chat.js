@@ -86,7 +86,7 @@ define([
             }
 
             return (
-                React.DOM.section( {id:"chat", className:user.name ? 'expanded' : '', onClick:this.handleFocus}, 
+                React.DOM.section( {id:"chat", onClick:this.handleFocus}, 
                     React.DOM.div(null, 
                         React.DOM.div( {id:"messages"}, 
                             React.DOM.div(null, 

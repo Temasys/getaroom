@@ -86,7 +86,7 @@ define([
             }
 
             return (
-                <section id="chat" className={user.name ? 'expanded' : ''} onClick={this.handleFocus}>
+                <section id="chat" onClick={this.handleFocus}>
                     <div>
                         <div id="messages">
                             <div>
