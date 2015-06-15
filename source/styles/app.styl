@@ -516,16 +516,16 @@ body > a {
     border-radius 8px 8px 0 0
     box-shadow 5px 5px 8px rgba(0,0,0,.2)
     z-index 9
-    display none
+    opacity .6
 
     #input
-        height 50px
+        height 0
         transition height .2s linear
 
     #messages
         width 100%
         min-height 100%
-        max-height 200px
+        max-height 50px
         overflow-x hidden
         overflow-y auto
         position relative
@@ -552,9 +552,15 @@ body > a {
         background transparent
 
 .chat #chat
-    display block
+    opacity 1
 
-.controls.chat #chat
+    #input
+        height 50px
+
+    #messages
+        max-height 250px
+
+.controls #chat
     opacity .6
 
     #messages

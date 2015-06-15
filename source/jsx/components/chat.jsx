@@ -19,6 +19,7 @@ define([
     var Chat = React.createClass({
         handleFocus: function() {
             Dispatcher.toggleControls(false);
+            Dispatcher.toggleChat();
         },
         handleSendMessage: function(e) {
             if(!e.keyCode || e.keyCode === 13) {
@@ -34,6 +35,7 @@ define([
                 }
 
                 e.currentTarget.value = '';
+                Dispatcher.toggleControls(false);
             }
         },
         componentDidUpdate: function() {
@@ -86,9 +88,9 @@ define([
             }
 
             return (
-                <section id="chat" onClick={this.handleFocus}>
+                <section id="chat">
                     <div>
-                        <div id="messages">
+                        <div id="messages" onClick={this.handleFocus}>
                             <div>
                                {res}
                             </div>
