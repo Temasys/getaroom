@@ -74,7 +74,7 @@ define([
 
                 if(message.img) {
                     res.push(
-                        React.DOM.div( {key:message.date, className:className}, 
+                        React.DOM.div( {key:message.date, className:className},
                             React.DOM.img( {src:message.img} ),
                             React.DOM.span( {className:"name"}, message.name),
                             React.DOM.span( {className:"body", dangerouslySetInnerHTML:{__html: this.marked(message.content)}})
@@ -83,7 +83,7 @@ define([
                 }
                 else {
                     res.push(
-                        React.DOM.div( {key:message.date, className:className}, 
+                        React.DOM.div( {key:message.date, className:className},
                             React.DOM.span( {className:"name"}, message.name),
                             React.DOM.span( {className:"body", dangerouslySetInnerHTML:{__html: this.marked(message.content)}})
                         )
@@ -92,15 +92,15 @@ define([
             }
 
             return (
-                React.DOM.section( {id:"chat"}, 
-                    React.DOM.div(null, 
-                        React.DOM.div( {id:"messages", onClick:this.handleFocus}, 
-                            React.DOM.div(null, 
+                React.DOM.section( {id:"chat"},
+                    React.DOM.div(null,
+                        React.DOM.div( {id:"messages", onClick:this.handleFocus},
+                            React.DOM.div(null,
                                res
                             )
                         ),
-                        React.DOM.div( {id:"input", className:this.props.state.room.status !== Constants.RoomState.CONNECTED ? 'disabled' : ''}, 
-                            React.DOM.input( {id:"messageInput", type:"text", placeholder:user.name ? 'Chat message' : 'What‘s your name?', autocomplete:"off", onKeyDown:this.handleSendMessage} )
+                        React.DOM.div( {id:"input", className:this.props.state.room.status !== Constants.RoomState.CONNECTED ? 'disabled' : ''},
+                            React.DOM.input( {id:"messageInput", type:"text", placeholder:user.name ? 'Chat message' : 'What‘s your name?', autoComplete:"off", onKeyDown:this.handleSendMessage} )
                         )
                     )
                 )

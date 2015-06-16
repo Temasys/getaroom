@@ -100,7 +100,7 @@ define([
                             </div>
                         </div>
                         <div id="input" className={this.props.state.room.status !== Constants.RoomState.CONNECTED ? 'disabled' : ''}>
-                            <input id="messageInput" type="text" placeholder={user.name ? 'Chat message' : 'What‘s your name?'} autocomplete='off' onKeyDown={this.handleSendMessage} />
+                            <input id="messageInput" type="text" placeholder={user.name ? 'Chat message' : 'What‘s your name?'} autoComplete='off' onKeyDown={this.handleSendMessage} />
                         </div>
                     </div>
                 </section>
