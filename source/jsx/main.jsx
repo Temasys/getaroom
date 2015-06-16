@@ -168,11 +168,15 @@ define([
             });
 
            Skylink.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
+                if(message.content.type !== 'chat') {
+                    return;
+                }
+
                 var newMessage = {
                     user: isSelf ? 0 : peerId,
                     name: peerInfo.userData.name,
                     type: Constants.MessageType.MESSAGE,
-                    content: message.content.message,
+                    content: message.content.content,
                     date: message.content.date
                 };
 
@@ -261,10 +265,11 @@ define([
                         screensharing: self.state.users[0].screensharing
                     });
                 },
-                sendMessage: function(message, type) {
+                sendMessage: function(content, type) {
                     Skylink.sendP2PMessage({
-                        message: message,
-                        type: type
+                        content: content,
+                        type: type || 'chat',
+                        date: (new Date()).toISOString()
                     });
                 },
                 toggleChat: function(state) {
