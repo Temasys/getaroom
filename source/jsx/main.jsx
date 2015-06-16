@@ -345,7 +345,8 @@ define([
             }
             if((webrtcDetectedBrowser === 'chrome' && webrtcDetectedVersion > 34) ||
                 (webrtcDetectedBrowser === 'firefox' && webrtcDetectedVersion > 33) ||
-                (AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.HasScreensharingFeature)) {
+                (AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.plugin &&
+                    AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable)) {
                 className = className + ' enableScreensharing';
             }
 
