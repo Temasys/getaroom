@@ -5,19 +5,23 @@ define([
     'utils',
     'constants',
     'configs',
-    'skylink'
-    //'marked'
+    'skylink',
+    'marked'
 ], function (
     React,
     Utils,
     Constants,
     Configs,
-    Skylink
-    //Marked
+    Skylink,
+    Marked
 ) {
 
     var Chat = React.createClass({
-        handleFocus: function() {
+        marked: Marked,
+        handleFocus: function(e) {
+            if(e.target.tagName === 'A') {
+                return;
+            }
             Dispatcher.toggleControls(false);
             Dispatcher.toggleChat();
         },
@@ -73,7 +77,7 @@ define([
                         <div key={message.date} className={className}>
                             <img src={message.img} />
                             <span className='name'>{message.name}</span>
-                            <span className='body'>{message.content}</span>
+                            <span className='body' dangerouslySetInnerHTML={{__html: this.marked(message.content)}}></span>
                         </div>
                         );
                 }
@@ -81,7 +85,7 @@ define([
                     res.push(
                         <div key={message.date} className={className}>
                             <span className='name'>{message.name}</span>
-                            <span className='body'>{message.content}</span>
+                            <span className='body' dangerouslySetInnerHTML={{__html: this.marked(message.content)}}></span>
                         </div>
                         );
                 }

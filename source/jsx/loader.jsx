@@ -22,7 +22,7 @@ require.config({
         fastclick: '//cdnjs.cloudflare.com/' +
             'ajax/libs/fastclick/0.6.11/fastclick.min',
         router: 'libs/director',
-        //marked: 'libs/marked',
+        marked: 'libs/marked',
         react: '//cdnjs.cloudflare.com/' +
             'ajax/libs/react/0.10.0/react'
     },
