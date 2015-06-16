@@ -90,7 +90,7 @@ define([
                         </p>
                         <p>
                             Just hit the &quot;Start a new call&quot; button below and share the link.<br /><br />
-                            This app is a <a href="https://temasys.github.io" target="_blank">SkylinkJS</a> tech demo and you can fork the <a href="https://github.com/serrynaimo/getaroom" target="_blank">code on github</a>.
+                            This app is a <a href="https://temasys.github.io" target="_blank">SkylinkJS</a> tech demo and you can fork the <a href="https://github.com/Temasys/getaroom" target="_blank">code on github</a>.
                         </p>
                     </div>
                     );
