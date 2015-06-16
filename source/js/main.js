@@ -343,6 +343,11 @@ define([
             if(this.state.chat) {
                 className = className + ' chat';
             }
+            if((webrtcDetectedBrowser === 'chrome' && webrtcDetectedVersion > 34) ||
+                (webrtcDetectedBrowser === 'firefox' && webrtcDetectedVersion > 33) ||
+                (AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.HasScreensharingFeature)) {
+                className = className + ' enableScreensharing';
+            }
 
             return (
                 React.DOM.div( {className:className}, 

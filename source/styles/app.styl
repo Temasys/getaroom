@@ -63,7 +63,7 @@ body > a {
         &#videoMute
             float left
             font-face Helvetica Neue, Helvetica, Arial, sans-serif
-            margin-left 24px
+            margin-left 65px
             background-image url(/img/camera.svg)
             background-repeat no-repeat
             background-position 50% 50%
@@ -79,6 +79,7 @@ body > a {
 
         &#screenshare
             float left
+            display none
             font-face Helvetica Neue, Helvetica, Arial, sans-serif
             background-image url(/img/screen.svg)
             background-repeat no-repeat
@@ -90,6 +91,11 @@ body > a {
             font-face Helvetica Neue, Helvetica, Arial, sans-serif
             background-image url(/img/lock.svg)
             background-repeat no-repeat
+            background-position 50% 50%
+            background-size 40% 40%
+
+        &#roomLock.on
+            background-image url(/img/unlock.svg)
             background-position 50% 50%
             background-size 40% 40%
 
@@ -239,6 +245,15 @@ body > a {
 
     nav:hover button.close:after
     	content 'x'
+
+
+.enableScreensharing #controls button
+    &#videoMute
+        margin-left 24px !important
+
+    &#screenshare
+        display block !important
+
 
 .controls #controls
     transform scale(1)
