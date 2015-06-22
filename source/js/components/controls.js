@@ -17,8 +17,18 @@ define([
 ) {
 
     var Controls = React.createClass({displayName: 'Controls',
+        handleMCUClick: function(e) {
+            Dispatcher.setMCU(e.target.checked);
+        },
+        componentDidUpdate: function() {
+            var $mcu = document.getElementById('mcu');
+            if($mcu) {
+                $mcu.checked = this.props.state.room.useMCU;
+            }
+        },
         handleStartRoom: function() {
-            var room = Utils.uuid(6);
+            var room = this.props.state.room.useMCU ? 'm' : '';
+            room = room + Utils.uuid(6);
             Router.setRoute('/' + room);
         },
         handleLeaveRoom: function() {
@@ -92,6 +102,12 @@ define([
                             "Just hit the \"Start a new call\" button below and share the link.",React.DOM.br(null ),React.DOM.br(null ),
                             "This app is a ", React.DOM.a( {href:"https://temasys.github.io", target:"_blank"}, "SkylinkJS"), " tech demo and you can fork the ", React.DOM.a( {href:"https://github.com/Temasys/getaroom", target:"_blank"}, "code on github"),"."
                         )
+                    )
+                    );
+
+                res.push(
+                    React.DOM.div( {className:"link"}, 
+                        React.DOM.input( {type:"checkbox", id:"mcu", name:"mcu", onClick:this.handleMCUClick} ), " ", React.DOM.label( {for:"mcu"}, "Use Skylink Media Relay")
                     )
                     );
             }

@@ -17,8 +17,18 @@ define([
 ) {
 
     var Controls = React.createClass({
+        handleMCUClick: function(e) {
+            Dispatcher.setMCU(e.target.checked);
+        },
+        componentDidUpdate: function() {
+            var $mcu = document.getElementById('mcu');
+            if($mcu) {
+                $mcu.checked = this.props.state.room.useMCU;
+            }
+        },
         handleStartRoom: function() {
-            var room = Utils.uuid(6);
+            var room = this.props.state.room.useMCU ? 'm' : '';
+            room = room + Utils.uuid(6);
             Router.setRoute('/' + room);
         },
         handleLeaveRoom: function() {
@@ -92,6 +102,12 @@ define([
                             Just hit the &quot;Start a new call&quot; button below and share the link.<br /><br />
                             This app is a <a href="https://temasys.github.io" target="_blank">SkylinkJS</a> tech demo and you can fork the <a href="https://github.com/Temasys/getaroom" target="_blank">code on github</a>.
                         </p>
+                    </div>
+                    );
+
+                res.push(
+                    <div className="link">
+                        <input type="checkbox" id="mcu" name="mcu" onClick={this.handleMCUClick} /> <label for="mcu">Use Skylink Media Relay</label>
                     </div>
                     );
             }

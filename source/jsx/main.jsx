@@ -43,7 +43,8 @@ define([
                     id: '',
                     messages: [],
                     isLocked: false,
-                    status: Constants.RoomState.IDLE
+                    status: Constants.RoomState.IDLE,
+                    useMCU: true
                 }
             };
         },
@@ -251,6 +252,13 @@ define([
                         screensharing: enable
                     });
                 },
+                setMCU: function(state) {
+                    self.setState({
+                        room: Utils.extend(self.state.room, {
+                            useMCU: !!state
+                        })
+                    });
+                },
                 setName: function(name) {
                     self.setState({
                         users: self.state.users.map(function (user) {
@@ -313,20 +321,23 @@ define([
             }
 
             room = room.toString();
+            var useMCU = room.substr(0,1) === 'm';
 
             this.setState({
                 state: Constants.AppState.IN_ROOM,
                 room: Utils.extend(this.state.room, {
                     id: room,
                     status: Constants.RoomState.IDLE,
-                    screensharing: false
+                    screensharing: false,
+                    useMCU: useMCU
                 }),
                 controls: true
             });
 
             Skylink.init({
                 roomServer: Configs.Skylink.roomServer,
-                apiKey: Configs.Skylink.apiKey,
+                apiKey: useMCU ?
+                    Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
                 defaultRoom: room
             }, function() {
                 Skylink.joinRoom({
