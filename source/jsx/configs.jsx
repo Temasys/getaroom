@@ -24,7 +24,7 @@ define([], function() {
         maxUsers: 4
     };
 
-    var config = {
+    var prod = {
         env: 'prod',
         Skylink: {
             apiMCUKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf',
