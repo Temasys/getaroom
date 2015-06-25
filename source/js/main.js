@@ -198,7 +198,7 @@ define([
                         })
                 };
 
-                if(state.users.length === 2) {
+                if(state.users.length === Configs.maxUsers - 1) {
                     Skylink.unlockRoom();
                 }
                 else if(state.users.length === 1) {
