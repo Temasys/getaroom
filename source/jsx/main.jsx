@@ -43,7 +43,8 @@ define([
                     id: '',
                     messages: [],
                     isLocked: false,
-                    status: Constants.RoomState.IDLE
+                    status: Constants.RoomState.IDLE,
+                    useMCU: true
                 }
             };
         },
@@ -197,7 +198,7 @@ define([
                         })
                 };
 
-                if(state.users.length === 2) {
+                if(state.users.length === Configs.maxUsers - 1) {
                     Skylink.unlockRoom();
                 }
                 else if(state.users.length === 1) {
@@ -249,6 +250,13 @@ define([
                     Skylink.setUserData({
                         name: self.state.users[0].name,
                         screensharing: enable
+                    });
+                },
+                setMCU: function(state) {
+                    self.setState({
+                        room: Utils.extend(self.state.room, {
+                            useMCU: !!state
+                        })
                     });
                 },
                 setName: function(name) {
@@ -313,20 +321,23 @@ define([
             }
 
             room = room.toString();
+            var useMCU = room.substr(0,1) === 'm';
 
             this.setState({
                 state: Constants.AppState.IN_ROOM,
                 room: Utils.extend(this.state.room, {
                     id: room,
                     status: Constants.RoomState.IDLE,
-                    screensharing: false
+                    screensharing: false,
+                    useMCU: useMCU
                 }),
                 controls: true
             });
 
             Skylink.init({
                 roomServer: Configs.Skylink.roomServer,
-                apiKey: Configs.Skylink.apiKey,
+                apiKey: useMCU ?
+                    Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
                 defaultRoom: room
             }, function() {
                 Skylink.joinRoom({
