@@ -1,4 +1,4 @@
-/*! adapterjs - v0.11.0 - 2015-06-08 */
+/*! adapterjs - v0.11.0 - 2015-07-16 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -340,9 +340,21 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
       try {
         event.cancelBubble = true;
       } catch(error) { }
+
+        var pluginInstallInterval = setInterval(function(){
+            if(! isIE) {
+              navigator.plugins.refresh(false);
+            }
+            AdapterJS.WebRTCPlugin.isPluginInstalled(
+              AdapterJS.WebRTCPlugin.pluginInfo.prefix,
+              AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+              AdapterJS.WebRTCPlugin.defineWebRTCInterface,
+              function() { //Does nothing because not used here
+              });
+          } , 500);
     });
-  }
-  else {
+
+  }else {
     c.document.close();
   }
   AdapterJS.addEvent(c.document, 'click', function() {
