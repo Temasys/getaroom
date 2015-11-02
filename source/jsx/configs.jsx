@@ -12,7 +12,7 @@ define([], function() {
             apiMCUKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf',
             apiNoMCUKey: '7e31b061-71e6-4dd7-bd55-516579973930'
         },
-        maxUsers: 4
+        maxUsers: 10
     };
 
     var dev = {
@@ -21,7 +21,7 @@ define([], function() {
             apiMCUKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf',
             apiNoMCUKey: '7e31b061-71e6-4dd7-bd55-516579973930'
         },
-        maxUsers: 4
+        maxUsers: 10
     };
 
     var prod = {
@@ -30,7 +30,7 @@ define([], function() {
             apiMCUKey: '7bcba74c-ee42-4fb7-ba17-94a9edb3c1bf',
             apiNoMCUKey: '7e31b061-71e6-4dd7-bd55-516579973930'
         },
-        maxUsers: 4
+        maxUsers: 10
     };
 
     return location.host === 'getaroom.io' ? prod : (
