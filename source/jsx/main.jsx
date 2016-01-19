@@ -44,7 +44,7 @@ define([
                     messages: [],
                     isLocked: false,
                     status: Constants.RoomState.IDLE,
-                    useMCU: true
+                    useMCU: false
                 }
             };
         },
