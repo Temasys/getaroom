@@ -330,10 +330,51 @@ body > a {
             top 50%
             left 50%
 
-    &.split5, &.split6, &.split7, &.split8, &.split9
+    &.split5
+        .userarea:nth-child(1)
+            width 33.33333vw
+            height 50vh
+
+        .userarea:nth-child(2)
+            width 33.33333vw
+            height 50vh
+
+        .userarea:nth-child(3)
+            width 33.33333vw
+            height 50vh
+
+        .userarea:nth-child(4)
+            width 50vw
+            height 50vh
+
+        .userarea:nth-child(5)
+            width 50vw
+            height 50vh
+
+    &.split6
+        .userarea
+            width 33.33333vw
+            height 50vh
+
+    &.split7, &.split8, &.split9
         .userarea
             width 33.33333vw
             height 33.33333vh
+
+    &.split10, &.split11, &.split12
+        .userarea
+            width 25vw
+            height 33.33333vh
+
+    &.split13, &.split14, &.split15, &.split16
+        .userarea
+            width 25vw
+            height 25vh
+
+    &.split17, &.split18, &.split19, &.split20
+        .userarea
+            width 20vw
+            height 25vh
 
     #us0
         transform rotateY(-180deg);
