@@ -21,6 +21,16 @@ define([
     Controls,
     Chat
 ) {
+    var getQuery = function (variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            if (decodeURIComponent(pair[0]) == variable) {
+                return decodeURIComponent(pair[1]);
+            }
+        }
+    };
 
     var App = React.createClass({displayName: 'App',
         getInitialState: function() {
@@ -95,31 +105,58 @@ define([
                     controls: true
                 });
 
-                alert("ERROR: " + error.toString());
+                //alert("ERROR: " + error.toString());
             });
 
             Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
-                if(self.state.users.length === Configs.maxUsers || isSelf) {
+                if(self.state.users.length === Configs.maxUsers ) {
                     return;
                 }
 
-                var state = {
-                    users: self.state.users.concat({
-                        id: peerId,
-                        name: 'Guest ' + peerId,
-                        stream: null,
-                        error: null,
-                        screensharing: peerInfo.userData.screensharing,
-                        videoMute: peerInfo.mediaStatus.videoMuted,
-                        audioMute: peerInfo.mediaStatus.audioMuted,
-                        updatedStreamRender: 0
-                    })
-                };
+                var state = {};
+                var initialUsername = 'User ' + peerId;
 
-                if(peerInfo.userData.screensharing) {
-                    state.room = Utils.extend(self.state.room, {
-                        screensharing: peerInfo.userData.screensharing
-                    });
+                if (isSelf) {
+                    state = {
+                        users: self.state.users.map(function (user) {
+                            if(isSelf && user.id === 0) {
+                                user.name = initialUsername;
+
+                                Skylink.setUserData({
+                                    screensharing: user.screensharing,
+                                    name: initialUsername
+                                });
+                            }
+                            return user;
+                        })
+                    };
+                }
+                else {
+                    state = {
+                        users: self.state.users.concat({
+                            id: peerId,
+                            name: initialUsername,
+                            stream: null,
+                            error: null,
+                            screensharing: peerInfo.userData.screensharing,
+                            videoMute: peerInfo.mediaStatus.videoMuted,
+                            audioMute: peerInfo.mediaStatus.audioMuted,
+                            updatedStreamRender: 0
+                        })
+                    };
+
+                    if(peerInfo.userData.screensharing) {
+                        state.room = Utils.extend(self.state.room, {
+                            screensharing: peerInfo.userData.screensharing
+                        });
+                    }
+
+                    if(self.state.users.length === Configs.maxUsers) {
+                        Skylink.lockRoom();
+                    }
+                    else if(self.state.users.length >= 2) {
+                        state.controls = false;
+                    }
                 }
 
                 self.setState(state);
@@ -135,13 +172,6 @@ define([
                         return user;
                     })
                 };
-
-                if(self.state.users.length === Configs.maxUsers) {
-                    Skylink.lockRoom();
-                }
-                else if(self.state.users.length >= 2) {
-                    state.controls = false;
-                }
 
                 self.setState(state);
             });
@@ -321,7 +351,8 @@ define([
             }
 
             room = room.toString();
-            var useMCU = room.substr(0,1) === 'm';
+            //var useMCU = room.substr(0,1) === 'm';
+            var useMCU = getQuery('mcu') === '1';
 
             this.setState({
                 state: Constants.AppState.IN_ROOM,
@@ -367,17 +398,17 @@ define([
             }
 
             return (
-                React.DOM.div( {className:className}, 
-                    React.DOM.div( {onClick:this.handleShowControls}, 
-                        UserAreas( {state:this.state} )
-                    ),
-                    Controls( {state:this.state} ),
-                    Chat( {state:this.state} )
+                React.DOM.div({className: className}, 
+                    React.DOM.div({onClick: this.handleShowControls}, 
+                        UserAreas({state: this.state})
+                    ), 
+                    Controls({state: this.state}), 
+                    Chat({state: this.state})
                 )
                 )
         }
     });
 
-    React.renderComponent(App(null ),
+    React.renderComponent(App(null),
         document.getElementById('app'));
 });

@@ -105,38 +105,58 @@ define([
                     controls: true
                 });
 
-                alert("ERROR: " + error.toString());
+                //alert("ERROR: " + error.toString());
             });
 
             Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
-                if(self.state.users.length === Configs.maxUsers || isSelf) {
+                if(self.state.users.length === Configs.maxUsers ) {
                     return;
                 }
 
-                var state = {
-                    users: self.state.users.concat({
-                        id: peerId,
-                        name: 'Guest ' + peerId,
-                        stream: null,
-                        error: null,
-                        screensharing: peerInfo.userData.screensharing,
-                        videoMute: peerInfo.mediaStatus.videoMuted,
-                        audioMute: peerInfo.mediaStatus.audioMuted,
-                        updatedStreamRender: 0
-                    })
-                };
+                var state = {};
+                var initialUsername = 'User ' + peerId;
 
-                if(peerInfo.userData.screensharing) {
-                    state.room = Utils.extend(self.state.room, {
-                        screensharing: peerInfo.userData.screensharing
-                    });
-                }
+                if (isSelf) {
+                    state = {
+                        users: self.state.users.map(function (user) {
+                            if(isSelf && user.id === 0) {
+                                user.name = initialUsername;
 
-                if(self.state.users.length === Configs.maxUsers) {
-                    Skylink.lockRoom();
+                                Skylink.setUserData({
+                                    screensharing: user.screensharing,
+                                    name: initialUsername
+                                });
+                            }
+                            return user;
+                        })
+                    };
                 }
-                else if(self.state.users.length >= 2) {
-                    state.controls = false;
+                else {
+                    state = {
+                        users: self.state.users.concat({
+                            id: peerId,
+                            name: initialUsername,
+                            stream: null,
+                            error: null,
+                            screensharing: peerInfo.userData.screensharing,
+                            videoMute: peerInfo.mediaStatus.videoMuted,
+                            audioMute: peerInfo.mediaStatus.audioMuted,
+                            updatedStreamRender: 0
+                        })
+                    };
+
+                    if(peerInfo.userData.screensharing) {
+                        state.room = Utils.extend(self.state.room, {
+                            screensharing: peerInfo.userData.screensharing
+                        });
+                    }
+
+                    if(self.state.users.length === Configs.maxUsers) {
+                        Skylink.lockRoom();
+                    }
+                    else if(self.state.users.length >= 2) {
+                        state.controls = false;
+                    }
                 }
 
                 self.setState(state);

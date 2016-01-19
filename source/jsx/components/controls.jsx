@@ -79,6 +79,9 @@ define([
         handleClose: function(e) {
             Dispatcher.toggleControls();
         },
+        handleDisplayName: function (e) {
+            Dispatcher.setName(e.currentTarget.value);
+        },
         render: function() {
             var res = [];
             var user = this.props.state.users.filter(function (user) {
@@ -147,6 +150,14 @@ define([
 
                     res.push(
                         <button id="roomLock" onClick={this.handleRoomLock} className={this.props.state.room.isLocked ? '' : 'on'} title="Lock/Unlock Room"></button>
+                        );
+
+                    res.push(
+                        <div className="displayName">
+                            <span>Display Name</span>
+                            <input id="displayName" type="text" value={user.name} placeholder="Display Name"
+                                title="Your Display Name in Chat" onChange={this.handleDisplayName} />
+                        </div>
                         );
 
                 }

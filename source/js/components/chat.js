@@ -31,12 +31,8 @@ define([
                     return user.id === 0;
                 })[0];
 
-                if(user.name) {
-                    Dispatcher.sendMessage(e.currentTarget.value);
-                }
-                else {
-                    Dispatcher.setName(e.currentTarget.value);
-                }
+                Dispatcher.sendMessage(e.currentTarget.value);
+                //Dispatcher.setName(e.currentTarget.value);
 
                 e.currentTarget.value = '';
                 Dispatcher.toggleControls(false);
@@ -51,7 +47,7 @@ define([
         render: function() {
             if(this.props.state.state !== Constants.AppState.IN_ROOM) {
                 return (
-                        React.DOM.section( {id:"chat", className:"offline"})
+                        React.DOM.section({id: "chat", className: "offline"})
                     );
             }
 
@@ -74,33 +70,33 @@ define([
 
                 if(message.img) {
                     res.push(
-                        React.DOM.div( {key:message.date, className:className}, 
-                            React.DOM.img( {src:message.img} ),
-                            React.DOM.span( {className:"name"}, message.name),
-                            React.DOM.span( {className:"body", dangerouslySetInnerHTML:{__html: this.marked(message.content)}})
+                        React.DOM.div({key: message.date, className: className}, 
+                            React.DOM.img({src: message.img}), 
+                            React.DOM.span({className: "name"}, message.name), 
+                            React.DOM.span({className: "body", dangerouslySetInnerHTML: {__html: this.marked(message.content)}})
                         )
                         );
                 }
                 else {
                     res.push(
-                        React.DOM.div( {key:message.date, className:className}, 
-                            React.DOM.span( {className:"name"}, message.name),
-                            React.DOM.span( {className:"body", dangerouslySetInnerHTML:{__html: this.marked(message.content)}})
+                        React.DOM.div({key: message.date, className: className}, 
+                            React.DOM.span({className: "name"}, message.name), 
+                            React.DOM.span({className: "body", dangerouslySetInnerHTML: {__html: this.marked(message.content)}})
                         )
                         );
                 }
             }
 
             return (
-                React.DOM.section( {id:"chat"}, 
+                React.DOM.section({id: "chat"}, 
                     React.DOM.div(null, 
-                        React.DOM.div( {id:"messages", onClick:this.handleFocus}, 
+                        React.DOM.div({id: "messages", onClick: this.handleFocus}, 
                             React.DOM.div(null, 
                                res
                             )
-                        ),
-                        React.DOM.div( {id:"input", className:this.props.state.room.status !== Constants.RoomState.CONNECTED ? 'disabled' : ''}, 
-                            React.DOM.input( {id:"messageInput", type:"text", placeholder:user.name ? 'Chat message' : 'What‘s your name?', autoComplete:"off", onKeyDown:this.handleSendMessage} )
+                        ), 
+                        React.DOM.div({id: "input", className: this.props.state.room.status !== Constants.RoomState.CONNECTED ? 'disabled' : ''}, 
+                            React.DOM.input({id: "messageInput", type: "text", placeholder: "Chat message", autoComplete: "off", onKeyDown: this.handleSendMessage})
                         )
                     )
                 )

@@ -31,12 +31,8 @@ define([
                     return user.id === 0;
                 })[0];
 
-                if(user.name) {
-                    Dispatcher.sendMessage(e.currentTarget.value);
-                }
-                else {
-                    Dispatcher.setName(e.currentTarget.value);
-                }
+                Dispatcher.sendMessage(e.currentTarget.value);
+                //Dispatcher.setName(e.currentTarget.value);
 
                 e.currentTarget.value = '';
                 Dispatcher.toggleControls(false);
@@ -100,7 +96,7 @@ define([
                             </div>
                         </div>
                         <div id="input" className={this.props.state.room.status !== Constants.RoomState.CONNECTED ? 'disabled' : ''}>
-                            <input id="messageInput" type="text" placeholder={user.name ? 'Chat message' : 'What‘s your name?'} autoComplete='off' onKeyDown={this.handleSendMessage} />
+                            <input id="messageInput" type="text" placeholder="Chat message" autoComplete="off" onKeyDown={this.handleSendMessage} />
                         </div>
                     </div>
                 </section>

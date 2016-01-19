@@ -9,6 +9,7 @@ require.config({
     ],
 
     paths: {
+        history: 'libs/history',
         socketio: '//cdn.temasys.com.sg/libraries/'
             + 'socket.io-client/1.0.6/socket.io',
         adapter: 'libs/adapter',
@@ -41,6 +42,9 @@ require.config({
         },
         router: {
             exports: 'Router',
+            deps: [
+                'history'
+            ],
             init: function() {
                 return new this.Router();
             }
