@@ -21,6 +21,16 @@ define([
     Controls,
     Chat
 ) {
+    var getQuery = function (variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            if (decodeURIComponent(pair[0]) == variable) {
+                return decodeURIComponent(pair[1]);
+            }
+        }
+    };
 
     var App = React.createClass({
         getInitialState: function() {
@@ -321,7 +331,8 @@ define([
             }
 
             room = room.toString();
-            var useMCU = room.substr(0,1) === 'm';
+            //var useMCU = room.substr(0,1) === 'm';
+            var useMCU = getQuery('mcu') === '1';
 
             this.setState({
                 state: Constants.AppState.IN_ROOM,

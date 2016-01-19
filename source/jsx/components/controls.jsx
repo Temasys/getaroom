@@ -27,10 +27,11 @@ define([
             }
         },
         handleStartRoom: function() {
-            var room = this.props.state.room.useMCU ? 'm' : '';
-            room = room + Utils.uuid(6);
+            //var room = this.props.state.room.useMCU ? 'm' : '';
+            var room = Utils.uuid(6);
+
             // Commenting this out. This may result in not so good UX but it works cross-browsers
-            window.location.pathname = '/' + room;
+            window.location.href = '/' + room + '?mcu=' + (this.props.state.room.useMCU ? '1' : '0');
             //Router.setRoute('/' + room);
         },
         handleLeaveRoom: function() {
