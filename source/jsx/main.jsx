@@ -132,6 +132,13 @@ define([
                     });
                 }
 
+                if(self.state.users.length === Configs.maxUsers) {
+                    Skylink.lockRoom();
+                }
+                else if(self.state.users.length >= 2) {
+                    state.controls = false;
+                }
+
                 self.setState(state);
             });
 
@@ -145,13 +152,6 @@ define([
                         return user;
                     })
                 };
-
-                if(self.state.users.length === Configs.maxUsers) {
-                    Skylink.lockRoom();
-                }
-                else if(self.state.users.length >= 2) {
-                    state.controls = false;
-                }
 
                 self.setState(state);
             });
