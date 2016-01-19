@@ -29,7 +29,9 @@ define([
         handleStartRoom: function() {
             var room = this.props.state.room.useMCU ? 'm' : '';
             room = room + Utils.uuid(6);
-            Router.setRoute('/' + room);
+            // Commenting this out. This may result in not so good UX but it works cross-browsers
+            window.location.pathname = '/' + room;
+            //Router.setRoute('/' + room);
         },
         handleLeaveRoom: function() {
             Skylink.leaveRoom();
