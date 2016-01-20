@@ -206,7 +206,7 @@ define([
           );
 
           res.push(
-            <button id="screenshare" onClick={this.handleScreenshare} className={(user.screensharing ? 'on' : '') + ' ' + (this.props.state.room.preventScreenshare ? 'muted' : '')} title="Share your screen"></button>
+            <button id="screenshare" onClick={this.handleScreenshare} className={(user.screensharing ? 'on' : '') + ' ' + (this.props.state.room.preventScreenshare || this.props.state.room.preventInitialScreenshare ? 'muted' : '')} title="Share your screen"></button>
           );
 
           res.push(
