@@ -355,12 +355,21 @@ define([
           })
         };
 
-        // Set Room status of screensharing if User screensharing is false
-        if(app.state.users[0].screensharing === false) {
+        var isRoomScreensharing = peerInfo.userData.screensharing;
+
+        if (!isSelf) {
           state.room = Utils.extend(app.state.room, {
-            screensharing: peerInfo.userData.screensharing
+            preventScreenshare: isRoomScreensharing,
+            screensharing: isRoomScreensharing
           });
         }
+
+        // Set Room status of screensharing if User screensharing is false
+        /*if(app.state.users[0].screensharing === false) {
+          state.room = Utils.extend(app.state.room, {
+            screensharing:
+          });
+        }*/
 
         app.setState(state);
       });
