@@ -326,7 +326,8 @@ define([
           //   prevent other users from screensharing
           if(peerInfo.userData.screensharing) {
             state.room = Utils.extend(app.state.room, {
-              screensharing: peerInfo.userData.screensharing
+              screensharing: true,
+              preventScreenshare: true
             });
           }
         }
@@ -379,6 +380,8 @@ define([
        * This triggers when a Peer or when User has left the Room
        */
       Skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
+        peerInfo.userData = peerInfo.userData || {};
+
         var state = {
           users: app.state.users.filter(function(user) {
             return user.id !== peerId || (isSelf && user.id !== 0);
@@ -391,9 +394,19 @@ define([
           state.controls = true;
 
           // If User does not have screensharing
-          if(!app.state.users[0].screensharing) {
+          /*if(!app.state.users[0].screensharing) {
+            roomState.screensharing = false;
             state.room = Utils.extend(app.state.room, {
               screensharing: false
+            });
+          }*/
+        } else {
+          // If the Peer is meant to be cleared and screensharing mode is from Peer
+          //  turn off screensharing mode and prevent screenshare mode
+          if (peerInfo.userData.screensharing) {
+            state.room = Utils.extend(app.state.room, {
+              screensharing: false,
+              preventScreenshare: false
             });
           }
         }
