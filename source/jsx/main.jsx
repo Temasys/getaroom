@@ -414,7 +414,7 @@ define([
             user: 0,
             name: 'GAR.io',
             type: Constants.MessageType.MESSAGE,
-            content: error.message || error,
+            content: (isScreensharing ? 'Screen' : 'Media') + ': ' + (error.message || error),
             date: (new Date()).toISOString()
           });
 
@@ -450,7 +450,7 @@ define([
           user: 0,
           name: 'GAR.io',
           type: Constants.MessageType.MESSAGE,
-          content: (isScreensharing ? 'Screensharing' : '') + 'Media access has been success',
+          content: (isScreensharing ? 'Screen' : 'Media') + ': Access has been granted',
           date: (new Date()).toISOString()
         });
 
