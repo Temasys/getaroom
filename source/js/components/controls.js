@@ -199,7 +199,7 @@ define([
           );
 
           res.push(
-            React.DOM.button({id: "screenshare", onClick: this.handleScreenshare, className: user.screensharing ? 'on' : (this.props.state.room.screensharing || window.webrtcDetectedBrowser === 'opera' ? 'muted' : ''), title: "Share your screen"})
+            React.DOM.button({id: "screenshare", onClick: this.handleScreenshare, className: user.screensharing ? 'on' : '', title: "Share your screen"})
           );
 
           res.push(
