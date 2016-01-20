@@ -91,11 +91,18 @@ define([
      * Handles the screensharing button
      */
     handleScreenshare: function() {
+      // Disable user from pressing multiple times invokes
+      //  until screensharing screen has processed
+      if (this.props.state.room.preventScreenshare) {
+        return;
+      }
       var user = this.props.state.users.filter(function (user) {
         return user.id === 0;
       })[0];
 
       if(!this.props.state.room.screensharing) {
+        this.props.state.room.preventScreenshare = true;
+
         // Dispatch to all element
         Dispatcher.sharescreen(true);
         // Start sharing screen
@@ -199,7 +206,7 @@ define([
           );
 
           res.push(
-            <button id="screenshare" onClick={this.handleScreenshare} className={user.screensharing ? 'on' : ''} title="Share your screen"></button>
+            <button id="screenshare" onClick={this.handleScreenshare} className={(user.screensharing ? 'on' : '') + ' ' + (this.props.state.room.preventScreenshare ? 'muted' : '')} title="Share your screen"></button>
           );
 
           res.push(

@@ -109,7 +109,8 @@ define([
           isLocked: false,
           status: Constants.RoomState.IDLE,
           useMCU: false,
-          error: ''
+          error: '',
+          preventScreenshare: false
         },
         // Contains the list of User and Peers
         users: [{
@@ -398,24 +399,58 @@ define([
       Skylink.on('mediaAccessError', function (error, isScreensharing) {
         var messages = app.state.room.messages;
 
-        console.info(messages, app);
+        // When screensharing failed
+        if (isScreensharing) {
+          messages.push({
+            user: 0,
+            name: 'GAR.io',
+            type: Constants.MessageType.MESSAGE,
+            content: error.message || error,
+            date: (new Date()).toISOString()
+          });
+
+          app.setState({
+            room: Utils.extend(app.state.room, {
+              messages: messages,
+              preventScreenshare: false
+            })
+          });
+
+          // Ping all Peers to let them know screensharing has failed
+          Dispatcher.sharescreen(false);
+
+        // When inital stream failed for joinRoom()
+        } else {
+          app.setState({
+            room: Utils.extend(app.state.room, {
+              status: Constants.RoomState.CONNECTION_ERROR,
+              error: error.message || error
+            })
+          });
+        }
+      });
+
+      /**
+       * Handles the Skylink "mediaAccessError" event
+       * This triggers when a User failed to retrieve Stream
+       */
+      Skylink.on('mediaAccessSuccess', function (stream, isScreensharing) {
+        var messages = app.state.room.messages;
 
         messages.push({
           user: 0,
           name: 'GAR.io',
           type: Constants.MessageType.MESSAGE,
-          content: error.message || error,
+          content: (isScreensharing ? 'Screensharing' : '') + 'Media access has been success',
           date: (new Date()).toISOString()
         });
 
         app.setState({
           room: Utils.extend(app.state.room, {
-            messages: messages
+            messages: messages,
+            preventScreenshare: false
           })
         });
-
-        // Ping all Peers to let them know screensharing has failed
-        Dispatcher.sharescreen(false);
       });
 
       /**
