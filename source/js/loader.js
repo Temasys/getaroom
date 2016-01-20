@@ -10,14 +10,9 @@ require.config({
 
     paths: {
         history: 'libs/history',
-        socketio: '//cdn.temasys.com.sg/libraries/'
-            + 'socket.io-client/1.0.6/socket.io',
-        adapter: 'libs/adapter',
-        //adapter: '//cdn.temasys.com.sg/adapterjs/0.11.x/' +
-        //    'adapter.screenshare',
-        skylink: 'libs/skylink',
-        //skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.x/' +
-        //    'skylink.debug',
+        socketio: '//cdn.socket.io/socket.io-1.3.7',
+        adapter: '//cdn.temasys.com.sg/adapterjs/0.13.x/adapter.screenshare',
+        skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.x/skylink.debug',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +
