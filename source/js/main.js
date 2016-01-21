@@ -312,6 +312,7 @@ define([
             id: peerId,
             name: peerInfo.userData.name,
             stream: null,
+            screensharing: false,
             videoMute: peerInfo.mediaStatus.videoMuted,
             audioMute: peerInfo.mediaStatus.audioMuted
           });
@@ -326,6 +327,8 @@ define([
         }
 
         app.setState(appState);
+
+        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
       });
 
       /**
@@ -351,6 +354,8 @@ define([
         }
 
         app.setState(appState);
+
+        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
       });
 
       /**
@@ -399,6 +404,16 @@ define([
         }
 
         app.setState(appState);
+
+        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
+      });
+
+      /**
+       * Handles the Skylink "peerRestart" event
+       * This triggers when a Peer or when User connection has restarted
+       */
+      Skylink.on('peerRestart', function(peerId, peerInfo, isSelf) {
+        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
       });
 
       /**
@@ -470,18 +485,6 @@ define([
         for (var i = 0; i < appState.users.length; i++) {
           if((isSelf && appState.users[i].id === 0) || appState.users[i].id === peerId) {
             appState.users[i].stream = stream;
-            appState.users[i].screensharing = peerInfo.settings && peerInfo.settings.video &&
-              peerInfo.settings.video.screenshare;
-
-            if(appState.users[i].screensharing) {
-              isScreensharing = true;
-
-              var screensharingPriority = (Skylink.getUserData() || {}).screensharingPriority || 0;
-
-              if (!isSelf && appState.users[i].screensharing && peerInfo.userData.screensharingPriority > screensharingPriority) {
-                Skylink.stopScreen();
-              }
-            }
             break;
           }
         }
@@ -490,9 +493,9 @@ define([
           appState.controls = false;
         }
 
-        appState.room.screensharing = isScreensharing;
-
         app.setState(appState);
+
+        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
       });
 
       /**
@@ -565,6 +568,46 @@ define([
           Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
             name: name
           }));
+        },
+
+        /**
+         * Dispatch to set the screensharing status and prioritizer
+         */
+        setSharescreen: function (peerId, peerInfo, isSelf) {
+          var appState = {
+            users: app.state.users,
+            room: Utils.extend(app.state.room, {})
+          };
+          var hasScreensharing = false;
+
+          for (var i = 0; i < appState.users.length; i++) {
+            if ((isSelf && appState.users[i].id === 0) || (appState.users[i].id === peerId)) {
+              appState.users[i].screensharing = peerInfo.settings && peerInfo.settings.video &&
+                peerInfo.settings.video.screenshare;
+
+              // If it's the other Peer and User and Peer is both screensharing
+              if (!isSelf && appState.users[i].screensharing && appState.users[0].screensharing) {
+                // Compare who comes first then discard
+                var screensharingPriority = (Skylink.getUserData() || {}).screensharingPriority || 0;
+
+                if ((peerInfo.userData.screensharingPriority || 0) > screensharingPriority) {
+                  Skylink.stopScreen();
+                }
+              }
+            }
+          }
+
+          // Set the screensharing
+          for (var i = 0; i < appState.users.length; i++) {
+            if (appState.users[i].screensharing) {
+              hasScreensharing = true;
+              break;
+            }
+          }
+
+          appState.room.screensharing = hasScreensharing;
+
+          app.setState(appState);
         },
 
         /**
