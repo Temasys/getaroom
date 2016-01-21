@@ -334,19 +334,6 @@ define([
         }
 
         app.setState(state);
-
-        // NOTE: Magic number to allow Peers to be established and detect if there's screensharing involved
-        //  before disabling it
-        // This is not advisable, but we have to figure a magical number
-        if (isSelf) {
-          setTimeout(function () {
-            app.setState({
-              room: Utils.extend(app.state.room, {
-                preventInitialScreenshare: false
-              })
-            });
-          }, 1500);
-        }
       });
 
       /**
