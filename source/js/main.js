@@ -347,7 +347,6 @@ define([
 
         // Fallback incase peerInfo.userData is not defined
         peerInfo.userData = peerInfo.userData || {};
-        peerInfo.userData.name = peerInfo.userData.name || 'User ' + peerId;
 
         for (var i = 0; i < appState.users.length; i++) {
           // If it is User's or the Peer's
