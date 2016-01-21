@@ -112,7 +112,7 @@ define([
           status: Constants.RoomState.IDLE,
           useMCU: false,
           error: '',
-          preventScreenshare: true
+          preventScreenshare: false
         },
         // Contains the list of User and Peers
         users: [{
@@ -312,16 +312,9 @@ define([
             id: peerId,
             name: peerInfo.userData.name,
             stream: null,
-            screensharing: peerInfo.userData.screensharing,
             videoMute: peerInfo.mediaStatus.videoMuted,
             audioMute: peerInfo.mediaStatus.audioMuted
           });
-
-          // Get the status of the Peer's screensharing to
-          //   prevent other users from screensharing
-          if(peerInfo.userData.screensharing) {
-            appState.room.screensharing = appState.room.preventScreenshare = true;
-          }
 
           appState.room.messages.push({
             user: peerId,
@@ -353,22 +346,9 @@ define([
           if ((isSelf && appState.users[i].id === 0) || (appState.users[i].id === peerId)) {
             appState.users[i].audioMute = peerInfo.mediaStatus.audioMuted;
             appState.users[i].videoMute = peerInfo.mediaStatus.videoMuted;
-            appState.users[i].screensharing = peerInfo.userData.screensharing;
             appState.users[i].name = peerInfo.userData.name;
-            break;
           }
         }
-
-        if (!isSelf) {
-          appState.room.preventScreenshare = appState.room.screensharing = peerInfo.userData.screensharing === true;
-        }
-
-        // Set Room status of screensharing if User screensharing is false
-        /*if(app.state.users[0].screensharing === false) {
-          state.room = Utils.extend(app.state.room, {
-            screensharing:
-          });
-        }*/
 
         app.setState(appState);
       });
@@ -409,12 +389,6 @@ define([
             }
           }
 
-          // If the Peer is meant to be cleared and screensharing mode is from Peer
-          //  turn off screensharing mode and prevent screenshare mode
-          if (peerInfo.userData.screensharing) {
-            appState.room.screensharing = appState.room.preventScreenshare = false;
-          }
-
           appState.room.messages.push({
             user: 0,
             name: 'GAR.io',
@@ -447,9 +421,6 @@ define([
         // When screensharing failed
         if (isScreensharing) {
           appState.room.preventScreenshare = false;
-
-          // Ping all Peers to let them know screensharing has failed
-          Dispatcher.sharescreen(false);
 
         // When inital stream failed for joinRoom()
         } else {
@@ -488,20 +459,38 @@ define([
        * Handles the Skylink "incomingStream" event
        * This triggers when a new Stream is retrieved from User or Peer
        */
-      Skylink.on('incomingStream', function(peerId, stream, isSelf) {
+      Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
         var appState = {
-          users: app.state.users
+          users: app.state.users,
+          room: Utils.extend(app.state.room, {})
         };
+
+        var isScreensharing = false;
 
         for (var i = 0; i < appState.users.length; i++) {
           if((isSelf && appState.users[i].id === 0) || appState.users[i].id === peerId) {
             appState.users[i].stream = stream;
+            appState.users[i].screensharing = peerInfo.settings && peerInfo.settings.video &&
+              peerInfo.settings.video.screenshare;
+
+            if(appState.users[i].screensharing) {
+              isScreensharing = true;
+
+              var screensharingPriority = (Skylink.getUserData() || {}).screensharingPriority || 0;
+
+              if (!isSelf && appState.users[i].screensharing && peerInfo.userData.screensharingPriority > screensharingPriority) {
+                Skylink.stopScreen();
+              }
+            }
+            break;
           }
         }
 
         if(appState.users.length >= 2) {
           appState.controls = false;
         }
+
+        appState.room.screensharing = isScreensharing;
 
         app.setState(appState);
       });
@@ -550,27 +539,6 @@ define([
       Dispatcher = {
 
         /**
-         * Dispatch to ping the screensharing state
-         */
-        sharescreen: function (enable) {
-          var appState = {
-            users: app.state.users,
-            room: Utils.extend(app.state.room, {})
-          };
-
-          appState.users[0].screensharing = enable;
-          appState.room.screensharing = enable;
-
-          // Ping the other Peers
-          Skylink.setUserData({
-            name: app.state.users[0].name,
-            screensharing: enable
-          });
-
-          app.setState(appState);
-        },
-
-        /**
          * Dispatch to ping the MCU state
          */
         setMCU: function(state) {
@@ -594,10 +562,9 @@ define([
 
           app.setState(appState);
 
-          Skylink.setUserData({
-            name: name,
-            screensharing: appState.users[0].screensharing
-          });
+          Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
+            name: name
+          }));
         },
 
         /**

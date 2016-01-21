@@ -120,18 +120,25 @@ define([
       var user = this.props.state.users.filter(function (user) {
         return user.id === 0;
       })[0];
+      var sharing = false;
 
-      if(!this.props.state.room.screensharing) {
+      if(!user.screensharing) {
         this.props.state.room.preventScreenshare = true;
+        sharing = true;
+      } else {
+        sharing = false;
+      }
 
-        // Dispatch to all element
-        Dispatcher.sharescreen(true);
-        // Start sharing screen
+      Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
+        screensharingPriority: (new Date()).getTime()
+      }));
+
+      if (sharing) {
         Skylink.shareScreen();
 
-      } else if(user.screensharing) {
+      } else {
         // Dispatch to all element
-        Dispatcher.sharescreen(false);
+        //Dispatcher.sharescreen(false);
         // Stop sharing screen
         Skylink.stopScreen();
       }
