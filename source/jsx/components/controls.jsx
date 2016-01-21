@@ -117,6 +117,24 @@ define([
     },
 
     /**
+     * Handles the recording option
+     */
+    handleRecording: function () {
+      if (this.props.state.room.preventRecording || !this.props.state.room.hasMCU) {
+        return;
+      }
+
+      if(!this.props.state.room.isRecording) {
+        // Prevent multiple clicks for now
+        this.props.state.room.preventRecording = true;
+        Skylink.startRecording();
+
+      } else {
+        Skylink.stopRecording();
+      }
+    },
+
+    /**
      * Handles the link share textbox
      */
     handleLinkClick: function (e) {
@@ -146,7 +164,7 @@ define([
         return user.id === 0;
       })[0];
 
-      res.push(<div className="logo">getaroom.io</div>);
+      res.push(<div className={'logo ' + (this.props.state.room.status === Constants.RoomState.CONNECTED ? 'joinRoom' : '')}>getaroom.io</div>);
 
       // Controls state when in foyer
       if(this.props.state.state === Constants.AppState.FOYER) {
@@ -206,12 +224,18 @@ define([
           );
 
           res.push(
-            <button id="screenshare" onClick={this.handleScreenshare} className={(user.screensharing ? 'on' : '') + ' ' + (this.props.state.room.preventScreenshare || this.props.state.room.preventInitialScreenshare ? 'muted' : '')} title="Share your screen"></button>
+            <button id="screenshare" onClick={this.handleScreenshare} className={(user.screensharing ? 'on' : '') + ' ' + (this.props.state.room.preventScreenshare ? 'muted' : '')} title="Share your screen"></button>
           );
 
           res.push(
             <button id="roomLock" onClick={this.handleRoomLock} className={this.props.state.room.isLocked ? '' : 'on'} title="Lock/Unlock Room"></button>
           );
+
+          if (this.props.state.room.hasMCU) {
+            res.push(
+              <button id="recording" onClick={this.handleRecording} className={(this.props.state.room.isRecording ? 'on' : '') + ' ' + (this.props.state.room.preventRecording ? 'muted' : '')} title="Start/Stop Recording"></button>
+            );
+          }
 
           res.push(
             <div className="displayName">

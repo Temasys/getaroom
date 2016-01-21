@@ -110,7 +110,10 @@ define([
           status: Constants.RoomState.IDLE,
           useMCU: false,
           error: '',
-          preventScreenshare: false
+          preventScreenshare: true,
+          isRecording: false,
+          preventRecording: true,
+          hasMCU: false
         },
         // Contains the list of User and Peers
         users: [{
@@ -165,7 +168,11 @@ define([
         } else if (state === Skylink.READY_STATE_CHANGE.COMPLETED) {
           roomState = Constants.RoomState.CONNECTING;
 
-          //Skylink._signalingServer = '//test.com';
+          // Override for recording changes
+          Skylink._signalingProtocol = 'http:';
+          Skylink._signalingServer = 'ec2-52-8-93-170.us-west-1.compute.amazonaws.com';
+          Skylink._signalingPort = 6001;
+          Skylink._socketPorts['http:'] = [6001];
 
         // Room has failed loading - ERROR
         } else if (state === Skylink.READY_STATE_CHANGE.ERROR) {
@@ -273,6 +280,34 @@ define([
       });
 
       /**
+       * Handles the Skylink "serverPeerJoined" event
+       * This triggers when MCU joins the room
+       */
+      Skylink.on('serverPeerJoined', function (peerId, peerType) {
+        if (peerType === Skylink.SERVER_PEER_TYPE.MCU) {
+          app.setState({
+            room: Utils.extend(app.state.room, {
+              hasMCU: true
+            })
+          });
+        }
+      });
+
+      /**
+       * Handles the Skylink "serverPeerLeft" event
+       * This triggers when MCU leaves the room
+       */
+      Skylink.on('serverPeerLeft', function (peerId, peerType) {
+        if (peerType === Skylink.SERVER_PEER_TYPE.MCU) {
+          app.setState({
+            room: Utils.extend(app.state.room, {
+              hasMCU: false
+            })
+          });
+        }
+      });
+
+      /**
        * Handles the Skylink "peerJoined" event
        * This triggers when a Peer or when User has joined the Room
        */
@@ -301,10 +336,10 @@ define([
                 // Set the current user state
                 user.name = initialUsername;
                 // Set the user data to inform Skylink
-                Skylink.setUserData({
-                    screensharing: user.screensharing,
-                    name: initialUsername
-                });
+                Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
+                  screensharing: user.screensharing,
+                  name: initialUsername
+                }));
               }
               return user;
             })
@@ -334,6 +369,15 @@ define([
         }
 
         app.setState(state);
+
+        console.info('peers length', app.state.users.length);
+
+        // Prevent recording if less than 2 peers
+        if (app.state.users.length > 1) {
+          app.state.room.preventRecording = false;
+        } else {
+          app.state.room.preventRecording = true;
+        }
       });
 
       /**
@@ -413,6 +457,21 @@ define([
         }
 
         app.setState(state);
+
+        // Prevent recording if less than 2 peers
+        if (app.state.users.length > 1) {
+          app.setState({
+            room: Utils.extend(app.state.room, {
+              preventRecording: false
+            })
+          });
+        } else {
+          app.setState({
+            room: Utils.extend(app.state.room, {
+              preventRecording: true
+            })
+          });
+        }
       });
 
       /**
@@ -508,8 +567,6 @@ define([
 
         var messages = app.state.room.messages;
 
-        console.info(app.state.room);
-
         messages.push({
           user: isSelf ? 0 : peerId,
           name: peerInfo.userData.name,
@@ -529,11 +586,55 @@ define([
        * Handles the Skylink "roomLock" event
        * This triggers when the Room is locked / unlocked
        */
-      Skylink.on("roomLock", function(isLocked) {
+      Skylink.on('roomLock', function(isLocked) {
         app.setState({
           room: Utils.extend(app.state.room, {
             isLocked: isLocked
           })
+        });
+      });
+
+      /**
+       * Handles the Skylink "recordingState" event
+       * This triggers when recording status has changed
+       */
+      Skylink.on('recordingState', function (state, link, error) {
+        var roomState = {
+          preventRecording: false
+        };
+
+        roomState.messages = app.state.room.messages;
+
+        var message = {
+          user: 0,
+          name: 'GAR.io',
+          type: Constants.MessageType.MESSAGE,
+          content: '',
+          date: (new Date()).toISOString()
+        };
+
+        if (state === this.RECORDING_STATES.START) {
+          roomState.isRecording = true;
+          message.content = 'Recording has started for room';
+
+        } else {
+          roomState.isRecording = false;
+
+          if (state === this.RECORDING_STATES.STOP) {
+            message.content = 'Recording has stopped for room';
+
+          } else if (state === this.RECORDING_STATES.ERROR) {
+            message.content = error.message || error;
+
+          } else if (state === this.RECORDING_STATES.SERVER_ERROR) {
+            message.content = 'Server error: ' + (error.message || error);
+          }
+        }
+
+        roomState.messages.push(message);
+
+        app.setState({
+          room: Utils.extend(app.state.room, roomState)
         });
       });
 
@@ -559,10 +660,25 @@ define([
           });
 
           // Ping the other Peers
-          Skylink.setUserData({
-            name: app.state.users[0].name,
+          Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
             screensharing: enable
-          });
+          }));
+        },
+
+        /**
+         * Dispatch to ping the recording state
+         */
+        recording: function (enable) {
+          if (enable) {
+            this.props.state.room.preventRecording = true;
+
+          } else {
+            Skylink.stopRecording();
+          }
+
+          Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
+            recording: enable
+          }));
         },
 
         /**
@@ -589,10 +705,9 @@ define([
             })
           });
 
-          Skylink.setUserData({
-            name: name,
-            screensharing: app.state.users[0].screensharing
-          });
+          Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
+            name: name
+          }));
         },
 
         /**
@@ -721,8 +836,6 @@ define([
       if(this.state.chat) {
         className = className + ' chat';
       }
-
-      console.info(window.webrtcDetectedBrowser, window.webrtcDetectedVersion);
 
       // Chrome screensharing supports
       if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 34) {

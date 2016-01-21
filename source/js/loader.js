@@ -12,7 +12,8 @@ require.config({
         history: 'libs/history',
         socketio: '//cdn.socket.io/socket.io-1.3.7',
         adapter: '//cdn.temasys.com.sg/adapterjs/0.13.x/adapter.screenshare',
-        skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.x/skylink.debug',
+        skylink: 'libs/skylink',
+            // '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.x/skylink.debug',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/' +
