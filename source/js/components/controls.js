@@ -42,10 +42,18 @@ define([
     handleStartRoom: function() {
       //var room = this.props.state.room.useMCU ? 'm' : '';
       var room = Utils.uuid(6);
+      var url = '/' + room;
 
-      // Commenting this out. This may result in not so good UX but it works cross-browsers
-      window.location.href = '/' + room + '?mcu=' + (this.props.state.room.useMCU ? '1' : '0');
-      //Router.setRoute('/' + room);
+      if (this.props.state.room.useMCU) {
+        url += '?mcu=1';
+      }
+
+      // Check if history is supported, or else just redirect immdediately
+      if (window.historyNotSupported) {
+        window.location.href = url;
+      } else {
+        Router.setRoute(url);
+      }
     },
 
     /**
@@ -53,7 +61,20 @@ define([
      */
     handleLeaveRoom: function() {
       Skylink.leaveRoom();
-      Router.setRoute('/');
+
+      var url = '/'
+
+      // Check if User is in room. If connecting, just redirect instantly to clear all current session
+      if (this.props.state.room.status !== Constants.RoomState.CONNECTED) {
+        window.location.href = url;
+      } else {
+        // Check if history is supported, or else just redirect immdediately
+        if (window.historyNotSupported) {
+          window.location.href = url;
+        } else {
+          Router.setRoute(url);
+        }
+      }
     },
 
     /**
