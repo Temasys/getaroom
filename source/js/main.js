@@ -110,7 +110,7 @@ define([
           status: Constants.RoomState.IDLE,
           useMCU: false,
           error: '',
-          preventScreenshare: false
+          preventScreenshare: true
         },
         // Contains the list of User and Peers
         users: [{
@@ -293,8 +293,7 @@ define([
         if (isSelf) {
           state = {
             room: Utils.extend(app.state.room, {
-              status: Constants.RoomState.CONNECTED,
-              preventInitialScreenshare: true
+              status: Constants.RoomState.CONNECTED
             }),
             users: app.state.users.map(function (user) {
               if(user.id === 0) {
@@ -468,12 +467,14 @@ define([
           date: (new Date()).toISOString()
         });
 
-        app.setState({
-          room: Utils.extend(app.state.room, {
-            messages: messages,
-            preventScreenshare: false
-          })
-        });
+        if (isScreensharing) {
+          app.setState({
+            room: Utils.extend(app.state.room, {
+              messages: messages,
+              preventScreenshare: false
+            })
+          });
+        }
       });
 
       /**
