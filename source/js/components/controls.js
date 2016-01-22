@@ -150,7 +150,8 @@ define([
      * Handles the recording option
      */
     handleRecording: function () {
-      if (this.props.state.room.preventRecording || !this.props.state.room.hasMCU) {
+      if (this.props.state.room.preventRecording || this.props.state.room.preventRecordingOneUser ||
+        !this.props.state.room.hasMCU) {
         return;
       }
 
@@ -263,7 +264,7 @@ define([
 
           if (this.props.state.room.hasMCU) {
             res.push(
-              React.DOM.button({id: "recording", onClick: this.handleRecording, className: (this.props.state.room.isRecording ? 'on' : '') + ' ' + (this.props.state.room.preventRecording ? 'muted' : ''), title: "Start/Stop Recording"})
+              React.DOM.button({id: "recording", onClick: this.handleRecording, className: (this.props.state.room.isRecording ? 'on' : '') + ' ' + (this.props.state.room.preventRecording || this.props.state.room.preventRecordingOneUser ? 'muted' : ''), title: "Start/Stop Recording"})
             );
           }
 

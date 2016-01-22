@@ -815,7 +815,7 @@ Skylink.prototype._assembleDataURL = function(dataURLArray) {
     try {
       outputStr += dataURLArray[i];
     } catch (error) {
-      console.error('Malformed', i, dataURLArray[i]);
+      log.error('Malformed', i, dataURLArray[i]);
     }
   }
 
@@ -10483,8 +10483,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   INTRODUCE: 'introduce',
   INTRODUCE_ERROR: 'introduceError',
   APPROACH: 'approach',
-  START_RECORDING: 'startRecording',
-  STOP_RECORDING: 'stopRecording',
+  START_RECORDING: 'startRecordingRoom',
+  STOP_RECORDING: 'stopRecordingRoom',
   RECORDING: 'recordingEvent'
 };
 
@@ -14745,7 +14745,7 @@ Skylink.prototype.startRecording = function () {
 
   });
 
-  console.debug(['MCU', 'Recording', null, 'Starting recording']);
+  log.debug(['MCU', 'Recording', null, 'Starting recording']);
 };
 
 /**
@@ -14791,15 +14791,15 @@ Skylink.prototype.stopRecording = function () {
 Skylink.prototype._recordingEventHandler = function (message) {
   log.debug(['MCU', 'Recording', null, 'Received recording message ->'], message);
 
-  if (message.action === 'ON') {
+  if (message.action === 'on') {
     this._isRecording = true;
     this._trigger('recordingState', this.RECORDING_STATES.START, null, null);
 
-  } else if (message.action === 'OFF') {
+  } else if (message.action === 'off') {
     this._isRecording = false;
     this._trigger('recordingState', this.RECORDING_STATES.STOP, null, null);
 
-  } else if (message.action === 'URL') {
+  } else if (message.action === 'url') {
     this._trigger('recordingState', this.RECORDING_STATES.URL, message.url, null);
 
   } else {

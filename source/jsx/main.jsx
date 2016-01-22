@@ -109,13 +109,14 @@ define([
           id: '',
           messages: [],
           isLocked: false,
+          isRecording: false,
           status: Constants.RoomState.IDLE,
           useMCU: false,
+          hasMCU: false,
           error: '',
           preventScreenshare: true,
-          isRecording: false,
-          preventRecording: true,
-          hasMCU: false
+          preventRecording: false,
+          preventRecordingOneUser: true
         },
         // Contains the list of User and Peers
         users: [{
@@ -350,9 +351,9 @@ define([
 
         // Prevent recording if less than 2 peers
         if (appState.users.length > 1) {
-          appState.room.preventRecording = false;
+          appState.room.preventRecordingOneUser = false;
         } else {
-          appState.room.preventRecording = true;
+          appState.room.preventRecordingOneUser = true;
         }
 
         appState.room.messages.push({
@@ -425,9 +426,9 @@ define([
 
         // Prevent recording if less than 2 peers
         if (appState.users.length > 1) {
-          appState.room.preventRecording = false;
+          appState.room.preventRecordingOneUser = false;
         } else {
-          appState.room.preventRecording = true;
+          appState.room.preventRecordingOneUser = true;
         }
 
         appState.room.messages.push({
@@ -596,11 +597,14 @@ define([
           if (state === this.RECORDING_STATES.STOP) {
             message.content = 'Recording has stopped for room';
 
-          } else if (state === this.RECORDING_STATES.ERROR) {
-            message.content = error.message || error;
+          } else if (state === this.RECORDING_STATES.URL) {
+            message.content = 'Download link: ' + link;
 
           } else if (state === this.RECORDING_STATES.SERVER_ERROR) {
             message.content = 'Server error: ' + (error.message || error);
+
+          } else {
+            message.content = error.message || error;
           }
         }
 
