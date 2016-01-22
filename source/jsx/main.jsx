@@ -100,7 +100,7 @@ define([
           useMCU: false,
           hasMCU: false,
           error: '',
-          preventScreenshare: true,
+          preventScreenshare: false,
           preventRecording: false,
           preventRecordingOneUser: true,
           recordingRandId: null,
