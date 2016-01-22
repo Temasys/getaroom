@@ -26,22 +26,6 @@ define([
 
 ) {
 
-  window.test = Skylink;
-
-  /**
-   * Gets the query string information
-   */
-  var getQuery = function (variable) {
-    var query = window.location.search.substring(1);
-    var vars = query.split('&');
-    for (var i = 0; i < vars.length; i++) {
-      var pair = vars[i].split('=');
-      if (decodeURIComponent(pair[0]) == variable) {
-          return decodeURIComponent(pair[1]);
-      }
-    }
-  };
-
   /**
    * Hook to allow the actual detection of the browser
    */
@@ -179,10 +163,10 @@ define([
           appState.room.error = '';
 
           // Override for recording changes
-          Skylink._signalingProtocol = 'http:';
-          Skylink._signalingServer = 'ec2-52-8-93-170.us-west-1.compute.amazonaws.com';
-          Skylink._signalingPort = 6001;
-          Skylink._socketPorts['http:'] = [6001];
+          //Skylink._signalingProtocol = 'http:';
+          //Skylink._signalingServer = 'ec2-52-8-93-170.us-west-1.compute.amazonaws.com';
+          //Skylink._signalingPort = 6001;
+          //Skylink._socketPorts['http:'] = [6001];
 
         // Room has failed loading - ERROR
         } else if (state === Skylink.READY_STATE_CHANGE.ERROR) {
