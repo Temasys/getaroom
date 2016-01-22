@@ -671,6 +671,17 @@ define([
             }
           }
 
+          if (hasScreensharing && appState.users.length > 4) {
+            appState.room.messages.push({
+              user: 0,
+              name: 'GAR.io',
+              type: Constants.MessageType.MESSAGE,
+              content: 'Room: Current screensharing layout scales up to 4 users, and some of the peers ' +
+                'might not be displayed due to the layout. Current users count is ' + appState.users.length,
+              date: (new Date()).toISOString()
+            });
+          }
+
           appState.room.screensharing = hasScreensharing;
           app.setState(appState);
         },
