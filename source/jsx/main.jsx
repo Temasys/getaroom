@@ -294,19 +294,11 @@ define([
         // Fallback incase peerInfo.userData is not defined
         peerInfo.userData = peerInfo.userData || {};
         var username = peerInfo.userData.name || 'User ' + peerId;
-        // Screensharing settings
-        var screensharing = peerInfo.settings && peerInfo.settings.video &&
-          peerInfo.settings.video.screenshare;
-        // Screensharing priority
-        var screensharingPriority = peerInfo.userData.screensharingPriority || 0;
-
 
         // User has joined the room
         if (isSelf) {
           appState.room.status = Constants.RoomState.CONNECTED;
           appState.users[0].name = username;
-          appState.users[0].screensharing = screensharing;
-          appState.users[0].screensharingPriority = screensharingPriority;
           appState.users[0].videoMute = peerInfo.mediaStatus.videoMuted;
           appState.users[0].audioMute = peerInfo.mediaStatus.audioMuted;
 
@@ -316,8 +308,6 @@ define([
             id: peerId,
             name: peerInfo.userData.name,
             stream: null,
-            screensharing: screensharing,
-            screensharingPriority: screensharingPriority,
             videoMute: peerInfo.mediaStatus.videoMuted,
             audioMute: peerInfo.mediaStatus.audioMuted
           });
@@ -333,7 +323,6 @@ define([
         });
 
         app.setState(appState);
-        Dispatcher.setScreen();
       });
 
       /**
@@ -349,11 +338,6 @@ define([
         // Fallback incase peerInfo.userData is not defined
         peerInfo.userData = peerInfo.userData || {};
         var username = peerInfo.userData.name || '';
-        // Screensharing settings
-        var screensharing = peerInfo.settings && peerInfo.settings.video &&
-          peerInfo.settings.video.screenshare;
-        // Screensharing priority
-        var screensharingPriority = peerInfo.userData.screensharingPriority || 0;
 
         for (var i = 0; i < appState.users.length; i++) {
           // If it is User's or the Peer's
@@ -361,14 +345,11 @@ define([
             appState.users[i].audioMute = peerInfo.mediaStatus.audioMuted;
             appState.users[i].videoMute = peerInfo.mediaStatus.videoMuted;
             appState.users[i].name = username;
-            appState.users[i].screensharing = screensharing;
-            appState.users[i].screensharingPriority = screensharingPriority;
             break;
           }
         }
 
         app.setState(appState);
-        Dispatcher.setScreen();
       });
 
       /**
@@ -408,40 +389,6 @@ define([
             'Room: Peer "' + username + '" has left the room',
           date: (new Date()).toISOString()
         });
-
-        app.setState(appState);
-        Dispatcher.setScreen();
-      });
-
-      /**
-       * Handles the Skylink "peerRestart" event
-       * This triggers when a Peer or when User connection has restarted
-       */
-      Skylink.on('peerRestart', function(peerId, peerInfo, isSelf) {
-        var appState = {
-          users: app.state.users,
-          room: Utils.extend(app.state.room, {})
-        };
-
-        // Fallback incase peerInfo,userData is not defined
-        peerInfo.userData = peerInfo.userData || {};
-        var username = peerInfo.userData.name || 'User ' + peerId;
-        // Screensharing settings
-        var screensharing = peerInfo.settings && peerInfo.settings.video &&
-          peerInfo.settings.video.screenshare;
-        // Screensharing priority
-        var screensharingPriority = peerInfo.userData.screensharingPriority || 0;
-
-        for (var i = 0; i < appState.users.length; i++) {
-          if((isSelf && appState.users[i].id === 0) || appState.users[i].id === peerId) {
-            appState.users[i].audioMute = peerInfo.mediaStatus.audioMuted;
-            appState.users[i].videoMute = peerInfo.mediaStatus.videoMuted;
-            appState.users[i].name = username;
-            appState.users[i].screensharing = screensharing;
-            appState.users[i].screensharingPriority = screensharingPriority;
-            break;
-          }
-        }
 
         app.setState(appState);
         Dispatcher.setScreen();
@@ -510,10 +457,17 @@ define([
           users: app.state.users,
           room: Utils.extend(app.state.room, {})
         };
+        // Screensharing settings
+        var screensharing = peerInfo.settings && peerInfo.settings.video &&
+          peerInfo.settings.video.screenshare;
+        // Screensharing priority
+        var screensharingPriority = peerInfo.userData.screensharingPriority || 0;
 
         for (var i = 0; i < appState.users.length; i++) {
           if((isSelf && appState.users[i].id === 0) || appState.users[i].id === peerId) {
             appState.users[i].stream = stream;
+            appState.users[i].screensharing = screensharing;
+            appState.users[i].screensharingPriority = screensharingPriority;
             break;
           }
         }
