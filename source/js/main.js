@@ -103,7 +103,8 @@ define([
           preventScreenshare: true,
           preventRecording: false,
           preventRecordingOneUser: true,
-          recordingRandId: null
+          recordingRandId: null,
+          recordingTimer: null
         },
         // Contains the list of User and Peers
         users: [{
@@ -582,46 +583,77 @@ define([
        * This triggers when recording status has changed
        */
       Skylink.on('recordingState', function (state, link, error) {
-        var roomState = {
-          preventRecording: false
+        var appState = {
+          room: Utils.extend(app.state.room, {})
         };
 
-        roomState.messages = app.state.room.messages;
+        if (state === Skylink.RECORDING_STATES.START) {
+          appState.room.isRecording = true;
+          appState.room.preventRecording = true;
+          appState.room.recordingRandId = Utils.uuid(10);
+          appState.room.messages.push({
+            user: 0,
+            name: 'GAR.io',
+            type: Constants.MessageType.MESSAGE,
+            content: 'Recording: (ID: ' + appState.room.recordingRandId +
+              ')\nStarted for room. Waiting for minium of 5 seconds before enabling',
+            date: (new Date()).toISOString()
+          });
 
-        var message = {
-          user: 0,
-          name: 'GAR.io',
-          type: Constants.MessageType.MESSAGE,
-          content: '',
-          date: (new Date()).toISOString()
-        };
-
-        if (state === this.RECORDING_STATES.START) {
-          roomState.isRecording = true;
-          message.content = 'Recording has started for room';
+          // 5 seconds of timeout
+          appState.room.recordingTimer = setTimeout(function () {
+            var newAppState = {
+              room: Utils.extend(app.state.room)
+            };
+            newAppState.room.preventRecording = false;
+            newAppState.room.recordingTimer = null;
+            app.setState(newAppState);
+          }, 5000);
 
         } else {
-          roomState.isRecording = false;
+          appState.room.isRecording = false;
 
-          if (state === this.RECORDING_STATES.STOP) {
-            message.content = 'Recording has stopped for room';
+          // Clear away the timer just incase
+          if (appState.room.recordingTimer) {
+            clearTimeout(appState.room.recordingTimer);
+          }
 
-          } else if (state === this.RECORDING_STATES.URL) {
-            message.content = 'Download link: ' + link;
+          if (state === Skylink.RECORDING_STATES.STOP) {
+            appState.room.preventRecording = true;
+            appState.room.messages.push({
+              user: 0,
+              name: 'GAR.io',
+              type: Constants.MessageType.MESSAGE,
+              content: 'Recording: (ID: ' + appState.room.recordingRandId +
+                ')\nStopped for room. Video is mixing ....',
+              date: (new Date()).toISOString()
+            });
 
-          } else if (state === this.RECORDING_STATES.SERVER_ERROR) {
-            message.content = 'Server error: ' + (error.message || error);
+          } else if (state === Skylink.RECORDING_STATES.URL) {
+            appState.room.preventRecording = false;
+            appState.room.messages.push({
+              user: 0,
+              name: 'GAR.io',
+              type: Constants.MessageType.MESSAGE,
+              content: 'Recording: (ID: ' + appState.room.recordingRandId +
+                ')\nMixing completed. [Download link](' + link + ')',
+              date: (new Date()).toISOString()
+            });
 
           } else {
-            message.content = error.message || error;
+            appState.room.preventRecording = false;
+            appState.room.messages.push({
+              user: 0,
+              name: 'GAR.io',
+              type: Constants.MessageType.MESSAGE,
+              content: 'Recording: (ID: ' + appState.room.recordingRandId +
+                ')\nError. ' + (error.message || error),
+              date: (new Date()).toISOString()
+            });
           }
         }
 
-        roomState.messages.push(message);
-
-        app.setState({
-          room: Utils.extend(app.state.room, roomState)
-        });
+        app.setState(appState);
       });
 
       /**
