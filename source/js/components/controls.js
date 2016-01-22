@@ -129,11 +129,13 @@ define([
         sharing = false;
       }
 
-      Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
-        screensharingPriority: (new Date()).getTime()
-      }));
-
       if (sharing) {
+        this.props.state.users[0].screensharingPriority = (new Date ()).getTime();
+
+        Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
+          screensharingPriority: this.props.state.users[0].screensharingPriority
+        }));
+
         Skylink.shareScreen();
 
       } else {

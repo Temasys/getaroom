@@ -122,7 +122,8 @@ define([
           renderStreamId: null,
           audioMute: false,
           videoMute: false,
-          screensharing: false
+          screensharing: false,
+          screensharingPriority: 0
         }],
         // Current Room state
         state: Constants.AppState.FOYER,
@@ -292,19 +293,22 @@ define([
 
         // Fallback incase peerInfo.userData is not defined
         peerInfo.userData = peerInfo.userData || {};
-        peerInfo.userData.name = peerInfo.userData.name || 'User ' + peerId;
+        var username = peerInfo.userData.name || 'User ' + peerId;
+        // Screensharing settings
+        var screensharing = peerInfo.settings && peerInfo.settings.video &&
+          peerInfo.settings.video.screenshare;
+        // Screensharing priority
+        var screensharingPriority = peerInfo.userData.screensharingPriority || 0;
+
 
         // User has joined the room
         if (isSelf) {
           appState.room.status = Constants.RoomState.CONNECTED;
-
-          appState.room.messages.push({
-            user: 0,
-            name: 'GAR.io',
-            type: Constants.MessageType.MESSAGE,
-            content: 'Room: You have joined the room',
-            date: (new Date()).toISOString()
-          });
+          appState.users[0].name = username;
+          appState.users[0].screensharing = screensharing;
+          appState.users[0].screensharingPriority = screensharingPriority;
+          appState.users[0].videoMute = peerInfo.mediaStatus.videoMuted;
+          appState.users[0].audioMute = peerInfo.mediaStatus.audioMuted;
 
         // Peer has joined the room (new one)
         } else {
@@ -312,23 +316,24 @@ define([
             id: peerId,
             name: peerInfo.userData.name,
             stream: null,
-            screensharing: false,
+            screensharing: screensharing,
+            screensharingPriority: screensharingPriority,
             videoMute: peerInfo.mediaStatus.videoMuted,
             audioMute: peerInfo.mediaStatus.audioMuted
           });
-
-          appState.room.messages.push({
-            user: peerId,
-            name: 'GAR.io',
-            type: Constants.MessageType.MESSAGE,
-            content: 'Room: Peer "' + peerInfo.userData.name + '" has joined the room',
-            date: (new Date()).toISOString()
-          });
         }
 
-        app.setState(appState);
+        appState.room.messages.push({
+          user: isSelf ? 0 : peerId,
+          name: 'GAR.io',
+          type: Constants.MessageType.MESSAGE,
+          content: isSelf ? 'Room: You have joined the room' :
+            'Room: Peer "' + username + '" has joined the room',
+          date: (new Date()).toISOString()
+        });
 
-        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
+        app.setState(appState);
+        Dispatcher.setScreen();
       });
 
       /**
@@ -343,19 +348,27 @@ define([
 
         // Fallback incase peerInfo.userData is not defined
         peerInfo.userData = peerInfo.userData || {};
+        var username = peerInfo.userData.name || '';
+        // Screensharing settings
+        var screensharing = peerInfo.settings && peerInfo.settings.video &&
+          peerInfo.settings.video.screenshare;
+        // Screensharing priority
+        var screensharingPriority = peerInfo.userData.screensharingPriority || 0;
 
         for (var i = 0; i < appState.users.length; i++) {
           // If it is User's or the Peer's
           if ((isSelf && appState.users[i].id === 0) || (appState.users[i].id === peerId)) {
             appState.users[i].audioMute = peerInfo.mediaStatus.audioMuted;
             appState.users[i].videoMute = peerInfo.mediaStatus.videoMuted;
-            appState.users[i].name = peerInfo.userData.name;
+            appState.users[i].name = username;
+            appState.users[i].screensharing = screensharing;
+            appState.users[i].screensharingPriority = screensharingPriority;
+            break;
           }
         }
 
         app.setState(appState);
-
-        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
+        Dispatcher.setScreen();
       });
 
       /**
@@ -370,21 +383,13 @@ define([
 
         // Fallback incase peerInfo,userData is not defined
         peerInfo.userData = peerInfo.userData || {};
-        peerInfo.userData.name = peerInfo.userData.name || 'User ' + peerId;
+        var username = peerInfo.userData.name || 'User ' + peerId;
 
         if (isSelf) {
           // Keep myself only
           appState.users = [appState.users[0]];
           appState.controls = true;
           appState.state = Constants.AppState.FOYER;
-
-          appState.room.messages.push({
-            user: 0,
-            name: 'GAR.io',
-            type: Constants.MessageType.MESSAGE,
-            content: 'Room: You have left the room',
-            date: (new Date()).toISOString()
-          });
 
         } else {
           for (var i = 0; i < appState.users.length; i++) {
@@ -393,19 +398,19 @@ define([
               break;
             }
           }
-
-          appState.room.messages.push({
-            user: 0,
-            name: 'GAR.io',
-            type: Constants.MessageType.MESSAGE,
-            content: 'Room: Peer "' + peerInfo.userData.name + '" has left the room',
-            date: (new Date()).toISOString()
-          });
         }
 
-        app.setState(appState);
+        appState.room.messages.push({
+          user: isSelf ? 0 : peerId,
+          name: 'GAR.io',
+          type: Constants.MessageType.MESSAGE,
+          content: isSelf ? 'Room: You have left the room' :
+            'Room: Peer "' + username + '" has left the room',
+          date: (new Date()).toISOString()
+        });
 
-        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
+        app.setState(appState);
+        Dispatcher.setScreen();
       });
 
       /**
@@ -413,7 +418,33 @@ define([
        * This triggers when a Peer or when User connection has restarted
        */
       Skylink.on('peerRestart', function(peerId, peerInfo, isSelf) {
-        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
+        var appState = {
+          users: app.state.users,
+          room: Utils.extend(app.state.room, {})
+        };
+
+        // Fallback incase peerInfo,userData is not defined
+        peerInfo.userData = peerInfo.userData || {};
+        var username = peerInfo.userData.name || 'User ' + peerId;
+        // Screensharing settings
+        var screensharing = peerInfo.settings && peerInfo.settings.video &&
+          peerInfo.settings.video.screenshare;
+        // Screensharing priority
+        var screensharingPriority = peerInfo.userData.screensharingPriority || 0;
+
+        for (var i = 0; i < appState.users.length; i++) {
+          if((isSelf && appState.users[i].id === 0) || appState.users[i].id === peerId) {
+            appState.users[i].audioMute = peerInfo.mediaStatus.audioMuted;
+            appState.users[i].videoMute = peerInfo.mediaStatus.videoMuted;
+            appState.users[i].name = username;
+            appState.users[i].screensharing = screensharing;
+            appState.users[i].screensharingPriority = screensharingPriority;
+            break;
+          }
+        }
+
+        app.setState(appState);
+        Dispatcher.setScreen();
       });
 
       /**
@@ -480,8 +511,6 @@ define([
           room: Utils.extend(app.state.room, {})
         };
 
-        var isScreensharing = false;
-
         for (var i = 0; i < appState.users.length; i++) {
           if((isSelf && appState.users[i].id === 0) || appState.users[i].id === peerId) {
             appState.users[i].stream = stream;
@@ -494,8 +523,7 @@ define([
         }
 
         app.setState(appState);
-
-        Dispatcher.setSharescreen(peerId, peerInfo, isSelf);
+        Dispatcher.setScreen();
       });
 
       /**
@@ -554,6 +582,37 @@ define([
         },
 
         /**
+         * Dispatch to set screensharing mode
+         */
+        setScreen: function () {
+          var appState = {
+            room: Utils.extend(app.state.room, {}),
+            users: app.state.users
+          };
+          var hasScreensharing = false;
+
+          for (var i = 0; i < appState.users.length; i++) {
+            // If Peer is screensharing
+            if (appState.users[i].screensharing) {
+              hasScreensharing = true;
+
+              if (appState.users[i].id !== 0) {
+                // Check if User is screensharing and then compare
+                if (appState.users[0].screensharing &&
+                // Priority is higher then stop your screensharing
+                  appState.users[i].screensharingPriority > appState.users[0].screensharingPriority) {
+
+                  Skylink.stopScreen();
+                }
+              }
+            }
+          }
+
+          appState.room.screensharing = hasScreensharing;
+          app.setState(appState);
+        },
+
+        /**
          * Dispatch to ping the current User username
          */
         setName: function(name) {
@@ -568,46 +627,6 @@ define([
           Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
             name: name
           }));
-        },
-
-        /**
-         * Dispatch to set the screensharing status and prioritizer
-         */
-        setSharescreen: function (peerId, peerInfo, isSelf) {
-          var appState = {
-            users: app.state.users,
-            room: Utils.extend(app.state.room, {})
-          };
-          var hasScreensharing = false;
-
-          for (var i = 0; i < appState.users.length; i++) {
-            if ((isSelf && appState.users[i].id === 0) || (appState.users[i].id === peerId)) {
-              appState.users[i].screensharing = peerInfo.settings && peerInfo.settings.video &&
-                peerInfo.settings.video.screenshare;
-
-              // If it's the other Peer and User and Peer is both screensharing
-              if (!isSelf && appState.users[i].screensharing && appState.users[0].screensharing) {
-                // Compare who comes first then discard
-                var screensharingPriority = (Skylink.getUserData() || {}).screensharingPriority || 0;
-
-                if ((peerInfo.userData.screensharingPriority || 0) > screensharingPriority) {
-                  Skylink.stopScreen();
-                }
-              }
-            }
-          }
-
-          // Set the screensharing
-          for (var i = 0; i < appState.users.length; i++) {
-            if (appState.users[i].screensharing) {
-              hasScreensharing = true;
-              break;
-            }
-          }
-
-          appState.room.screensharing = hasScreensharing;
-
-          app.setState(appState);
         },
 
         /**
