@@ -109,6 +109,8 @@ define([
           id: '',
           messages: [],
           isLocked: false,
+          isMCURestart: false,
+          screensharing: false,
           status: Constants.RoomState.IDLE,
           useMCU: false,
           error: '',
@@ -297,6 +299,9 @@ define([
 
         // User has joined the room
         if (isSelf) {
+          if (appState.room.useMCU) {
+            appState.state = Constants.AppState.IN_ROOM;
+          }
           appState.room.status = Constants.RoomState.CONNECTED;
           appState.users[0].name = username;
           appState.users[0].videoMute = peerInfo.mediaStatus.videoMuted;
@@ -369,8 +374,11 @@ define([
         if (isSelf) {
           // Keep myself only
           appState.users = [appState.users[0]];
-          appState.controls = true;
-          appState.state = Constants.AppState.FOYER;
+
+          if (!(appState.room.useMCU && appState.room.isMCURestart)) {
+            appState.controls = true;
+            appState.state = Constants.AppState.FOYER;
+          }
 
         } else {
           for (var i = 0; i < appState.users.length; i++) {
@@ -392,6 +400,22 @@ define([
 
         app.setState(appState);
         Dispatcher.setScreen();
+      });
+
+      /**
+       * Handles the Skylink "serverPeerRestart" event
+       * This triggers when MCU is restarted with User
+       */
+      Skylink.on('serverPeerRestart', function (peerId, peerType) {
+        if (peerType === Skylink.SERVER_PEER_TYPE.MCU) {
+          var appState = {
+            room: Utils.extend(app.state.room, {})
+          };
+
+          appState.room.isMCURestart = true;
+
+          app.setState(appState);
+        }
       });
 
       /**
