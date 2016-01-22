@@ -748,8 +748,6 @@ define([
         className = className + ' chat';
       }
 
-      console.info(window.webrtcDetectedBrowser, window.webrtcDetectedVersion);
-
       // Chrome screensharing supports
       if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 34) {
         isScreensharingSupported = true;
