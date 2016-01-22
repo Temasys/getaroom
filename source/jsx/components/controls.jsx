@@ -42,10 +42,18 @@ define([
     handleStartRoom: function() {
       //var room = this.props.state.room.useMCU ? 'm' : '';
       var room = Utils.uuid(6);
+      var url = '/' + room;
 
-      // Commenting this out. This may result in not so good UX but it works cross-browsers
-      window.location.href = '/' + room + '?mcu=' + (this.props.state.room.useMCU ? '1' : '0');
-      //Router.setRoute('/' + room);
+      if (this.props.state.room.useMCU) {
+        url += '?mcu=1';
+      }
+
+      // Check if history is supported, or else just redirect immdediately
+      if (window.historyNotSupported) {
+        window.location.href = url;
+      } else {
+        Router.setRoute(url);
+      }
     },
 
     /**
@@ -53,7 +61,20 @@ define([
      */
     handleLeaveRoom: function() {
       Skylink.leaveRoom();
-      Router.setRoute('/');
+
+      var url = '/'
+
+      // Check if User is in room. If connecting, just redirect instantly to clear all current session
+      if (this.props.state.room.status !== Constants.RoomState.CONNECTED) {
+        window.location.href = url;
+      } else {
+        // Check if history is supported, or else just redirect immdediately
+        if (window.historyNotSupported) {
+          window.location.href = url;
+        } else {
+          Router.setRoute(url);
+        }
+      }
     },
 
     /**
@@ -99,18 +120,27 @@ define([
       var user = this.props.state.users.filter(function (user) {
         return user.id === 0;
       })[0];
+      var sharing = false;
 
-      if(!this.props.state.room.screensharing) {
+      if(!user.screensharing) {
         this.props.state.room.preventScreenshare = true;
+        sharing = true;
+      } else {
+        sharing = false;
+      }
 
-        // Dispatch to all element
-        Dispatcher.sharescreen(true);
-        // Start sharing screen
+      if (sharing) {
+        this.props.state.users[0].screensharingPriority = (new Date ()).getTime();
+
+        Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
+          screensharingPriority: this.props.state.users[0].screensharingPriority
+        }));
+
         Skylink.shareScreen();
 
-      } else if(user.screensharing) {
+      } else {
         // Dispatch to all element
-        Dispatcher.sharescreen(false);
+        //Dispatcher.sharescreen(false);
         // Stop sharing screen
         Skylink.stopScreen();
       }

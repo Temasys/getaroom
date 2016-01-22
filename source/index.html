@@ -47,6 +47,11 @@
   ga('send', 'pageview');
 
   </script>
+  <script>
+    if (!(window.history && window.history.pushState)) {
+      window.historyNotSupported = true;
+    }
+  </script>
   <img src="/img/camera.svg" style="visibility: hidden; width: 1px; height: 1px;" />
   <img src="/img/lock.svg" style="visibility: hidden; width: 1px; height: 1px;" />
   <img src="/img/unlock.svg" style="visibility: hidden; width: 1px; height: 1px;" />
