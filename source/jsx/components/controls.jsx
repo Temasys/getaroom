@@ -262,7 +262,7 @@ define([
             <button id="roomLock" onClick={this.handleRoomLock} className={this.props.state.room.isLocked ? '' : 'on'} title="Lock/Unlock Room"></button>
           );
 
-          if (this.props.state.room.hasMCU) {
+          if (this.props.state.room.hasMCU && window.getQuery('recording') === '1') {
             res.push(
               <button id="recording" onClick={this.handleRecording} className={(this.props.state.room.isRecording ? 'on' : '') + ' ' + (this.props.state.room.preventRecording || this.props.state.room.preventRecordingOneUser ? 'muted' : '')} title="Start/Stop Recording"></button>
             );

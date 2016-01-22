@@ -10204,7 +10204,7 @@ Skylink.prototype._createSocket = function (type) {
 
   var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
 
-  if (window.getQuery('mcu') === '1') {
+  if (window.getQuery('mcu') === '1' && window.getQuery('recording') === '1') {
     url = 'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
   }
 
