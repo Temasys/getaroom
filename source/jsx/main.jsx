@@ -102,7 +102,8 @@ define([
           error: '',
           preventScreenshare: true,
           preventRecording: false,
-          preventRecordingOneUser: true
+          preventRecordingOneUser: true,
+          recordingRandId: null
         },
         // Contains the list of User and Peers
         users: [{

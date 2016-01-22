@@ -14799,12 +14799,16 @@ Skylink.prototype._recordingEventHandler = function (message) {
   log.debug(['MCU', 'Recording', null, 'Received recording message ->'], message);
 
   if (message.action === 'on') {
-    this._isRecording = true;
-    this._trigger('recordingState', this.RECORDING_STATES.START, null, null);
+    if (!this._isRecording) {
+      this._isRecording = true;
+      this._trigger('recordingState', this.RECORDING_STATES.START, null, null);
+    }
 
   } else if (message.action === 'off') {
-    this._isRecording = false;
-    this._trigger('recordingState', this.RECORDING_STATES.STOP, null, null);
+    if (this._isRecording) {
+      this._isRecording = false;
+      this._trigger('recordingState', this.RECORDING_STATES.STOP, null, null);
+    }
 
   } else if (message.action === 'url') {
     this._trigger('recordingState', this.RECORDING_STATES.URL, message.url, null);
