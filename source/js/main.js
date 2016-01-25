@@ -574,7 +574,7 @@ define([
           room: Utils.extend(app.state.room, {})
         };
 
-        app.room.isLocked = isLocked;
+        appState.room.isLocked = isLocked;
         app.setState(appState);
       });
 
