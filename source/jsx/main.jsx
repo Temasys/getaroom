@@ -596,7 +596,7 @@ define([
             name: 'GAR.io',
             type: Constants.MessageType.MESSAGE,
             content: 'Recording: (ID: ' + appState.room.recordingRandId +
-              ')\nStarted for room. Waiting for minium of 5 seconds before enabling',
+              ')\nStarted for room. Waiting for minium of 10 seconds before enabling',
             date: (new Date()).toISOString()
           });
 
@@ -608,7 +608,7 @@ define([
             newAppState.room.preventRecording = false;
             newAppState.room.recordingTimer = null;
             app.setState(newAppState);
-          }, 5000);
+          }, 10000);
 
         } else {
           appState.room.isRecording = false;
