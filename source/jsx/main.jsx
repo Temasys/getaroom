@@ -341,11 +341,11 @@ define([
         }
 
         // Prevent recording if less than 2 peers
-        /*if (appState.users.length > 1) {
+        //if (appState.users.length > 1) {
           appState.room.preventRecordingOneUser = false;
-        } else {*/
+        /*} else {
           appState.room.preventRecordingOneUser = true;
-        //}
+        }*/
 
         appState.room.messages.push({
           user: isSelf ? 0 : peerId,
@@ -419,11 +419,11 @@ define([
         }
 
         // Prevent recording if less than 2 peers
-        /*if (appState.users.length > 1) {
+        //if (appState.users.length > 1) {
           appState.room.preventRecordingOneUser = false;
-        } else {*/
+        /*} else {
           appState.room.preventRecordingOneUser = true;
-        //}
+        }*/
 
         appState.room.messages.push({
           user: isSelf ? 0 : peerId,
