@@ -124,25 +124,30 @@ define([
         }));
 
         var muted = [];
+        var disabled = [];
 
         // Status of audio in Stream
-        if(this.props.user.audioMute) {
+        if (!this.props.user.hasAudio) {
+          disabled.push('Audio');
+        } else if(this.props.user.audioMute) {
           muted.push('Audio');
         }
 
         // Status of video in Stream
-        if(this.props.user.videoMute) {
+        if (!this.props.user.hasVideo) {
+          disabled.push('Video');
+        } else if(this.props.user.videoMute) {
           muted.push('Video');
         }
 
+        // If any has disabled
         // If any has muted
-        if(muted.length > 0) {
-          res.push(
-            <span className="userInfo">
-              {muted.join('/')} muted
-            </span>
-          );
-        }
+        res.push(
+          <span className="userInfo">
+            {disabled.length > 0 ? disabled.join('/') + ' disabled' : ''} <br/>
+            {muted.length > 0 ? muted.join('/') + ' muted' : ''}
+          </span>
+        );
       }
 
       return (

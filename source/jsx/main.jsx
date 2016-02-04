@@ -115,7 +115,9 @@ define([
           audioMute: false,
           videoMute: false,
           screensharing: false,
-          screensharingPriority: 0
+          screensharingPriority: 0,
+          hasAudio: false,
+          hasVideo: false
         }],
         // Current Room state
         state: Constants.AppState.FOYER,
@@ -328,6 +330,8 @@ define([
           appState.users[0].name = username;
           appState.users[0].videoMute = peerInfo.mediaStatus.videoMuted;
           appState.users[0].audioMute = peerInfo.mediaStatus.audioMuted;
+          appState.users[0].hasAudio = !!peerInfo.settings.audio;
+          appState.users[0].hasVideo = !!peerInfo.settings.video;
 
         // Peer has joined the room (new one)
         } else {
@@ -336,7 +340,9 @@ define([
             name: peerInfo.userData.name,
             stream: null,
             videoMute: peerInfo.mediaStatus.videoMuted,
-            audioMute: peerInfo.mediaStatus.audioMuted
+            audioMute: peerInfo.mediaStatus.audioMuted,
+            hasAudio: !!peerInfo.settings.audio,
+            hasVideo: !!peerInfo.settings.video
           });
         }
 
@@ -379,6 +385,8 @@ define([
             appState.users[i].audioMute = peerInfo.mediaStatus.audioMuted;
             appState.users[i].videoMute = peerInfo.mediaStatus.videoMuted;
             appState.users[i].name = username;
+            appState.users[i].hasAudio = !!peerInfo.settings.audio;
+            appState.users[i].hasVideo = !!peerInfo.settings.video;
             break;
           }
         }
@@ -528,6 +536,8 @@ define([
             appState.users[i].stream = stream;
             appState.users[i].screensharing = screensharing;
             appState.users[i].screensharingPriority = screensharingPriority;
+            appState.users[i].hasAudio = !!peerInfo.settings.audio;
+            appState.users[i].hasVideo = !!peerInfo.settings.video;
             break;
           }
         }

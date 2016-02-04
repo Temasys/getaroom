@@ -85,6 +85,10 @@ define([
         return user.id === 0;
       })[0];
 
+      if (!user.hasVideo) {
+        return;
+      }
+
       Skylink[user.videoMute ? 'enableVideo' : 'disableVideo']();
     },
 
@@ -95,6 +99,10 @@ define([
       var user = this.props.state.users.filter(function (user) {
         return user.id === 0;
       })[0];
+
+      if (!user.hasAudio) {
+        return;
+      }
 
       Skylink[user.audioMute ? 'enableAudio' : 'disableAudio']();
     },
@@ -247,11 +255,11 @@ define([
 
         if(this.props.state.room.status === Constants.RoomState.CONNECTED && user.stream != null) {
           res.push(
-            <button id="videoMute" onClick={this.handleVideoMute} className={user.videoMute ? '' : 'on'} title="Mute/Unmute Video"></button>
+            <button id="videoMute" onClick={this.handleVideoMute} className={this.props.state.users[0].hasVideo ? (user.videoMute ? '' : 'on') : 'off muted'} title="Mute/Unmute Video"></button>
           );
 
           res.push(
-            <button id="audioMute" onClick={this.handleAudioMute} className={user.audioMute ? '' : 'on'} title="Mute/Unmute Audio"></button>
+            <button id="audioMute" onClick={this.handleAudioMute} className={this.props.state.users[0].hasAudio ? (user.audioMute ? '' : 'on') : 'off muted'} title="Mute/Unmute Audio"></button>
           );
 
           res.push(
