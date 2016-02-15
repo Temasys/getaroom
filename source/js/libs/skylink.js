@@ -14812,6 +14812,11 @@ Skylink.prototype._recordingEventHandler = function (message) {
     this._trigger('recordingState', this.RECORDING_STATES.URL, message.url, null);
 
   } else {
+    if (this._isRecording) {
+      this._isRecording = false;
+      this._trigger('recordingState', this.RECORDING_STATES.STOP, null, null);
+    }
+
     var recordingErrorMessage = message.error || 'Unknown error';
 
     this._trigger('recordingState', this.RECORDING_STATES.ERROR, null, new Error(recordingErrorMessage));
