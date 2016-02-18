@@ -14737,10 +14737,10 @@ Skylink.prototype.startRecording = function () {
   }
 
   // NOTE: Not sure if this is needed? just return as log.error?
-  if (this._isRecording) {
+  /*if (this._isRecording) {
     log.error('Unable to start recording as there is an existing recording in-progress');
     return;
-  }
+  }*/
 
   this._sendChannelMessage({
 
@@ -14765,10 +14765,10 @@ Skylink.prototype.stopRecording = function () {
   }
 
   // NOTE: Not sure if this is needed? just return as log.error?
-  if (!this._isRecording) {
+  /*if (!this._isRecording) {
     log.error('Unable to stop recording as there is no recording in-progress');
     return;
-  }
+  }*/
 
   this._sendChannelMessage({
 
@@ -14796,22 +14796,22 @@ Skylink.prototype._recordingEventHandler = function (message) {
   log.debug(['MCU', 'Recording', null, 'Received recording message ->'], message);
 
   if (message.action === 'on') {
-    if (!this._isRecording) {
-      this._isRecording = true;
+    //if (!this._isRecording) {
+      //this._isRecording = true;
       this._trigger('recordingState', this.RECORDING_STATES.START, message.recordingId, null, null);
-    }
+    //}
 
   } else if (message.action === 'off') {
-    if (this._isRecording) {
-      this._isRecording = false;
+    //if (this._isRecording) {
+      //this._isRecording = false;
       this._trigger('recordingState', this.RECORDING_STATES.STOP, message.recordingId, null, null);
-    }
+    //}
 
   } else if (message.action === 'url') {
     this._trigger('recordingState', this.RECORDING_STATES.URL, message.recordingId, message.url, null);
 
   } else {
-    this._isRecording = false;
+    //this._isRecording = false;
 
     var recordingErrorMessage = message.error || 'Unknown error';
 
