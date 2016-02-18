@@ -103,7 +103,6 @@ define([
           preventScreenshare: false,
           preventRecording: false,
           preventRecordingOneUser: true,
-          recordingRandId: null,
           recordingTimer: null
         },
         // Contains the list of User and Peers
@@ -592,7 +591,7 @@ define([
        * Handles the Skylink "recordingState" event
        * This triggers when recording status has changed
        */
-      Skylink.on('recordingState', function (state, link, error) {
+      Skylink.on('recordingState', function (state, recordingId, link, error) {
         var appState = {
           room: Utils.extend(app.state.room, {})
         };
@@ -600,12 +599,11 @@ define([
         if (state === Skylink.RECORDING_STATES.START) {
           appState.room.isRecording = true;
           appState.room.preventRecording = true;
-          appState.room.recordingRandId = Utils.uuid(10);
           appState.room.messages.push({
             user: 0,
             name: 'GAR.io',
             type: Constants.MessageType.MESSAGE,
-            content: 'Recording: (ID: ' + appState.room.recordingRandId +
+            content: 'Recording: (ID: ' + recordingId +
               ')\nStarted for room. Waiting for minium of 10 seconds before enabling',
             date: (new Date()).toISOString()
           });
@@ -629,12 +627,12 @@ define([
           }
 
           if (state === Skylink.RECORDING_STATES.STOP) {
-            appState.room.preventRecording = true;
+            //appState.room.preventRecording = true;
             appState.room.messages.push({
               user: 0,
               name: 'GAR.io',
               type: Constants.MessageType.MESSAGE,
-              content: 'Recording: (ID: ' + appState.room.recordingRandId +
+              content: 'Recording: (ID: ' + recordingId +
                 ')\nStopped for room. Video is mixing ....',
               date: (new Date()).toISOString()
             });
@@ -645,7 +643,7 @@ define([
               user: 0,
               name: 'GAR.io',
               type: Constants.MessageType.MESSAGE,
-              content: 'Recording: (ID: ' + appState.room.recordingRandId +
+              content: 'Recording: (ID: ' + recordingId +
                 ')\nMixing completed. [Download link](' + link + ')',
               date: (new Date()).toISOString()
             });
@@ -656,7 +654,7 @@ define([
               user: 0,
               name: 'GAR.io',
               type: Constants.MessageType.MESSAGE,
-              content: 'Recording: (ID: ' + appState.room.recordingRandId +
+              content: 'Recording: (ID: ' + recordingId +
                 ')\nError. ' + (error.message || error),
               date: (new Date()).toISOString()
             });

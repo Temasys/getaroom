@@ -14718,6 +14718,7 @@ Skylink.prototype.RECORDING_STATES = {
  * The event that triggers the current state of the recording status
  * @event recordingState
  * @param {Number} state The recording states which can be inferred from RECORDING_STATES
+ * @param {String} recordingId The recording ID.
  * @param {String} link The recording URL compiled once the recording has mixing and completed.
  * @param {Object} error The error object received when there's an exception
  * @for Skylink
@@ -14731,14 +14732,13 @@ Skylink.prototype.RECORDING_STATES = {
  */
 Skylink.prototype.startRecording = function () {
   if (!this._hasMCU) {
-    this._trigger('recordingState', this.RECORDING_STATES.ERROR, null,
-      new Error('Unable to start recording as MCU is not connected'));
+    log.error('Unable to start recording as MCU is not connected');
     return;
   }
 
+  // NOTE: Not sure if this is needed? just return as log.error?
   if (this._isRecording) {
-    this._trigger('recordingState', this.RECORDING_STATES.ERROR, null,
-      new Error('Unable to start recording as there is an existing recording in-progress'));
+    log.error('Unable to start recording as there is an existing recording in-progress');
     return;
   }
 
@@ -14760,14 +14760,13 @@ Skylink.prototype.startRecording = function () {
  */
 Skylink.prototype.stopRecording = function () {
   if (!this._hasMCU) {
-    this._trigger('recordingState', this.RECORDING_STATES.ERROR, null,
-      new Error('Unable to stop recording as MCU is not connected'));
+    log.error('Unable to stop recording as MCU is not connected');
     return;
   }
 
+  // NOTE: Not sure if this is needed? just return as log.error?
   if (!this._isRecording) {
-    this._trigger('recordingState', this.RECORDING_STATES.ERROR, null,
-      new Error('Unable to stop recording as there is no recording in-progress'));
+    log.error('Unable to stop recording as there is no recording in-progress');
     return;
   }
 
@@ -14799,24 +14798,24 @@ Skylink.prototype._recordingEventHandler = function (message) {
   if (message.action === 'on') {
     if (!this._isRecording) {
       this._isRecording = true;
-      this._trigger('recordingState', this.RECORDING_STATES.START, null, null);
+      this._trigger('recordingState', this.RECORDING_STATES.START, message.recordingId, null, null);
     }
 
   } else if (message.action === 'off') {
     if (this._isRecording) {
       this._isRecording = false;
-      this._trigger('recordingState', this.RECORDING_STATES.STOP, null, null);
+      this._trigger('recordingState', this.RECORDING_STATES.STOP, message.recordingId, null, null);
     }
 
   } else if (message.action === 'url') {
-    this._trigger('recordingState', this.RECORDING_STATES.URL, message.url, null);
+    this._trigger('recordingState', this.RECORDING_STATES.URL, message.recordingId, message.url, null);
 
   } else {
     this._isRecording = false;
 
     var recordingErrorMessage = message.error || 'Unknown error';
 
-    this._trigger('recordingState', this.RECORDING_STATES.ERROR, null, new Error(recordingErrorMessage));
+    this._trigger('recordingState', this.RECORDING_STATES.ERROR, message.recordingId, null, new Error(recordingErrorMessage));
 
     log.error(['MCU', 'Recording', null, 'Recording failure ->'], new Error(recordingErrorMessage));
   }
