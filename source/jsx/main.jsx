@@ -619,15 +619,14 @@ define([
           }, 10000);
 
         } else {
-          appState.room.isRecording = false;
-
-          // Clear away the timer just incase
-          if (appState.room.recordingTimer) {
-            clearTimeout(appState.room.recordingTimer);
-          }
-
           if (state === Skylink.RECORDING_STATES.STOP) {
-            //appState.room.preventRecording = true;
+            // Clear away the timer just incase
+            if (appState.room.recordingTimer) {
+              clearTimeout(appState.room.recordingTimer);
+            }
+
+            appState.room.isRecording = false;
+            appState.room.preventRecording = false;
             appState.room.messages.push({
               user: 0,
               name: 'GAR.io',
@@ -638,7 +637,7 @@ define([
             });
 
           } else if (state === Skylink.RECORDING_STATES.URL) {
-            appState.room.preventRecording = false;
+            //appState.room.preventRecording = false;
             appState.room.messages.push({
               user: 0,
               name: 'GAR.io',
@@ -649,7 +648,7 @@ define([
             });
 
           } else {
-            appState.room.preventRecording = false;
+            //appState.room.preventRecording = false;
             appState.room.messages.push({
               user: 0,
               name: 'GAR.io',

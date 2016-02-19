@@ -331,8 +331,8 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
   var channelName = (dc) ? dc.label : customChannelName;
   var pc = self._peerConnections[peerId];
 
-  var SctpSupported = 
-    !(window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion < 30 || 
+  var SctpSupported =
+    !(window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion < 30 ||
       window.webrtcDetectedBrowser === 'opera'  && window.webrtcDetectedVersion < 20 );
 
   if (!SctpSupported) {
@@ -14693,12 +14693,12 @@ Skylink.prototype._addSDPSsrcFirefoxAnswer = function (targetMid, sdp) {
  */
 
 /**
- * The flag that determines if Skylink is recording or not.
- * @attribute _isRecording
- * @type Boolean
+ * Stores the list of recordings.
+ * @attribute _recordings
+ * @type JSON
  * @for Skylink
  */
-Skylink.prototype._isRecording = false;
+Skylink.prototype._recordings = {};
 
 /**
  * Contains the list of recording states.
@@ -14796,28 +14796,57 @@ Skylink.prototype._recordingEventHandler = function (message) {
   log.debug(['MCU', 'Recording', null, 'Received recording message ->'], message);
 
   if (message.action === 'on') {
-    //if (!this._isRecording) {
-      //this._isRecording = true;
+    if (!this._recordings[message.recordingId]) {
+      log.debug(['MCU', 'Recording', message.recordingId, 'Started recording']);
+
+      this._recordings[message.recordingId] = {
+        isOn: true,
+        url: null,
+        error: null
+      };
+
       this._trigger('recordingState', this.RECORDING_STATES.START, message.recordingId, null, null);
-    //}
+    }
 
   } else if (message.action === 'off') {
-    //if (this._isRecording) {
-      //this._isRecording = false;
-      this._trigger('recordingState', this.RECORDING_STATES.STOP, message.recordingId, null, null);
-    //}
+    if (!this._recordings[message.recordingId]) {
+      log.error(['MCU', 'Recording', message.recordingId, 'Received request of "off" but the session is empty']);
+      return;
+    }
+
+    log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording']);
+
+    this._recordings[message.recordingId].isOn = false;
+    this._trigger('recordingState', this.RECORDING_STATES.STOP, message.recordingId, null, null);
 
   } else if (message.action === 'url') {
+    if (!this._recordings[message.recordingId]) {
+      log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
+      return;
+    }
+
+    this._recordings[message.recordingId].url = message.url;
     this._trigger('recordingState', this.RECORDING_STATES.URL, message.recordingId, message.url, null);
 
   } else {
-    //this._isRecording = false;
+    var recordingError = new Error(message.error || 'Unknown error');
 
-    var recordingErrorMessage = message.error || 'Unknown error';
+    if (!this._recordings[message.recordingId]) {
+      log.error(['MCU', 'Recording', message.recordingId, 'Received error but the session is empty ->'], recordingError);
+      return;
+    }
 
-    this._trigger('recordingState', this.RECORDING_STATES.ERROR, message.recordingId, null, new Error(recordingErrorMessage));
+    log.error(['MCU', 'Recording', message.recordingId, 'Recording failure ->'], recordingError);
 
-    log.error(['MCU', 'Recording', null, 'Recording failure ->'], new Error(recordingErrorMessage));
+    this._recordings[message.recordingId].error = recordingError;
+    this._trigger('recordingState', this.RECORDING_STATES.ERROR, message.recordingId, null, recordingError);
+
+    if (this._recordings[message.recordingId].isOn) {
+      log.debug(['MCU', 'Recording', message.recordingId, 'Stopped recording abruptly']);
+
+      this._recordings[message.recordingId].isOn = false;
+      this._trigger('recordingState', this.RECORDING_STATES.STOP, message.recordingId, null, recordingError);
+    }
   }
 };
 
