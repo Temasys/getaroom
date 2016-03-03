@@ -10202,7 +10202,7 @@ Skylink.prototype._createSocket = function (type) {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
-  self._signalingServer = '//staging-signaling.temasys.com.sg/';
+  self._signalingServer = '//staging-signaling.temasys.com.sg';
 
   var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
 
