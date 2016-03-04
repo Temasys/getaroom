@@ -10202,6 +10202,11 @@ Skylink.prototype._createSocket = function (type) {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
+  if ((self._roomServer || '').indexOf('staging') > -1) {
+    log.warn([null, 'Socket', null, 'Switching to staging signaling server']);
+    self._signalingServer = 'staging-signaling.temasys.com.sg';
+  }
+
   var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
 
   if (type === 'WebSocket') {
