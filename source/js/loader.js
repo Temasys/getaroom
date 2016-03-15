@@ -9,22 +9,15 @@ require.config({
     ],
 
     paths: {
-        socketio: '//cdn.temasys.com.sg/libraries/'
-            + 'socket.io-client/1.0.6/socket.io',
-        //adapter: 'libs/adapter',
-        adapter: '//cdn.temasys.com.sg/adapterjs/0.11.x/' +
-            'adapter.screenshare',
-        //skylink: 'libs/skylink',
-        skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.x/' +
-            'skylink.debug',
+        socketio: '//cdn.socket.io/socket.io-1.4.4',
+        adapter: '//cdn.temasys.com.sg/adapterjs/0.13.0/adapter.screenshare',
+        skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.10/skylink.debug',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
-        fastclick: '//cdnjs.cloudflare.com/' +
-            'ajax/libs/fastclick/0.6.11/fastclick.min',
+        fastclick: '//cdnjs.cloudflare.com/ajax/libs/fastclick/0.6.11/fastclick.min',
         router: 'libs/director',
         marked: 'libs/marked',
-        react: '//cdnjs.cloudflare.com/' +
-            'ajax/libs/react/0.10.0/react'
+        react: '//cdnjs.cloudflare.com/ajax/libs/react/0.10.0/react'
     },
 
     shim: {

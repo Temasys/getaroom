@@ -367,17 +367,17 @@ define([
             }
 
             return (
-                React.DOM.div( {className:className}, 
-                    React.DOM.div( {onClick:this.handleShowControls}, 
-                        UserAreas( {state:this.state} )
-                    ),
-                    Controls( {state:this.state} ),
-                    Chat( {state:this.state} )
+                React.DOM.div({className: className}, 
+                    React.DOM.div({onClick: this.handleShowControls}, 
+                        UserAreas({state: this.state})
+                    ), 
+                    Controls({state: this.state}), 
+                    Chat({state: this.state})
                 )
                 )
         }
     });
 
-    React.renderComponent(App(null ),
+    React.renderComponent(App(null),
         document.getElementById('app'));
 });
