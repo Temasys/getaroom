@@ -4,7 +4,7 @@ getaroom.io
 > Pretty nifty cross device and cross browser WebRTC audio/video conferencing demo of [SkylinkJS](http://github.com/Temasys/SkylinkJS) using [React](http://facebook.github.io/react/).
 > Try it out at http://getaroom.io
 
-For more other advanced features of SkylinkJS like the file transfers or the privileged key feature, see the `demo/app` folder in [SkylinkJS demos list](https://github.com/Temasys/SkylinkJS/tree/master/demo). 
+For more other advanced features of SkylinkJS like the file transfers or the privileged key feature, [see the SkylinkJS demos list](https://github.com/Temasys/SkylinkJS/tree/master/demo). 
 
 Browser support
 ----
