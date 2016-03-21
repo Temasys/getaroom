@@ -13,6 +13,8 @@ require.config({
         socketio: '//cdn.socket.io/socket.io-1.4.4',
         adapter: '//cdn.temasys.com.sg/adapterjs/0.13.2/adapter.screenshare',
         skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.11/skylink.debug',
+        // facebook: '//connect.facebook.net/en_US/all',
+        // twitter: '//platform.twitter.com/widgets',
         fastclick: '//cdnjs.cloudflare.com/ajax/libs/fastclick/0.6.11/fastclick.min',
         router: 'libs/director',
         marked: 'libs/marked',
