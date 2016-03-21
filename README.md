@@ -26,7 +26,7 @@ Replace the API keys and hostnames in the `configs.jsx` file with your own. You 
 
 Note that it's important to reference the correct `socket.io-client` and `adapterjs` dependencies version based on the version of SkylinkJS you are using.
 
-Folders
+Files and Folders
 ----
 
 You do not need to modify the `.js` files in `/js` folder nor modify from the `styles/app.css` file, since they are auto-generated everytime you do `grunt dev`. 
@@ -48,6 +48,8 @@ You do not need to modify the `.js` files in `/js` folder nor modify from the `s
 - `styles/app.css`: The output auto-generated stylesheet `.css` file after `grunt dev` is invoked.
 - `styles/app.styl`: This file contains the demo styling.
 - `index.html`: This file is the main HTML template. Modify with your own Google Analytics if required.
+
+Note that the `ca.crt`, `server.crt` and `server.key` are for `localhost` demos. You might have to replace with your own certificates if you are hosting this demo on your page.
 
 
 Need help or want something changed?
