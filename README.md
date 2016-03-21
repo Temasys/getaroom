@@ -8,7 +8,7 @@ For more other advanced features of SkylinkJS like the file transfers or the pri
 
 Browser support
 ----
-Currently, the demo only support up to 10 peers. You may modify the demo to fit to your own limit. Note that in connection wise, how many peers it can connect with depends on network connection and computer's available memory.
+Currently, the demo only support up to 10 peers. You may modify the demo to fit to your own limit. Note that in actual connection limits depends on network connection and computer's available memory.
 
 See SkylinkJS support https://github.com/Temasys/SkylinkJS/#supported-browsers
 
