@@ -93,17 +93,13 @@ define([
           id: '',
           messages: [],
           isLocked: false,
-          isRecording: false,
           isMCURestart: false,
           screensharing: false,
           status: Constants.RoomState.IDLE,
           useMCU: false,
           hasMCU: false,
           error: '',
-          preventScreenshare: false,
-          preventRecording: false,
-          preventRecordingOneUser: true,
-          recordingTimer: null
+          preventScreenshare: false
         },
         // Contains the list of User and Peers
         users: [{
@@ -164,12 +160,6 @@ define([
         } else if (state === Skylink.READY_STATE_CHANGE.COMPLETED) {
           appState.room.status = Constants.RoomState.CONNECTING;
           appState.room.error = '';
-
-          // Override for recording changes
-          //Skylink._signalingProtocol = 'http:';
-          //Skylink._signalingServer = 'ec2-52-8-93-170.us-west-1.compute.amazonaws.com';
-          //Skylink._signalingPort = 6001;
-          //Skylink._socketPorts['http:'] = [6001];
 
         // Room has failed loading - ERROR
         } else if (state === Skylink.READY_STATE_CHANGE.ERROR) {
@@ -345,13 +335,6 @@ define([
           });
         }
 
-        // Prevent recording if less than 2 peers
-        //if (appState.users.length > 1) {
-          appState.room.preventRecordingOneUser = false;
-        /*} else {
-          appState.room.preventRecordingOneUser = true;
-        }*/
-
         appState.room.messages.push({
           user: isSelf ? 0 : peerId,
           name: 'GAR.io',
@@ -424,13 +407,6 @@ define([
             }
           }
         }
-
-        // Prevent recording if less than 2 peers
-        //if (appState.users.length > 1) {
-          appState.room.preventRecordingOneUser = false;
-        /*} else {
-          appState.room.preventRecordingOneUser = true;
-        }*/
 
         appState.room.messages.push({
           user: isSelf ? 0 : peerId,
@@ -588,82 +564,6 @@ define([
       });
 
       /**
-       * Handles the Skylink "recordingState" event
-       * This triggers when recording status has changed
-       */
-      Skylink.on('recordingState', function (state, recordingId, link, error) {
-        var appState = {
-          room: Utils.extend(app.state.room, {})
-        };
-
-        if (state === Skylink.RECORDING_STATES.START) {
-          appState.room.isRecording = true;
-          appState.room.preventRecording = true;
-          appState.room.messages.push({
-            user: 0,
-            name: 'GAR.io',
-            type: Constants.MessageType.MESSAGE,
-            content: 'Recording: (ID: ' + recordingId +
-              ')\nStarted for room. Waiting for minium of 10 seconds before enabling',
-            date: (new Date()).toISOString()
-          });
-
-          // 5 seconds of timeout
-          appState.room.recordingTimer = setTimeout(function () {
-            var newAppState = {
-              room: Utils.extend(app.state.room)
-            };
-            newAppState.room.preventRecording = false;
-            newAppState.room.recordingTimer = null;
-            app.setState(newAppState);
-          }, 10000);
-
-        } else {
-          if (state === Skylink.RECORDING_STATES.STOP) {
-            // Clear away the timer just incase
-            if (appState.room.recordingTimer) {
-              clearTimeout(appState.room.recordingTimer);
-            }
-
-            appState.room.isRecording = false;
-            appState.room.preventRecording = false;
-            appState.room.messages.push({
-              user: 0,
-              name: 'GAR.io',
-              type: Constants.MessageType.MESSAGE,
-              content: 'Recording: (ID: ' + recordingId +
-                ')\nStopped for room. Video is mixing ....',
-              date: (new Date()).toISOString()
-            });
-
-          } else if (state === Skylink.RECORDING_STATES.URL) {
-            //appState.room.preventRecording = false;
-            appState.room.messages.push({
-              user: 0,
-              name: 'GAR.io',
-              type: Constants.MessageType.MESSAGE,
-              content: 'Recording: (ID: ' + recordingId +
-                ')\nMixing completed. [Download link](' + link + ')',
-              date: (new Date()).toISOString()
-            });
-
-          } else {
-            //appState.room.preventRecording = false;
-            appState.room.messages.push({
-              user: 0,
-              name: 'GAR.io',
-              type: Constants.MessageType.MESSAGE,
-              content: 'Recording: (ID: ' + recordingId +
-                ')\nError. ' + (error.message || error),
-              date: (new Date()).toISOString()
-            });
-          }
-        }
-
-        app.setState(appState);
-      });
-
-      /**
        * Dispatcher of events
        */
       Dispatcher = {
@@ -678,18 +578,6 @@ define([
 
           appState.room.useMCU = state === true;
           app.setState(appState);
-        },
-
-        /**
-         * Dispatch to ping the recording state
-         */
-        recording: function (enable) {
-          if (enable) {
-            this.props.state.room.preventRecording = true;
-
-          } else {
-            Skylink.stopRecording();
-          }
         },
 
         /**

@@ -155,25 +155,6 @@ define([
     },
 
     /**
-     * Handles the recording option
-     */
-    handleRecording: function () {
-      if (this.props.state.room.preventRecording || this.props.state.room.preventRecordingOneUser ||
-        !this.props.state.room.hasMCU) {
-        return;
-      }
-
-      if(!this.props.state.room.isRecording) {
-        // Prevent multiple clicks for now
-        this.props.state.room.preventRecording = true;
-        Skylink.startRecording();
-
-      } else {
-        Skylink.stopRecording();
-      }
-    },
-
-    /**
      * Handles the link share textbox
      */
     handleLinkClick: function (e) {
@@ -269,12 +250,6 @@ define([
           res.push(
             <button id="roomLock" onClick={this.handleRoomLock} className={this.props.state.room.isLocked ? '' : 'on'} title="Lock/Unlock Room"></button>
           );
-
-          if (this.props.state.room.hasMCU) {
-            res.push(
-              <button id="recording" onClick={this.handleRecording} className={(this.props.state.room.isRecording ? 'on' : '') + ' ' + (this.props.state.room.preventRecording || this.props.state.room.preventRecordingOneUser ? 'muted' : '')} title="Start/Stop Recording"></button>
-            );
-          }
 
           res.push(
             <div className="displayName">
