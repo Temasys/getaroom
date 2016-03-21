@@ -49,7 +49,7 @@ You do not need to modify the `.js` files in `/js` folder nor modify from the `s
 - `styles/app.styl`: This file contains the demo styling.
 - `index.html`: This file is the main HTML template. Modify with your own Google Analytics if required.
 
-Note that the `ca.crt`, `server.crt` and `server.key` are for `localhost` demos. You might have to replace with your own certificates if you are hosting this demo on your page.
+Note that the `ca.crt`, `server.crt` and `server.key` are for your `localhost` domain. You might have to replace with your own certificates if you are hosting this demo on your page.
 
 
 Need help or want something changed?
