@@ -241,7 +241,7 @@ define([
 
         res.push(
           React.DOM.div({className: "link"}, 
-              "Share this link to invite others into this call", React.DOM.br(null), 
+              "Invite others to join this call at this link:", React.DOM.br(null), 
               React.DOM.input({type: "text", value: location.toString(), onClick: this.handleLinkClick, readOnly: true})
           )
         );

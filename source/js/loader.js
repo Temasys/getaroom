@@ -10,8 +10,8 @@ require.config({
 
     paths: {
         history: 'libs/history',
-        socketio: '//cdn.socket.io/socket.io-1.3.7',
-        adapter: '//cdn.temasys.com.sg/adapterjs/0.13.x/adapter.screenshare',
+        socketio: '//cdn.socket.io/socket.io-1.4.4',
+        adapter: '//cdn.temasys.com.sg/adapterjs/0.13.2/adapter.screenshare',
         skylink: 'libs/skylink',
             // '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.x/skylink.debug',
         // facebook: '//connect.facebook.net/en_US/all',

@@ -241,7 +241,7 @@ define([
 
         res.push(
           <div className="link">
-              Share this link to invite others into this call<br />
+              Invite others to join this call at this link:<br />
               <input type="text" value={location.toString()} onClick={this.handleLinkClick} readOnly />
           </div>
         );
