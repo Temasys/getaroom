@@ -5290,6 +5290,12 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     log.log([targetMid, null, null, 'Not setting any audio codec']);
   }
 
+  //if (['chrome', 'opera', 'safari', 'IE'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    log.warn([targetMid, null, null, 'Setting 500 google min/max bitrate for VP8/90000']);
+
+    sdpLines = self._setSDPGoogBitrate(sdpLines);
+  //}
+
   sessionDescription.sdp = sdpLines.join('\r\n');
 
   // Remove REMB packet for MCU connection consistent video quality
@@ -14506,6 +14512,39 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
 
     log.debug([null, 'SDP', null, 'Setting video resolution (broken)']);
   }
+  return sdpLines;
+};
+
+/**
+ * Sets th google bitrate for max and min sending bitrate.
+ * @method _setSDPVideoResolution
+ * @param {Array} sdpLines The array of lines in the session description.
+ * @return {Array} The updated array of lines in the session description
+ *    with the custom video resolution.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._setSDPGoogBitrate = function(sdpLines){
+  var vp8Payload = null;
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('a=rtpmap:') === 0 && sdpLines[i].indexOf('VP8/90000') > 0) {
+      vp8Payload = sdpLines[i].split(':')[1].split(' ')[0];
+      break;
+    }
+  }
+
+  if (vp8Payload) {
+    for (var j = 0; j < sdpLines.length; j++) {
+      if (sdpLines[j].indexOf('a=fmtp:' + vp8Payload) === 0) {
+        sdpLines[j] += '; x-google-min-bitrate=500; x-google-max-bitrate=500';
+        break;
+      }
+    }
+  }
+
   return sdpLines;
 };
 
