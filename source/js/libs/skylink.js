@@ -14527,21 +14527,31 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  * @since 0.5.10
  */
 Skylink.prototype._setSDPGoogBitrate = function(sdpLines){
-  var vp8Payload = null;
+  var vp8Payload = null,
+      vp8LineIndex = -1;
 
   for (var i = 0; i < sdpLines.length; i++) {
     if (sdpLines[i].indexOf('a=rtpmap:') === 0 && sdpLines[i].indexOf('VP8/90000') > 0) {
       vp8Payload = sdpLines[i].split(':')[1].split(' ')[0];
+      vp8LineIndex = i;
       break;
     }
   }
 
   if (vp8Payload) {
+    var hasLine = false,
+        paramsLine = 'x-google-min-bitrate=500; x-google-max-bitrate=500';
+
     for (var j = 0; j < sdpLines.length; j++) {
       if (sdpLines[j].indexOf('a=fmtp:' + vp8Payload) === 0) {
-        sdpLines[j] += '; x-google-min-bitrate=500; x-google-max-bitrate=500';
+        sdpLines[j] += '; ' + paramsLine;
+        hasLine = true;
         break;
       }
+    }
+
+    if (!hasLine) {
+      sdpLines.splice(vp8LineIndex + 1, 0, 'a=fmtp:' + vp8Payload + ' ' + paramsLine);
     }
   }
 
