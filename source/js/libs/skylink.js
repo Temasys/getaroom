@@ -5290,11 +5290,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     log.log([targetMid, null, null, 'Not setting any audio codec']);
   }
 
-  //if (['chrome', 'opera', 'safari', 'IE'].indexOf(window.webrtcDetectedBrowser) > -1) {
+  if (self._hasMCU) { //['chrome', 'opera', 'safari', 'IE'].indexOf(window.webrtcDetectedBrowser) > -1) {
     log.warn([targetMid, null, null, 'Setting 500 google min/max bitrate for VP8/90000']);
 
-    sdpLines = self._setSDPGoogBitrate(sdpLines);
-  //}
+    sdpLines = self._setSDPGoogMinBitrate(sdpLines);
+  }
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
@@ -14517,7 +14517,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
 
 /**
  * Sets th google bitrate for max and min sending bitrate.
- * @method _setSDPVideoResolution
+ * @method _setSDPGoogMinBitrate
  * @param {Array} sdpLines The array of lines in the session description.
  * @return {Array} The updated array of lines in the session description
  *    with the custom video resolution.
@@ -14526,7 +14526,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._setSDPGoogBitrate = function(sdpLines){
+Skylink.prototype._setSDPGoogMinBitrate = function(sdpLines){
   var vp8Payload = null,
       vp8LineIndex = -1;
 
@@ -14540,7 +14540,7 @@ Skylink.prototype._setSDPGoogBitrate = function(sdpLines){
 
   if (vp8Payload) {
     var hasLine = false,
-        paramsLine = 'x-google-min-bitrate=500; x-google-max-bitrate=500';
+        paramsLine = 'x-google-min-bitrate=256'; // x-google-max-bitrate=500';
 
     for (var j = 0; j < sdpLines.length; j++) {
       if (sdpLines[j].indexOf('a=fmtp:' + vp8Payload) === 0) {
