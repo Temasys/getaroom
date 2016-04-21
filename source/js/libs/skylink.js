@@ -5291,7 +5291,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   if (self._hasMCU) { //['chrome', 'opera', 'safari', 'IE'].indexOf(window.webrtcDetectedBrowser) > -1) {
-    log.warn([targetMid, null, null, 'Setting 500 google min/max bitrate for VP8/90000']);
+    log.warn([targetMid, null, null, 'Setting 256 google min bitrate for VP8/90000']);
 
     sdpLines = self._setSDPGoogMinBitrate(sdpLines);
   }
