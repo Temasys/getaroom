@@ -9,6 +9,7 @@ require.config({
     ],
 
     paths: {
+        history: 'libs/history',
         socketio: '//cdn.socket.io/socket.io-1.4.4',
         adapter: '//cdn.temasys.com.sg/adapterjs/0.13.3/adapter.screenshare',
         skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.12/skylink.debug',
@@ -34,6 +35,9 @@ require.config({
         },
         router: {
             exports: 'Router',
+            deps: [
+                'history'
+            ],
             init: function() {
                 return new this.Router();
             }
