@@ -10,7 +10,7 @@ require.config({
 
     paths: {
         socketio: '//cdn.temasys.com.sg/libraries/socket.io-client/1.4.4/socket.io',
-        adapter: 'libs/adapter',
+        adapter: '//http://cdn.temasys.com.sg/adapterjs/0.13.3/adapter.screenshare',
         skylink: '//cdn.temasys.com.sg/skylink/skylinkjs/0.6.14/skylink.debug',
         // facebook: '//connect.facebook.net/en_US/all',
         // twitter: '//platform.twitter.com/widgets',
