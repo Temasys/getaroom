@@ -340,9 +340,15 @@ define([
                     Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
                 defaultRoom: room
             }, function() {
-                Skylink.joinRoom({
-                    audio: true,
-                    video: true
+                navigator.getUserMedia({
+                  audio: true,
+                  video: true
+                }, function (stream) {
+                  window.console.log('Got stream', stream);
+                  Skylink.sendStream(stream);
+                  Skylink.joinRoom();
+                }, function (error) {
+                  window.console.error('The error', error);
                 });
             });
         },
