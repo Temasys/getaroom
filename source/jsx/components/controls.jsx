@@ -61,7 +61,7 @@ define([
 
                 Dispatcher.sharescreen(true);
 
-                Skylink.shareScreen();
+                Skylink.shareScreen(true);
             }
             else if(user.screensharing) {
 
