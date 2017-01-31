@@ -341,7 +341,7 @@ define([
                 defaultRoom: room
             }, function() {
                 Skylink.joinRoom({
-                    audio: true,
+                    audio: { stereo: true, echoCancellation: true },
                     video: true
                 });
             });
