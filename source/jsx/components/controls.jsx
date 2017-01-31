@@ -61,7 +61,11 @@ define([
 
                 Dispatcher.sharescreen(true);
 
-                Skylink.shareScreen(true);
+                Skylink.shareScreen(true, function (err) {
+                    if (err) {
+                        Dispatcher.sharescreen(false);
+                    }
+                });
             }
             else if(user.screensharing) {
 
