@@ -65,7 +65,7 @@ In the contents of the `source/` folder:
 
 Run `grunt dev` to compile the React JSX (js) and Stylus (css) files.
 
-This starts a localhost webserver in your browser in `https://localhost:8085`.
+This opens `https://localhost:8085` in your browser as it runs localhost webserver on your device.
    
 #### 4. Make it production ready
 
