@@ -5,17 +5,6 @@ getaroom.io
 > Try it out at http://getaroom.io
 
 
-Setup
-----
-
-You'll need node, npm and grunt installed. Clone the repo and run `npm install` to install dependencies.
-
-- `grunt dev` will compile the JSX and Stylus files, start a web-server and open your browser to run it locally.
-- `grunt stage` will create a _staging_ folder and create a compiled and minified version of the application
-- `grunt publish` will move the contents of the _staging_ folder to a _publish_ folder.
-
-Replace the API keys and hostnames in the `configs.jsx` file with your own. You can [sign up for your own API key here](https://developer.temasys.com.sg).
-
 Setup / Development
 ----
 
@@ -27,9 +16,9 @@ Skip relevant steps when required.
 
 2. Make modifications in `source/` folder.
 
-   Contents:
+   **Contents:**
    
-   - `configs.jsx`: Defines the App Keys based on the different environment. Modify `local` only.
+   - `configs.jsx`: Defines the App Keys based on the different environment. Modify `local` only. You can [sign up for your own App key here](https://console.temasys.io).
     
    - `index.html`: Defines the HTML file for getaroom app. This contains the Google Analytics settings in which you can modify for your custom getaroom app.
 
