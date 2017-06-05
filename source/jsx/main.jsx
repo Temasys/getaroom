@@ -338,11 +338,14 @@ define([
                 roomServer: Configs.Skylink.roomServer,
                 apiKey: useMCU ?
                     Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
-                defaultRoom: room
+                defaultRoom: room,
+                audioFallback: true
             }, function() {
-                Skylink.joinRoom({
+                Skylink.getUserMedia({
                     audio: { stereo: true, echoCancellation: true },
                     video: true
+                }, function () {
+                    Skylink.joinRoom();
                 });
             });
         },
