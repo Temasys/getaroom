@@ -338,15 +338,39 @@ define([
                 roomServer: Configs.Skylink.roomServer,
                 apiKey: useMCU ?
                     Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
-                defaultRoom: room,
-                audioFallback: true
+                defaultRoom: room
             }, function() {
-                Skylink.getUserMedia({
-                    audio: { stereo: true, echoCancellation: true },
-                    video: true
-                }, function () {
-                    Skylink.joinRoom();
-                });
+                var fnOnItems = function (sources) {
+                    var hasAudio = false;
+                    var hasVideo = false;
+                    var index = 0;
+
+                    while (index < sources.length) {
+                        if (sources[index].kind === 'audioinput') {
+                            hasAudio = true;
+                        } else if (sources[index].kind === 'videoinput') {
+                            hasVideo = true;
+                        }
+                        index++;
+                    }
+
+                    Skylink.getUserMedia({
+                        audio: hasAudio ? { stereo: true, echoCancellation: true } : false,
+                        video: hasVideo
+                    }, function () {
+                        Skylink.joinRoom();
+                    });
+                };
+
+                if (navigator.mediaDevices && typeof navigator.mediaDevices === 'object' &&
+                    typeof navigator.mediaDevices.enumerateDevices === 'function') {
+                    navigator.mediaDevices.enumerateDevices().then(fnOnItems);
+                } else if (window.MediaStreamTrack && typeof window.MediaStreamTrack.getSources === 'function') {
+                    MediaStreamTrack.getSources(fnOnItems);
+                } else {
+                    // Spoof to just retrieve audio and video tracks if possible
+                    fnOnItems([{ kind: 'videoinput' }, { kind: 'audioinput' }]);
+                }
             });
         },
         handleShowControls: function(e) {
