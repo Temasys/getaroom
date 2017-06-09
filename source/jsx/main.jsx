@@ -336,9 +336,10 @@ define([
 
             Skylink.init({
                 roomServer: Configs.Skylink.roomServer,
-                apiKey: useMCU ?
+                appKey: useMCU ?
                     Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
-                defaultRoom: room
+                defaultRoom: room,
+                audioFallback: true
             }, function() {
                 var fnOnItems = function (sources) {
                     var hasAudio = false;
