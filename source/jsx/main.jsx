@@ -347,9 +347,9 @@ define([
                     var index = 0;
 
                     while (index < sources.length) {
-                        if (sources[index].kind === 'audioinput') {
+                        if (['audio', 'audioinput'].indexOf(sources[index].kind) > -1) {
                             hasAudio = true;
-                        } else if (sources[index].kind === 'videoinput') {
+                        } else if (['video', 'videoinput'].indexOf(sources[index].kind) > -1) {
                             hasVideo = true;
                         }
                         index++;
