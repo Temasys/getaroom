@@ -848,21 +848,46 @@ define([
       this.setState(appState);
 
       Skylink.init({
-        roomServer: Configs.Skylink.roomServer || null,
-        apiKey: appState.room.useMCU ? Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
-        defaultRoom: room
+        roomServer: Configs.Skylink.roomServer,
+        appKey: appState.room.useMCU ? Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
+        defaultRoom: room,
+        audioFallback: true
+      }, function() {
+        var fnOnItems = function (sources) {
+          var hasAudio = false;
+          var hasVideo = false;
+          var index = 0;
 
-      }, function(error, success) {
-        // Only when it's successful, then join the Room
-        if (success) {
-          Skylink.joinRoom({
-            audio: true,
-            video: true,
-            userData: {
-              name: appState.users[0].name,
-              screensharing: false
+          while (index < sources.length) {
+            if (['audio', 'audioinput'].indexOf(sources[index].kind) > -1) {
+              hasAudio = true;
+            } else if (['video', 'videoinput'].indexOf(sources[index].kind) > -1) {
+              hasVideo = true;
             }
+            index++;
+          }
+
+          Skylink.getUserMedia({
+            audio: hasAudio ? { stereo: true, echoCancellation: true } : false,
+            video: hasVideo
+          }, function () {
+            Skylink.joinRoom({
+              userData: {
+                name: appState.users[0].name,
+                screensharing: false
+              }
+            });
           });
+        };
+
+        if (navigator.mediaDevices && typeof navigator.mediaDevices === 'object' &&
+          typeof navigator.mediaDevices.enumerateDevices === 'function') {
+          navigator.mediaDevices.enumerateDevices().then(fnOnItems);
+        } else if (window.MediaStreamTrack && typeof window.MediaStreamTrack.getSources === 'function') {
+          MediaStreamTrack.getSources(fnOnItems);
+        } else {
+          // Spoof to just retrieve audio and video tracks if possible
+          fnOnItems([{ kind: 'videoinput' }, { kind: 'audioinput' }]);
         }
       });
     },
