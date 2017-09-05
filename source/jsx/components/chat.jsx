@@ -9,7 +9,6 @@ define([
   'marked'
 
 ], function (
-
   React,
   Utils,
   Constants,
@@ -28,6 +27,7 @@ define([
       if(e.target.tagName === 'A') {
         return;
       }
+
       Dispatcher.toggleControls(false);
       Dispatcher.toggleChat();
     },

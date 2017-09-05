@@ -21,7 +21,7 @@ define([
         <UserAreaList users={this.props.state.users} /> : <div id='noUser'></div>;
 
       return (
-        <section id="userareas" className={this.props.state.room.screensharing ? 'screensharing' : 'split' + this.props.state.users.length}>
+        <section id="userareas" className={this.props.state.room.screensharing.length > 0 ? 'screensharing' : 'split' + this.props.state.users.length}>
           {showList}
         </section>
       );
