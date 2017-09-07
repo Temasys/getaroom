@@ -26,56 +26,6 @@ define([
 
 ) {
 
-  /**
-   * Hook to allow the actual detection of the browser
-   */
-  (function () {
-    var hasMatch, checkMatch = navigator.userAgent.match(
-      /(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-
-    if (/trident/i.test(checkMatch[1])) {
-      hasMatch = /\brv[ :]+(\d+)/g.exec(navigator.userAgent) || [];
-      window.webrtcDetectedBrowser = 'IE';
-      window.webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);
-    } else if (checkMatch[1] === 'Chrome') {
-      hasMatch = navigator.userAgent.match(/\bOPR\/(\d+)/);
-      if (hasMatch !== null) {
-        window.webrtcDetectedBrowser = 'opera';
-        window.webrtcDetectedVersion = parseInt(hasMatch[1], 10);
-      }
-    }
-
-    if (navigator.userAgent.indexOf('Safari')) {
-      if (typeof InstallTrigger !== 'undefined') {
-        window.webrtcDetectedBrowser = 'firefox';
-      } else if (/*@cc_on!@*/ false || !!document.documentMode) {
-        window.webrtcDetectedBrowser = 'IE';
-      } else if (
-        Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
-        window.webrtcDetectedBrowser = 'safari';
-      } else if (!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
-        window.webrtcDetectedBrowser = 'opera';
-      } else if (!!window.chrome) {
-        window.webrtcDetectedBrowser = 'chrome';
-      }
-    }
-
-    if (!webrtcDetectedBrowser) {
-      window.webrtcDetectedVersion = checkMatch[1];
-    }
-
-    if (!window.webrtcDetectedVersion) {
-      try {
-        checkMatch = (checkMatch[2]) ? [checkMatch[1], checkMatch[2]] :
-          [navigator.appName, navigator.appVersion, '-?'];
-        if ((hasMatch = navigator.userAgent.match(/version\/(\d+)/i)) !== null) {
-          checkMatch.splice(1, 1, hasMatch[1]);
-        }
-        window.webrtcDetectedVersion = parseInt(checkMatch[1], 10);
-      } catch (error) { }
-    }
-  })();
-
   window.test = Skylink;
 
   /**
