@@ -26,7 +26,7 @@ define([
 
 ) {
 
-  window.test = Skylink;
+  window.skylink = Skylink;
 
   /**
    * Configure React App
