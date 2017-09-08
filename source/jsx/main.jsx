@@ -96,7 +96,7 @@ define([
           index++;
         }
 
-        switch (window.location.searchItems.media) {
+        switch (window.location.searchParameters.media) {
           case 'a':
             videoSources = false;
             break;
@@ -136,8 +136,8 @@ define([
       app.state.state = Constants.AppState.IN_ROOM;
       app.state.room.status = Constants.RoomState.IDLE;
       app.state.room.states.screensharing = false;
-      app.state.room.flags.mcu = ['1', 'true'].indexOf(window.location.searchItems.mcu) > -1;
-      app.state.room.flags.forceTurn = ['1', 'true'].indexOf(window.location.searchItems.forceTurn) > -1;
+      app.state.room.flags.mcu = ['1', 'true'].indexOf(window.location.searchParameters.mcu) > -1;
+      app.state.room.flags.forceTurn = ['1', 'true'].indexOf(window.location.searchParameters.forceTurn) > -1;
       app.state.show.controls = true;
       app.state.users.self.name = 'User ' + (new Date ()).getTime();
 
@@ -156,8 +156,8 @@ define([
           getUserMedia: 0,
           refreshConnection: 0
         },
-        socketServer: window.location.searchItems.socketServer || null,
-        iceServer: window.location.searchItems.turnServer || null
+        socketServer: window.location.searchParameters.socketServer || null,
+        iceServer: window.location.searchParameters.turnServer || null
 
       }, function(err) {
         if (err) return;
