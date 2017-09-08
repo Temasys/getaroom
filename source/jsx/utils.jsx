@@ -50,6 +50,41 @@ define([], function() {
         }
       }
       return newObj;
+    },
+
+    /**
+     * Gets the list of object keys.
+     */
+    keys: function (object) {
+      var keys = [];
+
+      for (var property in object) {
+        if (object.hasOwnProperty(property)) {
+          keys.push(property);
+        }
+      }
+      return keys;
+    },
+
+    /**
+     * Loops an object.
+     */
+    forEach: function (object, fn) {
+      if (Array.isArray(object)) {
+        var index = 0;
+  
+        while (index < object.length) {
+          fn(object[index], index);
+          index++;
+        }
+      } else if (object && typeof object === 'object') {
+        for (var prop in object) {
+          if (object.hasOwnProperty(prop)) {
+            fn(object[prop], prop);
+          }
+        }
+      }
     }
+
   };
 });

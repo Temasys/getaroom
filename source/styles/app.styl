@@ -184,12 +184,16 @@ body > a {
         text-align center
         font-family Lobster
         font-size 4.2em
-        padding 160px 25px 5px
+        padding 140px 25px 5px
         text-shadow -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff, 4px 4px 0 #fff, 5px 5px 0 #fff
         transition all .15s ease-in
 
-        &.joinRoom
+        &.joinRoom 
+            padding-top 160px
+
+        &.recording
             padding-top 80px
+        
     p
         margin 0
         padding 0 55px 35px
@@ -209,10 +213,13 @@ body > a {
     .displayName,
     .link
         position absolute
-        bottom 85px
+        bottom 90px
         left 0
         right 0
         font-weight 200
+
+        &.top
+            bottom 120px
 
         input[type=text]
             width 330px

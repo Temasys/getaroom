@@ -4,6 +4,16 @@ getaroom.io
 > Pretty nifty cross device and cross browser WebRTC audio/video conferencing demo of [SkylinkJS](http://github.com/Temasys/SkylinkJS) using [React](http://facebook.github.io/react/).
 > Try it out at http://getaroom.io
 
+#### Demo Query Parameters
+
+| Parameter | Description |
+| --------- | ----------- |
+| `mcu` | Set to `1` or `true` to enable MCU connections |
+| `forceTurn` | Set to `1` or `true` to force TURN connections |
+| `forcePlugin` | Set to `1` or `true` to force Temasys WebRTC Plugin in Safari 11 |
+| `media` | Set to `av` to fetch audio and video media, `v` to fetch only video media, `a` to fetch only audio media and `none` to no media. |
+| `socketServer` | Configure custom Temasys Signaling server URL (e.g. `https://signaling.temasys.io:3443`) |
+| `turnServer` | Configure custom Temasys TURN server URL (e.g. `turn:turn.temasys.io:3478`) |
 
 Setup / Development
 ----
@@ -78,6 +88,3 @@ License
 ----
 
 [APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
-
-
-

@@ -13,7 +13,6 @@ define([
   'components/chat'
 
 ], function (
-// How the modules appear after load
   React,
   Router,
   Skylink,
@@ -26,871 +25,679 @@ define([
 
 ) {
 
+  /**
+   * The app Skylink object instance.
+   * @attribute skylink
+   * @type Skylink
+   * @global
+   */
   window.skylink = Skylink;
 
   /**
-   * Configure React App
+   * The entire app component.
+   * @class App
    */
   var App = React.createClass({
 
-    /*
-     * Sets the initial stage when User joins the Room
+    /**
+     * Handles the state when self is in foyer (init: app.com/).
+     * @method enterFoyer
+     * @for App
      */
-    getInitialState: function() {
-      return {
-        // Contains the Room information
-        room: {
-          id: '',
-          messages: [],
-          isLocked: false,
-          isRecording: false,
-          isMCURestart: false,
-          screensharing: false,
-          status: Constants.RoomState.IDLE,
-          useMCU: false,
-          hasMCU: false,
-          error: '',
-          preventScreenshare: false,
-          preventRecording: false,
-          preventRecordingOneUser: true,
-          recordingTimer: null
-        },
-        // Contains the list of User and Peers
-        users: [{
-          id: 0,
-          name: '',
-          stream: null,
-          renderStreamId: null,
-          audioMute: false,
-          videoMute: false,
-          screensharing: false,
-          screensharingPriority: 0,
-          hasAudio: false,
-          hasVideo: false
-        }],
-        // Current Room state
-        state: Constants.AppState.FOYER,
-        // The flag if we should display the controls
-        controls: true,
-        // The flag if we should allow chat
-        chat: true
-      };
+    enterFoyer: function() {
+      var app = this;
+
+      app.state.state = Constants.AppState.FOYER;
+      app.state.room.status = Constants.RoomState.IDLE;
+      app.state.room.screensharing = false;
+      app.state.room.messages = [];
+      app.state.show.controls = true;
+
+      app.setState(app.state);
     },
 
     /**
-     * Keeps updating at different stages
-     * Here is where all Skylink events are subscribed.
+     * Handles the state when self is retrieving the list of available stream track sources.
+     * @method fetchStreamSources
+     * @for App
      */
-    componentWillMount: function() {
-      var app = this; // self
-
-      // Disable debug mode because trace is ugly :(
-      //Skylink.setDebugMode(true);
-
-      // Set the log level for Skylink
-      Skylink.setLogLevel(Skylink.LOG_LEVEL.DEBUG);
-
-      /**
-       * Handles the Skylink "readyStateChange" event
-       * This triggers when the Room is fetching the session.
-       */
-      Skylink.on('readyStateChange', function (state, error) {
-        var appState = {
-          room: Utils.extend(app.state.room, {})
-        };
-
-        // Room has not loaded anything yet
-        if (state === Skylink.READY_STATE_CHANGE.INIT) {
-          appState.room.status = Constants.RoomState.IDLE;
-          appState.room.error = '';
-
-        // Room is retrieving the session information
-        } else if (state === Skylink.READY_STATE_CHANGE.LOADING) {
-          appState.room.status = Constants.RoomState.LOADING;
-          appState.room.error = '';
-
-        // Room has loaded the session information and at this point,
-        //   the Room is ready to join
-        } else if (state === Skylink.READY_STATE_CHANGE.COMPLETED) {
-          appState.room.status = Constants.RoomState.CONNECTING;
-          appState.room.error = '';
-
-          // Override for recording changes
-          //Skylink._signalingProtocol = 'http:';
-          //Skylink._signalingServer = 'ec2-52-8-93-170.us-west-1.compute.amazonaws.com';
-          //Skylink._signalingPort = 6001;
-          //Skylink._socketPorts['http:'] = [6001];
-
-        // Room has failed loading - ERROR
-        } else if (state === Skylink.READY_STATE_CHANGE.ERROR) {
-          // Fallback when error object received is empty
-          if (!error) {
-            error = {};
-          }
-
-          // Loop out for key
-          if (!error.content) {
-            error.content = new Error('Application error');
-          }
-
-          appState.room.status = Constants.RoomState.LOAD_ERROR;
-          appState.room.error = error.content.message || error.content;
-        }
-
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "systemAction" event
-       * This triggers when Server is warning User or rejected User from Room
-       */
-      Skylink.on('systemAction', function(action, serverMessage, reason) {
-        var appState = {
-          room: Utils.extend(app.state.room, {})
-        };
-
-        // If User is rejected from Room
-        if(action === Skylink.SYSTEM_ACTION.REJECT) {
-          appState.room.status = Constants.RoomState.CONNECTION_ERROR;
-          appState.room.error = serverMessage;
-          appState.room.isLocked = true;
-          appState.controls = true;
-
-        } else {
-          appState.room.messages.push({
-            user: 0,
-            name: 'GAR.io',
-            type: Constants.MessageType.MESSAGE,
-            content: 'Warning: ' + (serverMessage.message || serverMessage),
-            date: (new Date()).toISOString()
-          });
-        }
-
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "socketError" event
-       * This triggers when failed to establish connection with Server
-       */
-      Skylink.on('socketError', function (state) {
-        var appState = {
-          room: Utils.extend(app.state.room, {})
-        };
-
-        // When all attempts have failed connecting
-        if (state === Skylink.SOCKET_ERROR.RECONNECTION_ABORTED ||
-          state === Skylink.SOCKET_ERROR.CONNECTION_ABORTED) {
-          appState.room.status = Constants.RoomState.CONNECTION_ERROR;
-
-        // When connection is attempting
-        } else if (state === Skylink.SOCKET_ERROR.RECONNECTION_ATTEMPT) {
-          appState.room.status = Constants.RoomState.RECONNECTING_ATTEMPT;
-
-        } else {
-          appState.room.status = Constants.RoomState.CONNECTION_ERROR;
-        }
-
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "channelRetry" event
-       * This triggers when attempting to establish connection with Server
-       */
-      Skylink.on('channelRetry', function (fallbackType) {
-        var appState = {
-          room: Utils.extend(app.state.room, {})
-        };
-
-        appState.room.status = Constants.RoomState.RECONNECTING;
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "channelError" event
-       * This triggers when exception is caught during connection, mostly Application error
-       */
-      Skylink.on('channelError', function (error) {
-        var appState = {
-          room: Utils.extend(app.state.room, {}),
-          users: app.state.users
-        };
-
-        appState.room.messages.push({
-          user: 0,
-          name: 'GAR.io',
-          type: Constants.MessageType.MESSAGE,
-          content: 'Error: ' + (error.message || error),
-          date: (new Date()).toISOString()
-        });
-
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "serverPeerJoined" event
-       * This triggers when MCU joins the room
-       */
-      Skylink.on('serverPeerJoined', function (peerId, peerType) {
-        if (peerType === Skylink.SERVER_PEER_TYPE.MCU) {
-          app.setState({
-            room: Utils.extend(app.state.room, {
-              hasMCU: true
-            })
-          });
-        }
-      });
-
-      /**
-       * Handles the Skylink "serverPeerLeft" event
-       * This triggers when MCU leaves the room
-       */
-      Skylink.on('serverPeerLeft', function (peerId, peerType) {
-        if (peerType === Skylink.SERVER_PEER_TYPE.MCU) {
-          app.setState({
-            room: Utils.extend(app.state.room, {
-              hasMCU: false
-            })
-          });
-        }
-      });
-
-      /**
-       * Handles the Skylink "peerJoined" event
-       * This triggers when a Peer or when User has joined the Room
-       */
-      Skylink.on('peerJoined', function (peerId, peerInfo, isSelf) {
-        var appState = {
-          room: Utils.extend(app.state.room, {}),
-          users: app.state.users
-        };
-
-        // Fallback incase peerInfo.userData is not defined
-        peerInfo.userData = peerInfo.userData || {};
-        var username = peerInfo.userData.name || 'User ' + peerId;
-
-        // User has joined the room
-        if (isSelf) {
-          if (appState.room.useMCU) {
-            appState.state = Constants.AppState.IN_ROOM;
-          }
-          appState.room.status = Constants.RoomState.CONNECTED;
-          appState.users[0].name = username;
-          appState.users[0].videoMute = peerInfo.mediaStatus.videoMuted;
-          appState.users[0].audioMute = peerInfo.mediaStatus.audioMuted;
-          appState.users[0].hasAudio = !!peerInfo.settings.audio;
-          appState.users[0].hasVideo = !!peerInfo.settings.video;
-
-        // Peer has joined the room (new one)
-        } else {
-          appState.users.push({
-            id: peerId,
-            name: peerInfo.userData.name,
-            stream: null,
-            videoMute: peerInfo.mediaStatus.videoMuted,
-            audioMute: peerInfo.mediaStatus.audioMuted,
-            hasAudio: !!peerInfo.settings.audio,
-            hasVideo: !!peerInfo.settings.video
-          });
-        }
-
-        // Prevent recording if less than 2 peers
-        //if (appState.users.length > 1) {
-          appState.room.preventRecordingOneUser = false;
-        /*} else {
-          appState.room.preventRecordingOneUser = true;
-        }*/
-
-        appState.room.messages.push({
-          user: isSelf ? 0 : peerId,
-          name: 'GAR.io',
-          type: Constants.MessageType.MESSAGE,
-          content: isSelf ? 'Room: You have joined the room' :
-            'Room: Peer "' + username + '" has joined the room',
-          date: (new Date()).toISOString()
-        });
-
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "peerUpdated" event
-       * This triggers when a Peer or when User data is updated
-       */
-      Skylink.on('peerUpdated', function(peerId, peerInfo, isSelf) {
-        var appState = {
-          room: Utils.extend(app.state.room, {}),
-          users: app.state.users
-        };
-
-        // Fallback incase peerInfo.userData is not defined
-        peerInfo.userData = peerInfo.userData || {};
-        var username = peerInfo.userData.name || '';
-
-        for (var i = 0; i < appState.users.length; i++) {
-          // If it is User's or the Peer's
-          if ((isSelf && appState.users[i].id === 0) || (appState.users[i].id === peerId)) {
-            appState.users[i].audioMute = peerInfo.mediaStatus.audioMuted;
-            appState.users[i].videoMute = peerInfo.mediaStatus.videoMuted;
-            appState.users[i].name = username;
-            appState.users[i].hasAudio = !!peerInfo.settings.audio;
-            appState.users[i].hasVideo = !!peerInfo.settings.video;
-            break;
-          }
-        }
-
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "peerLeft" event
-       * This triggers when a Peer or when User has left the Room
-       */
-      Skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
-        var appState = {
-          room: Utils.extend(app.state.room, {}),
-          users: app.state.users
-        };
-
-        // Fallback incase peerInfo,userData is not defined
-        peerInfo.userData = peerInfo.userData || {};
-        var username = peerInfo.userData.name || 'User ' + peerId;
-
-        if (isSelf) {
-          // Keep myself only
-          appState.users = [appState.users[0]];
-
-          if (!(appState.room.useMCU && appState.room.isMCURestart)) {
-            appState.controls = true;
-            appState.state = Constants.AppState.FOYER;
-          }
-
-        } else {
-          for (var i = 0; i < appState.users.length; i++) {
-            if (appState.users[i].id === peerId) {
-              appState.users.splice(i, 1);
-              break;
-            }
-          }
-        }
-
-        // Prevent recording if less than 2 peers
-        //if (appState.users.length > 1) {
-          appState.room.preventRecordingOneUser = false;
-        /*} else {
-          appState.room.preventRecordingOneUser = true;
-        }*/
-
-        appState.room.messages.push({
-          user: isSelf ? 0 : peerId,
-          name: 'GAR.io',
-          type: Constants.MessageType.MESSAGE,
-          content: isSelf ? 'Room: You have left the room' :
-            'Room: Peer "' + username + '" has left the room',
-          date: (new Date()).toISOString()
-        });
-
-        app.setState(appState);
-        Dispatcher.setScreen();
-      });
-
-      /**
-       * Handles the Skylink "serverPeerRestart" event
-       * This triggers when MCU is restarted with User
-       */
-      Skylink.on('serverPeerRestart', function (peerId, peerType) {
-        if (peerType === Skylink.SERVER_PEER_TYPE.MCU) {
-          var appState = {
-            room: Utils.extend(app.state.room, {})
-          };
-
-          appState.room.isMCURestart = true;
-
-          app.setState(appState);
-        }
-      });
-
-      /**
-       * Handles the Skylink "mediaAccessError" event
-       * This triggers when a User failed to retrieve Stream
-       */
-      Skylink.on('mediaAccessError', function (error, isScreensharing) {
-        var appState = {
-          room: Utils.extend(app.state.room, {})
-        };
-
-        appState.room.messages.push({
-          user: 0,
-          name: 'GAR.io',
-          type: Constants.MessageType.MESSAGE,
-          content: (isScreensharing ? 'Screen' : 'Media') + ': ' + (error.message || error),
-          date: (new Date()).toISOString()
-        });
-
-        // When screensharing failed
-        if (isScreensharing) {
-          appState.room.preventScreenshare = false;
-
-        // When inital stream failed for joinRoom()
-        } else {
-          appState.room.status = Constants.RoomState.CONNECTION_ERROR;
-          appState.room.error = error.message || error;
-        }
-
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "mediaAccessError" event
-       * This triggers when a User failed to retrieve Stream
-       */
-      Skylink.on('mediaAccessSuccess', function (stream, isScreensharing) {
-        var appState = {
-          room: Utils.extend(app.state.room, {})
-        };
-
-        appState.room.messages.push({
-          user: 0,
-          name: 'GAR.io',
-          type: Constants.MessageType.MESSAGE,
-          content: (isScreensharing ? 'Screen' : 'Media') + ': Access has been granted',
-          date: (new Date()).toISOString()
-        });
-
-        if (isScreensharing) {
-          appState.room.preventScreenshare = false;
-        }
-
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "incomingStream" event
-       * This triggers when a new Stream is retrieved from User or Peer
-       */
-      Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
-        var appState = {
-          users: app.state.users,
-          room: Utils.extend(app.state.room, {})
-        };
-        // Screensharing settings
-        var screensharing = peerInfo.settings && peerInfo.settings.video &&
-          peerInfo.settings.video.screenshare;
-        // Screensharing priority
-        var screensharingPriority = peerInfo.userData.screensharingPriority || 0;
-
-        for (var i = 0; i < appState.users.length; i++) {
-          if((isSelf && appState.users[i].id === 0) || appState.users[i].id === peerId) {
-            appState.users[i].stream = stream;
-            appState.users[i].screensharing = screensharing;
-            appState.users[i].screensharingPriority = screensharingPriority;
-            appState.users[i].hasAudio = !!peerInfo.settings.audio;
-            appState.users[i].hasVideo = !!peerInfo.settings.video;
-            break;
-          }
-        }
-
-        if(appState.users.length >= 2) {
-          appState.controls = false;
-        }
-
-        app.setState(appState);
-        Dispatcher.setScreen();
-      });
-
-      /**
-       * Handles the Skylink "incomingMessage" event
-       * This triggers when a new Message is received from User or Peer
-       */
-      Skylink.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
-        if(message.content.type !== 'chat') {
-          return;
-        }
-
-        var appState = {
-          users: app.state.users,
-          room: Utils.extend(app.state.room, {})
-        };
-
-        appState.room.messages.push({
-          user: isSelf ? 0 : peerId,
-          name: peerInfo.userData.name + (isSelf ? ' (You)' : ''),
-          type: Constants.MessageType.MESSAGE,
-          content: message.content.content,
-          date: message.content.date
-        });
-
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "roomLock" event
-       * This triggers when the Room is locked / unlocked
-       */
-      Skylink.on("roomLock", function(isLocked) {
-        var appState = {
-          room: Utils.extend(app.state.room, {})
-        };
-
-        appState.room.isLocked = isLocked;
-        app.setState(appState);
-      });
-
-      /**
-       * Handles the Skylink "recordingState" event
-       * This triggers when recording status has changed
-       */
-      Skylink.on('recordingState', function (state, recordingId, link, error) {
-        var appState = {
-          room: Utils.extend(app.state.room, {})
-        };
-
-        if (state === Skylink.RECORDING_STATES.START) {
-          appState.room.isRecording = true;
-          appState.room.preventRecording = true;
-          appState.room.messages.push({
-            user: 0,
-            name: 'GAR.io',
-            type: Constants.MessageType.MESSAGE,
-            content: 'Recording: (ID: ' + recordingId +
-              ')\nStarted for room. Waiting for minium of 10 seconds before enabling',
-            date: (new Date()).toISOString()
-          });
-
-          // 5 seconds of timeout
-          appState.room.recordingTimer = setTimeout(function () {
-            var newAppState = {
-              room: Utils.extend(app.state.room)
-            };
-            newAppState.room.preventRecording = false;
-            newAppState.room.recordingTimer = null;
-            app.setState(newAppState);
-          }, 10000);
-
-        } else {
-          if (state === Skylink.RECORDING_STATES.STOP) {
-            // Clear away the timer just incase
-            if (appState.room.recordingTimer) {
-              clearTimeout(appState.room.recordingTimer);
-            }
-
-            appState.room.isRecording = false;
-            appState.room.preventRecording = false;
-            appState.room.messages.push({
-              user: 0,
-              name: 'GAR.io',
-              type: Constants.MessageType.MESSAGE,
-              content: 'Recording: (ID: ' + recordingId +
-                ')\nStopped for room. Video is mixing ....',
-              date: (new Date()).toISOString()
-            });
-
-          } else if (state === Skylink.RECORDING_STATES.URL) {
-            //appState.room.preventRecording = false;
-            appState.room.messages.push({
-              user: 0,
-              name: 'GAR.io',
-              type: Constants.MessageType.MESSAGE,
-              content: 'Recording: (ID: ' + recordingId +
-                ')\nMixing completed. [Download link](' + link + ')',
-              date: (new Date()).toISOString()
-            });
-
-          } else {
-            //appState.room.preventRecording = false;
-            appState.room.messages.push({
-              user: 0,
-              name: 'GAR.io',
-              type: Constants.MessageType.MESSAGE,
-              content: 'Recording: (ID: ' + recordingId +
-                ')\nError. ' + (error.message || error),
-              date: (new Date()).toISOString()
-            });
-          }
-        }
-
-        app.setState(appState);
-      });
-
-      /**
-       * Dispatcher of events
-       */
-      Dispatcher = {
-
-        /**
-         * Dispatch to ping the MCU state
-         */
-        setMCU: function(state) {
-          var appState = {
-            room: Utils.extend(app.state.room, {})
-          };
-
-          appState.room.useMCU = state === true;
-          app.setState(appState);
-        },
-
-        /**
-         * Dispatch to ping the recording state
-         */
-        recording: function (enable) {
-          if (enable) {
-            this.props.state.room.preventRecording = true;
-
-          } else {
-            Skylink.stopRecording();
-          }
-        },
-
-        /**
-         * Dispatch to set screensharing mode
-         */
-        setScreen: function () {
-          var appState = {
-            room: Utils.extend(app.state.room, {}),
-            users: app.state.users
-          };
-          var hasScreensharing = false;
-
-          for (var i = 0; i < appState.users.length; i++) {
-            // If Peer is screensharing
-            if (appState.users[i].screensharing) {
-              hasScreensharing = true;
-
-              if (appState.users[i].id !== 0) {
-                // Check if User is screensharing and then compare
-                if (appState.users[0].screensharing &&
-                // Priority is higher then stop your screensharing
-                  appState.users[i].screensharingPriority > appState.users[0].screensharingPriority) {
-
-                  Skylink.stopScreen();
-                }
-              }
-            }
-          }
-
-          if (hasScreensharing && appState.users.length > 4) {
-            appState.room.messages.push({
-              user: 0,
-              name: 'GAR.io',
-              type: Constants.MessageType.MESSAGE,
-              content: 'Room: Current screensharing layout scales up to 4 users, and some of the peers ' +
-                'might not be displayed due to the layout. Current users count is ' + appState.users.length,
-              date: (new Date()).toISOString()
-            });
-          }
-
-          appState.room.screensharing = hasScreensharing;
-          app.setState(appState);
-        },
-
-        /**
-         * Dispatch to ping the current User username
-         */
-        setName: function(name) {
-          var appState = {
-            users: app.state.users
-          };
-
-          appState.users[0].name = name;
-
-          app.setState(appState);
-
-          Skylink.setUserData(Utils.extend(Skylink.getUserData(), {
-            name: name
-          }));
-        },
-
-        /**
-         * Dispatch to send a message.
-         */
-        sendMessage: function(content, type) {
-          Skylink.sendMessage({
-            content: content,
-            type: type || 'chat',
-            date: (new Date()).toISOString()
-          });
-        },
-
-        /**
-         * Dispatch to toggle chat box
-         */
-        toggleChat: function(state) {
-          var appState = {
-            chat: state !== undefined ? state : !app.state.chat
-          };
-
-          app.setState(appState);
-        },
-
-        /**
-         * Dispatch to toggle controls
-         */
-        toggleControls: function(state) {
-          var appState = {
-            room: Utils.extend(app.state.room, {})
-          };
-
-          if(appState.room.status === Constants.RoomState.CONNECTED) {
-            appState.controls = state !== undefined ? state : !app.state.controls;
-          }
-
-          app.setState(appState);
-        }
+    fetchStreamSources: function (fn) {
+      var app = this;
+
+      if (navigator.mediaDevices && typeof navigator.mediaDevices === 'object' &&
+        typeof navigator.mediaDevices.enumerateDevices === 'function') {
+        navigator.mediaDevices.enumerateDevices().then(fn);
+
+      } else if (window.MediaStreamTrack && typeof window.MediaStreamTrack.getSources === 'function') {
+        MediaStreamTrack.getSources(fn);
+
+      // Spoof to just retrieve audio and video tracks if possible
+      } else {
+        fn([{ kind: 'videoinput' }, { kind: 'audioinput' }]);
       }
     },
 
     /**
-     * Happens at the beginning once
-     * Here is where you start to joinRoom() in Skylink and init()
+     * Handles the state when self is retrieving stream.
+     * @method fetchStream
+     * @for App
      */
-    componentDidMount: function() {
-      Router.configure({
-        html5history: true
-      }).mount({
-        '/:room': this.joinRoom.bind(this),
-        '/': this.enterFoyer.bind(this)
-      });
+    fetchStream: function (fn) {
+      var app = this;
 
-      Router.init();
+      app.fetchStreamSources(function (sources) {
+        var audioSources = false;
+        var videoSources = false;
+        var index = 0;
+
+        while (index < sources.length) {
+          audioSources = ['audio', 'audioinput'].indexOf(sources[index].kind) > -1 || audioSources;
+          videoSources = ['video', 'videoinput'].indexOf(sources[index].kind) > -1 || videoSources;
+          index++;
+        }
+
+        switch (window.location.searchItems.media) {
+          case 'a':
+            videoSources = false;
+            break;
+          case 'v':
+            audioSources = false;
+            break;
+          case 'none':
+            audioSources = false;
+            videoSources = false;
+        }
+
+        if (!audioSources && !videoSources) {
+          return fn();
+        }
+
+        Skylink.getUserMedia({
+          audio: audioSources ? { stereo: true, echoCancellation: true } : false,
+          video: videoSources
+        }, fn);
+      });
     },
 
     /**
-     * State when entering the foyer
-     */
-    enterFoyer: function() {
-      this.setState({
-        state: Constants.AppState.FOYER,
-        room: Utils.extend(this.state.room, {
-          status: Constants.RoomState.IDLE,
-          screensharing: false,
-          messages: []
-        }),
-        controls: true
-      });
-    },
-
-    /**
-     * State when joining the room
+     * Handles the state when self is joining to the Room (init: app.com/roomName).
+     * @method enterFoyer
+     * @for App
      */
     joinRoom: function(room) {
-      if(room === undefined) {
+      var app = this;
+
+      if(!room) {
         return;
       }
 
-      var appState = {
-        room: Utils.extend(this.state.room, {}),
-        users: this.state.users
-      };
-
       room = room.toString();
 
-      // Using MCU by queryString instead of "m" in Room names
-      //var useMCU = room.substr(0,1) === 'm';
-      appState.state = Constants.AppState.IN_ROOM;
-      appState.room.id = room;
-      appState.room.status = Constants.RoomState.IDLE;
-      appState.room.screensharing = false;
-      appState.room.useMCU =  getQuery('mcu') === '1';
-      appState.controls = true;
-      appState.users[0].name = 'User ' + (new Date ()).getTime();
+      app.state.state = Constants.AppState.IN_ROOM;
+      app.state.room.status = Constants.RoomState.IDLE;
+      app.state.room.states.screensharing = false;
+      app.state.room.flags.mcu = ['1', 'true'].indexOf(window.location.searchItems.mcu) > -1;
+      app.state.room.flags.forceTurn = ['1', 'true'].indexOf(window.location.searchItems.forceTurn) > -1;
+      app.state.show.controls = true;
+      app.state.users.self.name = 'User ' + (new Date ()).getTime();
 
-      this.setState(appState);
+      app.setState(app.state);
 
       Skylink.init({
-        roomServer: Configs.Skylink.roomServer,
-        appKey: appState.room.useMCU ? Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
+
+        appKey: app.state.room.flags.mcu ? Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
         defaultRoom: room,
-        audioFallback: true
-      }, function() {
-        var fnOnItems = function (sources) {
-          var hasAudio = false;
-          var hasVideo = false;
-          var index = 0;
+        forceTURN: !app.state.room.flags.mcu && app.state.room.flags.forceTurn,
+        useEdgeWebRTC: true,
+        socketTimeout: 7500,
+        usePublicSTUN: false,
+        throttleIntervals: {
+          shareScreen: 0,
+          getUserMedia: 0,
+          refreshConnection: 0
+        },
+        socketServer: window.location.searchItems.socketServer || null,
+        iceServer: window.location.searchItems.turnServer || null
 
-          while (index < sources.length) {
-            if (['audio', 'audioinput'].indexOf(sources[index].kind) > -1) {
-              hasAudio = true;
-            } else if (['video', 'videoinput'].indexOf(sources[index].kind) > -1) {
-              hasVideo = true;
+      }, function(err) {
+        if (err) return;
+
+        app.fetchStream(function () {
+          Skylink.joinRoom({
+            userData: {
+              name: app.state.users.self.name,
+              screensharing: false
             }
-            index++;
-          }
-
-          Skylink.getUserMedia({
-            audio: hasAudio ? { stereo: true, echoCancellation: true } : false,
-            video: hasVideo
-          }, function () {
-            Skylink.joinRoom({
-              userData: {
-                name: appState.users[0].name,
-                screensharing: false
-              }
-            });
           });
-        };
-
-        if (navigator.mediaDevices && typeof navigator.mediaDevices === 'object' &&
-          typeof navigator.mediaDevices.enumerateDevices === 'function') {
-          navigator.mediaDevices.enumerateDevices().then(fnOnItems);
-        } else if (window.MediaStreamTrack && typeof window.MediaStreamTrack.getSources === 'function') {
-          MediaStreamTrack.getSources(fnOnItems);
-        } else {
-          // Spoof to just retrieve audio and video tracks if possible
-          fnOnItems([{ kind: 'videoinput' }, { kind: 'audioinput' }]);
-        }
+        })
       });
     },
 
     /**
-     * State to show controls
+     * Handles the state to toggle controls.
+     * @method handleShowControls
+     * @for App
      */
     handleShowControls: function(e) {
       Dispatcher.toggleControls();
     },
 
     /**
-     * State to render App
+     * Handles the parsing of user info.
+     * @method parseUserInfo
+     * @param {JSON} [peerInfo] The Peer information.
+     * @for App
      */
-    render: function() {
-      var className = '',
-          isScreensharingSupported = false;
+    parseUserInfo: function (peerInfo, peerId) {
+      peerInfo = peerInfo || {};
+      peerInfo.settings = peerInfo.settings || {};
+      peerInfo.userData = peerInfo.userData || {};
 
-      if(this.state.controls) {
+      return {
+        name: peerInfo.userData.name || 'User ' + (peerId || (new Date()).getTime()),
+        priority: peerInfo.userData.priority || 0,
+        audio: peerInfo.settings.audio ? {
+          muted: peerInfo.mediaStatus.audioMuted
+        } : false,
+        video: peerInfo.settings.video ? {
+          muted: peerInfo.mediaStatus.videoMuted,
+          screensharing: typeof peerInfo.settings.video === 'object' &&
+            peerInfo.settings.video && peerInfo.settings.video.screenshare
+        } : false
+      };
+    },
+
+    getInitialState: function() {
+      var app = this;
+
+      return {
+        state: Constants.AppState.FOYER,
+        show : {
+          controls: true,
+          chat: true
+        },
+        room: {
+          status: Constants.RoomState.IDLE,
+          statusError: '',
+          states: {
+            locked: false,
+            recording: false,
+            recordingTimer: null,
+            mcuServerId: null,
+            mcuRestart: false,
+            screensharing: false
+          },
+          flags: {
+            mcu: false,
+            forceTurn: false
+          },
+          prevent: {
+            screensharing: false,
+            recording: false
+          },
+          messages: []
+        },
+        users: {
+          self: app.parseUserInfo({})
+        }
+      };
+    },
+
+    componentWillMount: function() {
+      var app = this;
+
+      // Read more on Skylink API from docs here: https://cdn.temasys.io/skylink/skylinkjs/0.6.x/doc/classes/Skylink.html
+      // This sets the Web Console log levels.
+      Skylink.setLogLevel(Skylink.LOG_LEVEL.DEBUG);
+
+      // Handles initialisation states like if required modules have been loaded successfully or app key is valid.
+      Skylink.on('readyStateChange', function (state, error) {
+        switch (state) {
+
+          case Skylink.READY_STATE_CHANGE.INIT:
+            app.state.room.status = Constants.RoomState.IDLE;
+            app.state.room.statusError = '';
+            break;
+
+          case Skylink.READY_STATE_CHANGE.LOADING:
+            app.state.room.status = Constants.RoomState.LOADING;
+            app.state.room.statusError = '';
+            break;
+
+          case Skylink.READY_STATE_CHANGE.COMPLETED:
+            app.state.room.status = Constants.RoomState.CONNECTING;
+            app.state.room.statusError = '';
+            break;
+
+          default:
+            var errorMessage = (error || {}).content;
+
+            if (errorMessage instanceof Error) {
+              errorMessage = errorMessage.message;
+            }
+
+            app.state.room.status = Constants.RoomState.LOAD_ERROR;
+            app.state.room.statusError = errorMessage || 'Unknown Error';
+        
+        }
+
+        app.setState(app.state);
+      });
+
+      // Handles when self is rejected from the Room.
+      Skylink.on('systemAction', function(action, serverMessage, reason) {
+        switch (action) {
+
+          case Skylink.SYSTEM_ACTION.REJECT:
+            app.state.room.status = Constants.RoomState.CONNECTION_ERROR;
+            app.state.room.statusError = serverMessage;
+            app.state.room.states.locked = reason === reason === Skylink.SYSTEM_ACTION_REASON.ROOM_LOCKED;
+            app.state.show.controls = true;
+            Skylink.stopStream();
+            break;
+
+          default:
+            app.state.room.messages.push({
+              userId: 'getaroom.io',
+              type: Constants.MessageType.ACTION,
+              content: 'Warning: ' + (serverMessage.message || serverMessage),
+              date: (new Date()).toISOString()
+            });
+
+        }
+
+        app.setState(app.state);
+      });
+
+      // Handles when socket connection to signaling server fails.
+      // Signaling server connection is required to start connection to the Room.
+      Skylink.on('socketError', function (state) {
+        switch (state) {
+
+          case Skylink.SOCKET_ERROR.RECONNECTION_ABORTED:
+          case Skylink.SOCKET_ERROR.CONNECTION_ABORTED:
+            app.state.room.status = Constants.RoomState.CONNECTION_ERROR;
+            break;
+          
+          case Skylink.SOCKET_ERROR.RECONNECTION_ATTEMPT:
+            app.state.room.status = Constants.RoomState.RECONNECTING;
+            break;
+
+        }
+
+        app.setState(app.state);
+      });
+
+      // Handles when socket connection to signaling server encounters app UI exception.
+      Skylink.on('channelError', function (error) {
+        app.state.room.messages.push({
+          userId: 'getaroom.io',
+          type: Constants.MessageType.ACTION,
+          content: 'Error: ' + (error.message || error),
+          date: (new Date()).toISOString()
+        });
+
+        app.setState(app.state);
+      });
+
+      // Handles when MCU is connected to the Room.
+      Skylink.on('serverPeerJoined', function (peerId, peerType) {
+        switch (peerType) {
+
+          case Skylink.SERVER_PEER_TYPE.MCU:
+            app.state.room.states.mcuServerId = peerId;
+            app.state.room.states.mcuRestart = false;
+
+        }
+
+        app.setState(app.state);
+      });
+
+      // Handles when MCU has restarted connection.
+      Skylink.on('serverPeerRestart', function (peerId, peerType) {
+        switch (peerType) {
+
+          case Skylink.SERVER_PEER_TYPE.MCU:
+            app.state.room.states.mcuRestart = true;
+
+        }
+
+        app.setState(app.state);
+      });
+
+      // Handles when MCU is disconnected from the Room.
+      Skylink.on('serverPeerLeft', function (peerId, peerType) {
+        switch (peerType) {
+
+          case Skylink.SERVER_PEER_TYPE.MCU:
+            app.state.room.states.mcuServerId = null;
+
+        }
+
+        app.setState(app.state);
+      });
+
+      // Handles when a new Peer is connected to the Room.
+      Skylink.on('peerJoined', function (peerId, peerInfo, isSelf) {
+        app.state.users[isSelf ? 'self' : peerId] = app.parseUserInfo(peerInfo, peerId);
+
+        if (isSelf) {
+          app.state.room.status = Constants.RoomState.CONNECTED;
+          app.state.users.self.connected = true;
+        }
+
+        app.state.room.messages.push({
+          userId: isSelf ? 'self' : peerId,
+          type: Constants.MessageType.ACTION,
+          content: 'Has joined the room',
+          date: (new Date()).toISOString()
+        });
+
+        app.setState(app.state);
+      });
+
+      // Handles when a Peer has updated user info.
+      Skylink.on('peerUpdated', function(peerId, peerInfo, isSelf) {
+        if (!app.state.users[isSelf ? 'self' : peerId]) {
+          return;
+        }
+
+        var userInfo = app.parseUserInfo(peerInfo, peerId);
+
+        app.state.users[isSelf ? 'self' : peerId].name = userInfo.name;
+        app.state.users[isSelf ? 'self' : peerId].priority = userInfo.priority;
+        app.state.users[isSelf ? 'self' : peerId].audio = userInfo.audio;
+        app.state.users[isSelf ? 'self' : peerId].video = userInfo.video;
+
+        app.setState(app.state);
+      });
+
+      // Handles when a Peer has disconnected from the Room.
+      Skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
+        if (!app.state.users[isSelf ? 'self' : peerId]) {
+          return;
+        }
+
+        app.state.room.messages.push({
+          userId: isSelf ? 'self' : peerId,
+          type: Constants.MessageType.ACTION,
+          content: 'Has left the room',
+          date: (new Date()).toISOString()
+        });
+
+        app.setState(app.state);
+
+        if (isSelf) {
+          app.state.users.self.connected = false;
+          app.state.room.status = app.state.room.states.mcuRestart ?
+            Constants.RoomState.RECONNECTING : Constants.RoomState.DISCONNECTED;
+      
+        } else {
+          delete app.state.users[peerId];
+          app.setState(app.state);
+        }
+
+        Dispatcher.setScreen();
+      });
+
+      // Handles when stream fails to load.
+      Skylink.on('mediaAccessError', function (error, isScreensharing) {
+        app.state.room.messages.push({
+          userId: 'getaroom.io',
+          type: Constants.MessageType.ACTION,
+          content: (isScreensharing ? 'Screen' : 'Media') + ': ' + (error.message || error),
+          date: (new Date()).toISOString()
+        });
+
+        app.setState(app.state);
+      });
+
+      // Handles when stream loads.
+      Skylink.on('mediaAccessSuccess', function (stream, isScreensharing) {
+        app.state.room.messages.push({
+          userId: 'getaroom.io',
+          type: Constants.MessageType.ACTION,
+          content: (isScreensharing ? 'Screen' : 'Media') + ': Access has been granted',
+          date: (new Date()).toISOString()
+        });
+
+        app.setState(app.state);
+      });
+
+      // Handles when Peer's ICE connection state changes.
+      Skylink.on('iceConnectionState', function(state, peerId) {
+        if (!app.state.users[peerId] && !(peerId === app.state.room.states.mcuServerId)) {
+          return;
+        }
+
+        switch (state) {
+
+          case Skylink.ICE_CONNECTION_STATE.CONNECTED:
+          case Skylink.ICE_CONNECTION_STATE.COMPLETED:
+            if (peerId === app.state.room.states.mcuServerId) {
+              app.state.users.self.mcuConnected = true;
+            } else {
+              app.state.users[peerId].connected = true;
+            }
+            break;
+
+          default:
+            if (peerId === app.state.room.states.mcuServerId) {
+              app.state.users.self.mcuConnected = false;
+            } else {
+              app.state.users[peerId].connected = false;
+            }
+        }
+
+        app.setState(app.state);
+      });
+
+      // Handles when receiving Peer's stream.
+      Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo, isScreensharing, streamId) {
+        if (!app.state.users[isSelf ? 'self' : peerId]) {
+          return;
+        }
+
+        var userInfo = app.parseUserInfo(peerInfo, peerId);
+        
+        app.state.users[isSelf ? 'self' : peerId].name = userInfo.name;
+        app.state.users[isSelf ? 'self' : peerId].priority = userInfo.priority;
+        app.state.users[isSelf ? 'self' : peerId].audio = userInfo.audio;
+        app.state.users[isSelf ? 'self' : peerId].video = userInfo.video;
+        app.state.users[isSelf ? 'self' : peerId].stream = stream;
+        app.state.users[isSelf ? 'self' : peerId].streamId = streamId;
+
+        if(Utils.keys(app.state.users).length >= 2) {
+          app.state.show.controls = false;
+        }
+        
+        app.setState(app.state);
+        Dispatcher.setScreen();
+      });
+
+      // Handles when receiving Peer's message.
+      Skylink.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
+        app.state.room.messages.push({
+          userId: isSelf ? 'self' : peerId,
+          type: Constants.MessageType.MESSAGE,
+          content: message.content.content,
+          date: message.content.date
+        });
+
+        app.setState(app.state);
+      });
+
+      // Handles the Room locked state change.
+      Skylink.on('roomLock', function(locked) {
+        app.state.room.states.locked = locked;
+        app.setState(app.state);
+      });
+
+      // Handles the MCU recording state change.
+      Skylink.on('recordingState', function (state, recordingId, link, error) {
+        switch (state) {
+
+          case Skylink.RECORDING_STATE.START:
+            app.state.room.states.recording = true;
+            app.state.room.prevent.recording = true;
+            app.state.room.messages.push({
+              userId: 'getaroom.io',
+              type: Constants.MessageType.ACTION,
+              content: 'Recording: (ID: ' + recordingId + ')\nStarted for room. Waiting for minium of 10 seconds before enabling',
+              date: (new Date()).toISOString()
+            });
+
+            // Ensure 10 seconds of recording first.
+            app.state.room.states.recordingTimer = setTimeout(function () {
+              app.state.room.prevent.recording = false;
+              app.state.room.states.recordingTimer = null;
+              app.setState(app.state);
+            }, 10000);
+            break;
+
+          case Skylink.RECORDING_STATE.STOP:
+            // Clear away the timer just incase
+            if (app.state.room.states.recordingTimer) {
+              clearTimeout(app.state.states.room.states.recordingTimer);
+              app.state.states.room.states.recordingTimer = null;
+            }
+
+            app.state.room.states.recording = false;
+            app.state.room.prevent.recording = false;
+            app.state.room.messages.push({
+              userId: 'getaroom.io',
+              type: Constants.MessageType.ACTION,
+              content: 'Recording: (ID: ' + recordingId + ')\nStopped for room. Video is mixing ....',
+              date: (new Date()).toISOString()
+            });
+            break;
+
+          case Skylink.RECORDING_STATE.LINK:
+            app.state.room.messages.push({
+              userId: 'getaroom.io',
+              type: Constants.MessageType.ACTION,
+              content: 'Recording: (ID: ' + recordingId + ')\nMixing completed. [Download link](' + link.mixin + ')',
+              date: (new Date()).toISOString()
+            });
+            break;
+          
+          default:
+            app.state.room.messages.push({
+              userId: 'getaroom.io',
+              type: Constants.MessageType.ACTION,
+              content: 'Recording: (ID: ' + recordingId + ')\nError. ' + (error.message || error),
+              date: (new Date()).toISOString()
+            });
+
+        }
+
+        app.setState(app.state);
+      });
+
+      /**
+       * The module to handle shared methods.
+       * @class Dispatcher
+       * @public
+       */
+      Dispatcher = {
+
+        /**
+         * Dispatch to display the screensharing state.
+         * @method setScreen
+         * @for Dispatcher
+         */
+        setScreen: function () {
+          var screensharing = 0;
+
+          Utils.forEach(app.state.users, function (user, userId) {
+            if (user.priority > screensharing && user.video && user.video.screensharing) {
+              screensharing = user.priority;
+            }
+          });
+
+          if (app.state.users.self.video && app.state.users.self.video.screensharing && app.state.users.self.priority < screensharing) {
+            Skylink.stopScreen();
+          }
+
+          if (screensharing && app.state.users.length > 4) {
+            app.state.room.messages.push({
+              userId: 'getaroom.io',
+              type: Constants.MessageType.ACTION,
+              content: 'Room: Current screensharing layout scales up to 4 users, and some of the peers ' +
+                'might not be displayed due to the layout. Current users count is ' + Utils.keys(app.states.users).length,
+              date: (new Date()).toISOString()
+            });
+          }
+
+          app.state.room.states.screensharing = screensharing > 0;
+          app.setState(app.state);
+        },
+
+        /**
+         * Dispatch to toggle chat box.
+         * @method toggleChat
+         * @for Dispatcher
+         */
+        toggleChat: function(state) {
+          app.state.show.chat = state !== undefined ? state : !app.state.show.chat;
+          app.setState(app.state);
+        },
+
+        /**
+         * Dispatch to toggle controls
+         * @method toggleChat
+         * @for Dispatcher
+         */
+        toggleControls: function(state) {
+          if(app.state.room.status === Constants.RoomState.CONNECTED) {
+            app.state.show.controls = state !== undefined ? state : !app.state.show.controls;
+          }
+
+          app.setState(app.state);
+        }
+      }
+    },
+
+    componentDidMount: function() {
+      var app = this;
+  
+      Router.configure({
+        html5history: true
+      }).mount({
+        '/:room': app.joinRoom.bind(app),
+        '/': app.enterFoyer.bind(app)
+      });
+
+      Router.init();
+    },
+
+    render: function() {
+      var app = this;
+      var className = '';
+      var screensharingSupported = 
+        (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 34) ||
+        (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 33) ||
+        (AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.plugin && AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable);
+
+      if(app.state.show.controls) {
         className = className + 'controls';
       }
 
-      if(this.state.chat) {
+      if(app.state.show.chat) {
         className = className + ' chat';
       }
 
-      // Chrome screensharing supports
-      if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 34) {
-        isScreensharingSupported = true;
-
-      // Firefox screensharing supports
-      } else if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 33) {
-        isScreensharingSupported = true;
-
-      // Plugin screensharing supports
-      } else if (AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.plugin &&
-        AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
-        isScreensharingSupported = true;
-      }
-      // Opera does not support screensharing
-
-      // If screensharing is not supported
-      if (isScreensharingSupported) {
+      if (screensharingSupported) {
         className = className + ' enableScreensharing';
       }
 
       return (
         <div className={className}>
-          <div onClick={this.handleShowControls}>
-            <UserAreas state={this.state} />
+          <div onClick={app.handleShowControls}>
+            <UserAreas state={app.state} />
           </div>
-          <Controls state={this.state} />
-          <Chat state={this.state} />
+          <Controls state={app.state} />
+          <Chat state={app.state} />
         </div>
       )
     }
