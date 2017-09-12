@@ -247,7 +247,7 @@ define([
       var logoClassName = 'logo';
 
       logoClassName += app.props.state.room.status === Constants.RoomState.CONNECTED ? ' joinRoom' : '';
-      logoClassName += app.props.state.room.states.mcuServerId ? ' recording' : '';
+      //logoClassName += app.props.state.room.states.mcuServerId ? ' recording' : '';
 
       // Push logo.
       outputHTML.push(<div className={logoClassName}>getaroom.io</div>);
@@ -349,12 +349,12 @@ define([
               <button id="roomLock" onClick={app.handleRoomLock} className={roomLockClassName} title="Lock/Unlock Room"></button>
             );
 
-            if (app.props.state.room.states.mcuServerId) {
+            /*if (app.props.state.room.states.mcuServerId) {
               // Push recording toggle button.
               outputHTML.push(
                 <button id="recording" onClick={app.handleRecording} className={recordingClassName} title="Start/Stop Recording"></button>
               );
-            }
+            }*/
 
             // Push display name textbox.
             outputHTML.push(
