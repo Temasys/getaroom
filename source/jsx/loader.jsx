@@ -25,7 +25,7 @@ require.config({
     skylink: {
       exports: 'Skylink',
       deps: ['socketio', 'adapter'],
-      init: function(io, CryptoJS) {
+      init: function(io) {
         window.io = io;
         return new this.Skylink();
       }
