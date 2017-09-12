@@ -143,9 +143,8 @@ define([
 
       app.setState(app.state);
 
-      Skylink.init({
-
-        appKey: app.state.room.flags.mcu ? Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey,
+      var config = {
+        appKey: window.location.searchParameters.appkeyId || (app.state.room.flags.mcu ? Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey),
         defaultRoom: room,
         forceTURN: !app.state.room.flags.mcu && app.state.room.flags.forceTurn,
         useEdgeWebRTC: true,
@@ -156,10 +155,23 @@ define([
           getUserMedia: 0,
           refreshConnection: 0
         },
-        socketServer: window.location.searchParameters.socketServer || null,
-        iceServer: window.location.searchParameters.turnServer || null
+        socketServer: window.location.searchParameters.signalingNode || null,
+        iceServer: window.location.searchParameters.turnNode || null
+      };
 
-      }, function(err) {
+      if (window.location.searchParameters.appkeyId && window.location.searchParameters.appkeySecret) {
+        var duration = 24;
+        var start = (new Date ()).toISOString();
+
+        config.credentials = {
+          duration: duration,
+          startDateTime: start,
+          credentials: encodeURIComponent(CryptoJS.HmacSHA1(config.defaultRoom + '_' + duration + '_' + start,
+            window.location.searchParameters.appkeySecret).toString(CryptoJS.enc.Base64))
+        };
+      }
+
+      Skylink.init(config, function(err) {
         if (err) return;
 
         app.fetchStream(function () {

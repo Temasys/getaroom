@@ -12,8 +12,10 @@ getaroom.io
 | `forceTurn` | Set to `1` or `true` to force TURN connections |
 | `forcePlugin` | Set to `1` or `true` to force Temasys WebRTC Plugin in Safari 11 |
 | `media` | Set to `av` to fetch audio and video media, `v` to fetch only video media, `a` to fetch only audio media and `none` to no media. |
-| `socketServer` | Configure custom Temasys Signaling server URL (e.g. `https://signaling.temasys.io:3443`) |
-| `turnServer` | Configure custom Temasys TURN server URL (e.g. `turn:turn.temasys.io:3478`) |
+| `signalingNode` | Configure custom Temasys Signaling server URL (e.g. `https://signaling.temasys.io:3443`) |
+| `turnNode` | Configure custom Temasys TURN server URL (e.g. `turn:turn.temasys.io:3478`) |
+| `appkeyId` | Configure custom App key ID for testing purposes on `getaroom.io`. |
+| `appkeySecret` | Configure custom App key secret for the configured `appkeyId` for testing purposes on `getaroom.io`. |
 
 Setup / Development
 ----
