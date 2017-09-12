@@ -461,6 +461,10 @@ define([
           date: (new Date()).toISOString()
         });
 
+        if (isScreensharing) {
+          app.state.room.prevent.screensharing = false;
+        }
+
         app.setState(app.state);
       });
 
@@ -472,6 +476,10 @@ define([
           content: (isScreensharing ? 'Screen' : 'Media') + ': Access has been granted',
           date: (new Date()).toISOString()
         });
+
+        if (isScreensharing) {
+          app.state.room.prevent.screensharing = false;
+        }
 
         app.setState(app.state);
       });

@@ -161,11 +161,8 @@ define([
       Skylink.shareScreen(true, function (err) {
         if (err) {
           Skylink.stopScreen();
-          app.props.state.room.prevent.screensharing = false;
           return;
         }
-
-        app.props.state.room.prevent.screensharing = false;
       });
     },
 
