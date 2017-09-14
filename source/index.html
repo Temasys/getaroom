@@ -12,8 +12,8 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Get a room already...">
     <meta property="og:description" content="FREE and hassle free audio/video real-time chat for desktop and mobile.">
-    <meta property="og:url" content="http://getaroom.io/">
-    <meta property="og:image" content="http://getaroom.io/assets/og_getaroom.png">
+    <meta property="og:url" content="https://getaroom.io/">
+    <meta property="og:image" content="https://getaroom.io/assets/og_getaroom.png">
     <meta property="og:site_name" content="getaroom.io">
 
     <meta name="git:tag" content="@@tag">
@@ -22,7 +22,7 @@
 
     <meta name="viewport" content="width=560">
     <link rel="icon" type="image/png" href="/img/favicon.png">
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:200,500|Lobster' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:200,500|Lobster" rel="stylesheet" type="text/css">
 
     <meta name="apple-itunes-app" content="app-id=, app-argument={{url}}">
     <link rel="apple-touch-icon" href="/img/favicon128.png">
@@ -34,19 +34,52 @@
 
 </head>
 <body>
-    <div id="app"></div>
+  <div id="app"></div>
 
-    <a href="https://github.com/Temasys/getaroom" target="_blank"><img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" border="0" alt="Fork me on GitHub"></a>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.4/require.min.js" data-main="/js/loader"></script>
-    <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  <a href="https://github.com/Temasys/getaroom" target="_blank"><img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" border="0" alt="Fork me on GitHub"></a>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.4/require.min.js" data-main="/js/loader"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-53665926-1', 'auto');
-  ga('send', 'pageview');
+    ga('create', 'UA-53665926-1', 'auto');
+    ga('send', 'pageview');
 
+  </script>
+  <script>
+    if (window.location.protocol !== 'https:') {
+      window.location.protocol = 'https:';
+    }
+
+    window.location.searchParameters = (function () {
+      var queries = {};
+      var arr = (window.location.search || '').replace('?', '').split('&');
+
+      for (var i = 0; i < arr.length; i++) {
+        if (!arr[i]) continue;
+        var parts = arr[i].split('=');
+        queries[parts[0]] = parts[1] || null;
+      }
+
+      return queries;
+    })();
+
+    if (!(window.history && window.history.pushState)) {
+      window.historyNotSupported = true;
+    }
+
+    // Set AdapterJS options.
+    window.AdapterJS = window.AdapterJS || {};
+    window.AdapterJS.options = window.AdapterJS.options || {};
+    // Force retrival of all Temasys WebRTC Plugin cameras.
+    window.AdapterJS.options.getAllCams = true;
+
+    // Force usage of Temasys WebRTC Plugin on Safari.
+    if (!!window.location.search.match(/[?|&]forcePlugin=[1|true]/gi)) {
+      window.AdapterJS.options.forceSafariPlugin = true;
+    }
   </script>
   <img src="/img/camera.svg" style="visibility: hidden; width: 1px; height: 1px;" />
   <img src="/img/lock.svg" style="visibility: hidden; width: 1px; height: 1px;" />

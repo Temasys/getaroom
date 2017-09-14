@@ -221,9 +221,9 @@ module.exports = function (grunt) {
                     port: 8085,
                     open: 'https://localhost:8085',
                     protocol: 'https',
-                    key: grunt.file.read('server.key').toString(),
-                    cert: grunt.file.read('server.crt').toString(),
-                    ca: grunt.file.read('ca.crt').toString()
+                    //key: grunt.file.read('server.key').toString(),
+                    //cert: grunt.file.read('server.crt').toString(),
+                    //ca: grunt.file.read('ca.crt').toString()
                 }
             },
             production: {
@@ -360,5 +360,7 @@ module.exports = function (grunt) {
         'connect:dev',
         'watch'
     ]);
+
+    grunt.registerTask('default', ['dev']);
 
 };

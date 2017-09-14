@@ -86,6 +86,15 @@ body > a {
             background-position 50% 50%
             background-size 50% 50%
 
+        &#recording
+            float left
+            font-face Helvetica Neue, Helvetica, Arial, sans-serif
+            background-image url(/img/recording.svg)
+            background-repeat no-repeat
+            background-position 50% 50%
+            background-size 40% 40%
+            margin-left: 24px !important;
+
         &#roomLock
             float left
             font-face Helvetica Neue, Helvetica, Arial, sans-serif
@@ -175,9 +184,16 @@ body > a {
         text-align center
         font-family Lobster
         font-size 4.2em
-        padding 160px 25px 5px
+        padding 140px 25px 5px
         text-shadow -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff, 4px 4px 0 #fff, 5px 5px 0 #fff
+        transition all .15s ease-in
 
+        &.joinRoom 
+            padding-top 160px
+
+        &.recording
+            padding-top 80px
+        
     p
         margin 0
         padding 0 55px 35px
@@ -189,12 +205,21 @@ body > a {
         font-weight 200
         padding-top 40px
 
+    .statusMessage
+        padding 5px 15px!important
+        text-transform uppercase
+        font-size 14px
+
+    .displayName,
     .link
         position absolute
-        bottom 85px
+        bottom 90px
         left 0
         right 0
         font-weight 200
+
+        &.top
+            bottom 120px
 
         input[type=text]
             width 330px
@@ -208,6 +233,35 @@ body > a {
 
         input[type=checkbox]
             vertical-align bottom
+
+    .displayName
+        bottom 165px
+        border 2px solid darken(color2, 10%)
+        width 345px
+        left 25px
+        right 25px
+        border-radius 4px
+
+        span,
+        input[type=text]
+            display inline-block
+            vertical-align top
+            padding 6px 8px 7px
+            font-size 14px
+            margin 0
+
+        span
+            background darken(color2, 10%)
+            color #fff
+            width 95px
+            text-align center
+            padding-top 8px
+            padding-bottom 7px
+
+        input[type=text]
+            border 0
+            float right
+            width 218px
 
     nav
         position relative
@@ -330,10 +384,51 @@ body > a {
             top 50%
             left 50%
 
-    &.split5, &.split6, &.split7, &.split8, &.split9
+    &.split5
+        .userarea:nth-child(1)
+            width 33.33333vw
+            height 50vh
+
+        .userarea:nth-child(2)
+            width 33.33333vw
+            height 50vh
+
+        .userarea:nth-child(3)
+            width 33.33333vw
+            height 50vh
+
+        .userarea:nth-child(4)
+            width 50vw
+            height 50vh
+
+        .userarea:nth-child(5)
+            width 50vw
+            height 50vh
+
+    &.split6
+        .userarea
+            width 33.33333vw
+            height 50vh
+
+    &.split7, &.split8, &.split9
         .userarea
             width 33.33333vw
             height 33.33333vh
+
+    &.split10, &.split11, &.split12
+        .userarea
+            width 25vw
+            height 33.33333vh
+
+    &.split13, &.split14, &.split15, &.split16
+        .userarea
+            width 25vw
+            height 25vh
+
+    &.split17, &.split18, &.split19, &.split20
+        .userarea
+            width 20vw
+            height 25vh
 
     #us0
         transform rotateY(-180deg);

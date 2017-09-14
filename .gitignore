@@ -87,3 +87,5 @@ publish
 staging
 _site
 source/config/local.json
+source/js/*.js
+source/js/components/*.js
