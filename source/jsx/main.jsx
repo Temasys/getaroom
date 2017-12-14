@@ -290,7 +290,7 @@ define([
 
             app.state.room.status = Constants.RoomState.LOAD_ERROR;
             app.state.room.statusError = errorMessage || 'Unknown Error';
-        
+
         }
 
         app.setState(app.state);
@@ -330,7 +330,7 @@ define([
           case Skylink.SOCKET_ERROR.CONNECTION_ABORTED:
             app.state.room.status = Constants.RoomState.CONNECTION_ERROR;
             break;
-          
+
           case Skylink.SOCKET_ERROR.RECONNECTION_ATTEMPT:
             app.state.room.status = Constants.RoomState.RECONNECTING;
             break;
@@ -443,7 +443,7 @@ define([
           app.state.users.self.connected = false;
           app.state.room.status = app.state.room.states.mcuRestart ?
             Constants.RoomState.RECONNECTING : Constants.RoomState.DISCONNECTED;
-      
+
         } else {
           delete app.state.users[peerId];
           app.setState(app.state);
@@ -519,7 +519,7 @@ define([
         }
 
         var userInfo = app.parseUserInfo(peerInfo, peerId);
-        
+
         app.state.users[isSelf ? 'self' : peerId].name = userInfo.name;
         app.state.users[isSelf ? 'self' : peerId].priority = userInfo.priority;
         app.state.users[isSelf ? 'self' : peerId].audio = userInfo.audio;
@@ -530,7 +530,7 @@ define([
         if(Utils.keys(app.state.users).length >= 2) {
           app.state.show.controls = false;
         }
-        
+
         app.setState(app.state);
         Dispatcher.setScreen();
       });
@@ -600,7 +600,7 @@ define([
               date: (new Date()).toISOString()
             });
             break;
-          
+
           default:
             app.state.room.messages.push({
               userId: 'getaroom.io',
@@ -680,7 +680,7 @@ define([
 
     componentDidMount: function() {
       var app = this;
-  
+
       Router.configure({
         html5history: true
       }).mount({
@@ -694,7 +694,7 @@ define([
     render: function() {
       var app = this;
       var className = '';
-      var screensharingSupported = 
+      var screensharingSupported =
         (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 34) ||
         (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 33) ||
         (AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.plugin && AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable);

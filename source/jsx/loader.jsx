@@ -17,7 +17,6 @@ require.config({
     fastclick: '//cdnjs.cloudflare.com/ajax/libs/fastclick/0.6.11/fastclick.min',
     // facebook: '//connect.facebook.net/en_US/all',
     // twitter: '//platform.twitter.com/widgets'
-    
   },
 
   shim: {
