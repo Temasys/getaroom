@@ -73,6 +73,14 @@ define([
       if (video && renderedStreamId && scope.props.user.stream && scope.props.user.streamId !== renderedStreamId.value) {
         window.attachMediaStream(video, scope.props.user.stream);
         renderedStreamId.value = scope.props.user.streamId;
+
+        if (video.hasAttribute('controls')) {
+          setTimeout(function () {
+            video.removeAttribute('controls');
+          });
+
+          video.setAttribute('playsinline', true);
+        }
       }
     },
 
@@ -95,7 +103,7 @@ define([
             Share your camera and microphone to participate in the call
           </span>
         );
-      
+
       // If is not self and has not been connected
       } else if (!scope.props.user.connected && scope.props.userId !== 'self') {
         outputHTML.push(
@@ -110,7 +118,8 @@ define([
         outputHTML.push(React.DOM.video({
           id: 'stream-' + scope.props.userId,
           autoPlay: true,
-          muted: scope.props.userId === 'self'
+          muted: scope.props.userId === 'self',
+          controls: true
         }));
 
         outputHTML.push(React.DOM.input({
