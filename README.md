@@ -16,6 +16,7 @@ getaroom.io
 | `turnNode` | Configure custom Temasys TURN server URL (e.g. `turn:turn.temasys.io:3478`) |
 | `appkeyId` | Configure custom App key ID for testing purposes on `getaroom.io`. |
 | `appkeySecret` | Configure custom App key secret for the configured `appkeyId` for testing purposes on `getaroom.io`. |
+| `res` | Set to `fhd` to fetch FHD resolution, `hd` to fetch HD resolution, `vga` to fetch VGA resolution and `qvga` to fetch QVGA resolution. *If local video appears black, it means it failed to retrieve the resolution because it is not available.* |
 
 Setup / Development
 ----

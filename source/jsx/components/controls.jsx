@@ -42,6 +42,15 @@ define([
     },
 
     /**
+     * Handles the select HD Resolution toggle checkbox.
+     * @method handleHDClick
+     * @for Controls
+     */
+    handleHDClick: function(e) {
+      this.props.state.room.flags.res = e.target.checked === true ? 'hd' : 'vga';
+    },
+
+    /**
      * Handles when "Start a Call" button is clicked.
      * @method handleStartRoom
      * @for Controls
@@ -57,6 +66,10 @@ define([
 
       if (app.props.state.room.flags.forceTurn) {
         url += (url.indexOf('?') === -1 ? '?' : '&') + 'forceTurn=1';
+      }
+
+      if (app.props.state.room.flags.res !== 'vga') {
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 'res=' + app.props.state.room.flags.res;
       }
 
       // Redirect instead for IE case if HTML5 history is not supported.
@@ -226,6 +239,7 @@ define([
       var app = this;
       var mcuDom = document.getElementById('mcu');
       var forceTurnDom = document.getElementById('forceTurn');
+      var hdDom = document.getElementById('useHD');
 
       // Enable MCU toggle.
       if (mcuDom) {
@@ -235,6 +249,11 @@ define([
       // Enable force TURN toggle.
       if (forceTurnDom) {
         forceTurnDom.checked = app.props.state.room.flags.forceTurn;
+      }
+
+      // Use HD toggle.
+      if (hdDom) {
+        hdDom.checked = app.props.state.room.flags.res === 'hd';
       }
     },
 
@@ -263,31 +282,37 @@ define([
           // Push description.
           outputHTML.push(
             <div className="description">
-                <p>
-                    A SkylinkJS Tech Demo : Start a FREE call<br />with up to {Configs.maxUsers} people
-                </p>
-                <p>
-                    Just hit the &quot;Start a new call&quot; button below and share the link.<br /><br />
-                    This app is a <a href="https://temasys.io/platform" target="_blank">SkylinkJS</a> tech demo and you can <a href="https://github.com/Temasys/getaroom" target="_blank">fork it on github</a>.
-                </p>
+              <p>
+                <small>A SkylinkJS Tech Demo</small><br /><br />
+                Start a FREE call<br />with up to {Configs.maxUsers} people
+              </p>
+              <p>
+                Just hit the &quot;Start a new call&quot; button below and share the link.<br /><br />
+                This app is a <a href="https://temasys.io/platform" target="_blank">SkylinkJS</a> tech demo and you can <a href="https://github.com/Temasys/getaroom" target="_blank">fork it on github</a>.
+              </p>
             </div>
           );
 
           // Push select MCU toggle checkbox.
           outputHTML.push(
             <div className="link top">
-                <input type="checkbox" id="mcu" name="mcu" onClick={app.handleMCUClick} /> <label for="mcu">Use Skylink Media Relay</label>
+              <input type="checkbox" id="mcu" name="mcu" onClick={app.handleMCUClick} /> <label for="mcu">Use Skylink Media Relay</label>
             </div>
           );
 
           // Push select force TURN toggle checkbox.
-          if (!app.props.state.room.flags.mcu) {
-            outputHTML.push(
-              <div className="link">
-                  <input type="checkbox" id="forceTurn" name="forceTurn" onClick={app.handleForceTURNClick} /> <label for="forceTurn">Force Skylink TURN</label>
-              </div>
-            );
-          }
+          outputHTML.push(
+            <div className="link">
+              <input type="checkbox" id="forceTurn" name="forceTurn" onClick={app.handleForceTURNClick} /> <label for="forceTurn">Force Skylink TURN</label>
+            </div>
+          );
+
+          // Push select force TURN toggle checkbox.
+          outputHTML.push(
+            <div className="link">
+                <input type="checkbox" id="useHD" name="useHD" onClick={app.handleHDClick} /> <label for="useHD">Use HD Resolution</label>
+            </div>
+          );
           break;
 
         // -----------------------------
@@ -296,15 +321,15 @@ define([
           // Push "Leave Room" button.
           outputHTML.push(
             <button className="leaveRoom mainControl" onClick={app.handleLeaveRoom}>
-                Leave this call
+              Leave this call
             </button>
           );
 
           // Push share link textbox.
           outputHTML.push(
-            <div className="link">
-                Invite others to join this call at this link:<br />
-                <input type="text" value={location.toString()} onClick={app.handleLinkClick} readOnly />
+            <div className="link joinRoom">
+              Invite others to join this call at this link:<br />
+              <input type="text" value={location.toString()} onClick={app.handleLinkClick} readOnly />
             </div>
           );
 
@@ -356,9 +381,9 @@ define([
             // Push display name textbox.
             outputHTML.push(
               <div className="displayName">
-                  <span>Display Name</span>
-                  <input id="displayName" type="text" value={app.props.state.users.self.name} placeholder="Display Name"
-                      title="Your Display Name in Chat" onChange={app.handleDisplayName} />
+                <span>Display Name</span>
+                <input id="displayName" type="text" value={app.props.state.users.self.name} placeholder="Display Name"
+                  title="Your Display Name in Chat" onChange={app.handleDisplayName} />
               </div>
             );
           }
@@ -367,9 +392,9 @@ define([
       return (
         <section id="controls">
             <nav>
-                <button onClick={app.handleClose} className={app.props.state.state === Constants.AppState.IN_ROOM ? 'close' : ''}></button>
-                <button></button>
-                <button></button>
+              <button onClick={app.handleClose} className={app.props.state.state === Constants.AppState.IN_ROOM ? 'close' : ''}></button>
+              <button></button>
+              <button></button>
             </nav>
             <div>{outputHTML}</div>
         </section>

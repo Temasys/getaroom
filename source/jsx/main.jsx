@@ -96,7 +96,7 @@ define([
           index++;
         }
 
-        switch (window.location.searchParameters.media) {
+        switch (window.location.searchParameters().media) {
           case 'a':
             videoSources = false;
             break;
@@ -113,8 +113,14 @@ define([
         }
 
         Skylink.getUserMedia({
-          audio: audioSources ? { stereo: true, echoCancellation: true } : false,
-          video: videoSources
+          useExactConstraints: true,
+          audio: audioSources ? {
+            stereo: true,
+            echoCancellation: true
+          } : false,
+          video: videoSources ? (app.state.room.flags.res ? {
+            resolution: Skylink.VIDEO_RESOLUTION[app.state.room.flags.res.toUpperCase()] || {}
+          } : true) : false
         }, fn);
       });
     },
@@ -132,19 +138,21 @@ define([
       }
 
       room = room.toString();
+      var res = window.location.searchParameters().res;
 
       app.state.state = Constants.AppState.IN_ROOM;
       app.state.room.status = Constants.RoomState.IDLE;
       app.state.room.states.screensharing = false;
-      app.state.room.flags.mcu = ['1', 'true'].indexOf(window.location.searchParameters.mcu) > -1;
-      app.state.room.flags.forceTurn = ['1', 'true'].indexOf(window.location.searchParameters.forceTurn) > -1;
+      app.state.room.flags.mcu = ['1', 'true'].indexOf(window.location.searchParameters().mcu) > -1;
+      app.state.room.flags.forceTurn = ['1', 'true'].indexOf(window.location.searchParameters().forceTurn) > -1;
+      app.state.room.flags.res = ['hd', 'qvga', 'fhd'].indexOf(res) > -1 ? res : 'vga';
       app.state.show.controls = true;
       app.state.users.self.name = 'User ' + (new Date ()).getTime();
 
       app.setState(app.state);
 
       var config = {
-        appKey: window.location.searchParameters.appkeyId || (app.state.room.flags.mcu ? Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey),
+        appKey: window.location.searchParameters().appkeyId || (app.state.room.flags.mcu ? Configs.Skylink.apiMCUKey : Configs.Skylink.apiNoMCUKey),
         defaultRoom: room,
         forceTURN: !app.state.room.flags.mcu && app.state.room.flags.forceTurn,
         useEdgeWebRTC: true,
@@ -155,11 +163,11 @@ define([
           getUserMedia: 0,
           refreshConnection: 0
         },
-        socketServer: window.location.searchParameters.signalingNode || null,
-        iceServer: window.location.searchParameters.turnNode || null
+        socketServer: window.location.searchParameters().signalingNode || null,
+        iceServer: window.location.searchParameters().turnNode || null
       };
 
-      if (window.location.searchParameters.appkeyId && window.location.searchParameters.appkeySecret) {
+      if (window.location.searchParameters().appkeyId && window.location.searchParameters().appkeySecret) {
         var duration = 24;
         var start = (new Date ()).toISOString();
 
@@ -167,7 +175,7 @@ define([
           duration: duration,
           startDateTime: start,
           credentials: encodeURIComponent(CryptoJS.HmacSHA1(config.defaultRoom + '_' + duration + '_' + start,
-            window.location.searchParameters.appkeySecret).toString(CryptoJS.enc.Base64))
+            window.location.searchParameters().appkeySecret).toString(CryptoJS.enc.Base64))
         };
       }
 
@@ -241,7 +249,8 @@ define([
           },
           flags: {
             mcu: false,
-            forceTurn: false
+            forceTurn: false,
+            res: 'vga'
           },
           prevent: {
             screensharing: false,
