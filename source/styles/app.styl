@@ -184,26 +184,27 @@ body > a {
         text-align center
         font-family Lobster
         font-size 4.2em
-        padding 140px 25px 5px
+        padding 100px 25px 5px
         text-shadow -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 2px 2px 0 #fff, 3px 3px 0 #fff, 4px 4px 0 #fff, 5px 5px 0 #fff
-        transition all .15s ease-in
+        transition all .25s ease-in
 
-        &.joinRoom 
+        &.joinRoom
             padding-top 160px
 
         &.recording
             padding-top 80px
-        
+
     p
         margin 0
-        padding 0 55px 35px
+        padding 0 55px 25px
 
     a
         color darken(color2, 20%)
 
     p:nth-child(2)
         font-weight 200
-        padding-top 40px
+        padding-top 10px
+        padding-bottom 25px
 
     .statusMessage
         padding 5px 15px!important
@@ -212,14 +213,20 @@ body > a {
 
     .displayName,
     .link
-        position absolute
-        bottom 90px
+        margin 15px 0 0 25%
         left 0
         right 0
         font-weight 200
+        text-align left
 
         &.top
-            bottom 120px
+            //bottom 120px
+
+        &.joinRoom
+            position absolute
+            bottom 90px
+            margin 0 auto
+            text-align center
 
         input[type=text]
             width 330px
@@ -241,6 +248,8 @@ body > a {
         left 25px
         right 25px
         border-radius 4px
+        position absolute
+        margin-left 0
 
         span,
         input[type=text]
