@@ -264,11 +264,11 @@ define([
           outputHTML.push(
             <div className="description">
                 <p>
-                    Start a FREE call<br />with up to {Configs.maxUsers} people
+                    A SkylinkJS Tech Demo : Start a FREE call<br />with up to {Configs.maxUsers} people
                 </p>
                 <p>
                     Just hit the &quot;Start a new call&quot; button below and share the link.<br /><br />
-                    This app is a <a href="https://temasys.io/platform" target="_blank">SkylinkJS</a> tech demo and you can fork the <a href="https://github.com/Temasys/getaroom" target="_blank">code on github</a>.
+                    This app is a <a href="https://temasys.io/platform" target="_blank">SkylinkJS</a> tech demo and you can <a href="https://github.com/Temasys/getaroom" target="_blank">fork it on github</a>.
                 </p>
             </div>
           );
@@ -284,7 +284,7 @@ define([
           if (!app.props.state.room.flags.mcu) {
             outputHTML.push(
               <div className="link">
-                  <input type="checkbox" id="forceTurn" name="forceTurn" onClick={app.handleForceTURNClick} /> <label for="forceTurn">Force Skylink TURN Connections</label>
+                  <input type="checkbox" id="forceTurn" name="forceTurn" onClick={app.handleForceTURNClick} /> <label for="forceTurn">Force Skylink TURN</label>
               </div>
             );
           }
